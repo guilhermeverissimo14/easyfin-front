@@ -1,5 +1,3 @@
-import UserFinancial from '@/app/(hydrogen)/user-financial/page';
-import { create } from 'lodash';
 
 export const routes = {
    searchAndFilter: {
@@ -174,7 +172,6 @@ export const routes = {
       revenueDetails: (id: string) => `/financial/revenues/${id}`,
       editRevenue: (id: string) => `/financial/revenues/${id}/edit`,
    },
-   producers: '/producers',
-   contracts: '/contracts',
-   production: '/production',
+   customers: '/customers',
+   suppliers: '/suppliers',
 };

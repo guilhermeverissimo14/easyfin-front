@@ -8,10 +8,8 @@ import { Collapse } from 'rizzui/collapse';
 import cn from '@core/utils/class-names';
 import { PiCaretDownBold } from 'react-icons/pi';
 import { menuItems } from '@/layouts/hydrogen/menu-items';
-import { menuItemsLocalManager } from '@/layouts/hydrogen/menu-items-local-manager';
-import { menuItemsPilots } from './menu-items-pilots';
+import { menuItemsUsers } from './menu-items-users';
 import { LocalUser } from '@/types';
-import { menuItemsFinancial } from './menu-items-financial';
 
 export function SidebarMenu() {
    const pathname = usePathname();
@@ -24,12 +22,8 @@ export function SidebarMenu() {
    const userRole = parsedUser?.role;
    let itemsToRender;
 
-   if (userRole === 'LOCAL_MANAGER') {
-      itemsToRender = menuItemsLocalManager;
-   } else if (userRole === 'PILOT' as string) {
-      itemsToRender = menuItemsPilots;
-   }else if (userRole === 'FINANCIAL' as string) {
-      itemsToRender = menuItemsFinancial;
+   if (userRole === 'USER' as string) {
+      itemsToRender = menuItemsUsers;
    }else {
       itemsToRender = menuItems;
    }

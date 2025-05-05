@@ -5,7 +5,7 @@ import {
    PiFactoryDuotone,
 } from 'react-icons/pi';
 
-export const menuItemsPilots = [
+export const menuItemsUsers = [
    {
       name: 'Visão Geral',
    },
@@ -26,11 +26,6 @@ export const menuItemsPilots = [
          },
       ],
    },
-   {
-      name:'Produção',
-      href: routes.production,
-      icon: <PiFactoryDuotone />,
-   }
 
 
    

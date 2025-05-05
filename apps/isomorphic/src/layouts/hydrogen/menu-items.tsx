@@ -2,9 +2,8 @@ import { routes } from '@/config/routes';
 import {
    PiChartBarDuotone,
    PiCurrencyCircleDollarDuotone,
-   PiFileTextDuotone,
-   PiRocketLaunchDuotone,
-   PiTractorDuotone,
+   PiHandshakeDuotone,
+   PiStackDuotone,
    PiUserGearDuotone,
 } from 'react-icons/pi';
 
@@ -23,21 +22,19 @@ export const menuItems = [
       href: routes.users,
       icon: <PiUserGearDuotone />,
    },
-   // {
-   //    name: 'Operações',
-   //    href: '#',
-   //    icon: <PiRocketLaunchDuotone />,
-   //    dropdownItems: [
-   //       {
-   //          name: 'Serviços Ativos',
-   //          href: routes.operational.services,
-   //       },
-   //       {
-   //          name: 'Histórico de Contratos',
-   //          href: routes.operational.contracts,
-   //       },
-   //    ],
-   // },
+
+   {
+      name: "Clientes",
+      href: routes.customers,
+      icon: <PiHandshakeDuotone />,
+   },
+
+   {
+      name: "Fornecedores",
+      href: routes.suppliers,
+      icon: <PiStackDuotone />,
+   },
+   
    {
       name: 'Financeiro',
       href: '#',
@@ -61,15 +58,15 @@ export const menuItems = [
          },
       ],
    },
-   {
-      name: 'Produtores',
-      href: routes.producers,
-      icon: <PiTractorDuotone />,
-   },
-   {
-      name: 'Contratos',
-      href: routes.contracts,
-      icon: <PiFileTextDuotone />,
-   },
+   // {
+   //    name: 'Produtores',
+   //    href: routes.producers,
+   //    icon: <PiTractorDuotone />,
+   // },
+   // {
+   //    name: 'Contratos',
+   //    href: routes.contracts,
+   //    icon: <PiFileTextDuotone />,
+   // },
 
 ];
