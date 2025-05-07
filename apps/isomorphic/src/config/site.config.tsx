@@ -1,7 +1,7 @@
 import { Metadata } from 'next';
-import logoImg from '@public/images/logo.png';
+import logoImg from '@public/images/logo_principal.png';
 import { LAYOUT_OPTIONS } from '@/config/enums';
-import logoIconImg from '@public/images/logo.png';
+import logoIconImg from '@public/images/logo_principal.png';
 import { OpenGraph } from 'next/dist/lib/metadata/types/opengraph-types';
 
 enum MODE {

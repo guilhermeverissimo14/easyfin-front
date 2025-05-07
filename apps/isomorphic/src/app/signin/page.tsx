@@ -15,7 +15,7 @@ export default function SignIn() {
                   <div className="mb-8 flex w-full justify-center">
                     <Image
                       alt="Logo"
-                      src="/images/Logo.png"
+                      src="/images/logo_principal.png"
                       width={230}
                       height={150}
                     />

@@ -3,7 +3,6 @@
 import cn from '@core/utils/class-names';
 import Link from 'next/link';
 import { SidebarMenu } from './sidebar-menu';
-import Logo from '../../../public/logo/logo.png';
 import Image from 'next/image';
 
 export default function Sidebar({ className }: { className?: string }) {
@@ -21,10 +20,10 @@ export default function Sidebar({ className }: { className?: string }) {
                className="text-gray-800 hover:text-gray-900"
             >
                <Image
-                  src="/images/Logo.png"
+                  src="/images/logo_principal_comFundo.png"
                   alt="Easyfin"
-                  width={130}
-                  height={20}
+                  width={200}
+                  height={60}
                   style={{ maxWidth: 140 }}
                />
             </Link>

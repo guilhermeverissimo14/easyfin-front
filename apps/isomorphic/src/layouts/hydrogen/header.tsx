@@ -7,7 +7,6 @@ import Sidebar from '@/layouts/hydrogen/sidebar';
 import HeaderMenuRight from '@/layouts/header-menu-right';
 import StickyHeader from '@/layouts/sticky-header';
 import SearchWidget from '@/app/shared/search/search';
-import Logo from '../../../public/logo/logo.png';
 
 export default function Header() {
    return (
@@ -22,7 +21,7 @@ export default function Header() {
                className="me-4 w-9 shrink-0 text-gray-800 hover:text-gray-900 lg:me-5 xl:hidden"
             >
                <Image
-                  src="/images/Logo.png"
+                  src="/images/logo_principal.png"
                   alt="Easyfin"
                   width={36}
                   height={10}

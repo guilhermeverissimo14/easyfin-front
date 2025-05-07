@@ -61,7 +61,7 @@ export default function ForgotPassword() {
       <div className="relative z-10 flex h-screen w-[100%] flex-col items-center justify-center bg-gray-100 lg:bg-gray-100 xl:w-[40%]">
         <div className="w-[100%] h-screen md:h-auto rounded-lg bg-white p-8 shadow-lg md:w-[600px]">
           <div className="mb-8 flex w-full justify-center">
-            <Image alt="Logo" src="/images/logo.png" width={230} height={150} />
+            <Image alt="Logo" src="/images/logo_principal.png" width={230} height={150} />
           </div>
           <div className="mb-8">
             <p className="text-md text-center font-normal text-gray-800">
