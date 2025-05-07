@@ -1,4 +1,3 @@
-import Logo from '../../../public/logo/logo.png';
 import { useEffect, useState } from 'react';
 import { Progressbar } from 'rizzui/progressbar';
 
