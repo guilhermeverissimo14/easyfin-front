@@ -59,6 +59,23 @@ export const ListUserColumn = (getList: () => void) => {
          cell: ({ row }) => <>{row.original.phone}</>,
       }),
       
+      // columnHelper.display({
+      //    id: 'active',
+      //    size: 80,
+      //    header: 'Status',
+      //    cell: ({ row }) => (
+      //       <div className="flex items-center">
+      //          <UpdateStatusPopover
+      //             title="Atualizar Status"
+      //             message={row.original.active ? 'Deseja bloquear o usuário?' : 'Deseja reativar este usuário?'}
+      //             onConfirm={() => handleUpdateStatus(row.original.id, !row.original.active)}
+      //          >
+      //             {getStatusBadge(row.original.active ?? false, row.original.active ? 'Ativo' : 'Bloqueado')}
+      //          </UpdateStatusPopover>
+      //       </div>
+      //    ),
+      // }),
+
       columnHelper.display({
          id: 'actions',
          size: 160,
@@ -85,11 +102,10 @@ export const ListUserColumn = (getList: () => void) => {
                openModalEdit={() =>
                   openModal({
                      view: (
-                        <ModalForm width={true} title="Editar usuário">
+                        <ModalForm title="Editar usuário">
                            <FormEdit getUsers={getList} id={row.original.id} />
                         </ModalForm>
                      ),
-                     customSize: '1024px',
                      size: 'lg',
                   })
                }

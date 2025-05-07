@@ -1,9 +1,6 @@
 export enum UserRole {
    ADMIN = 'ADMIN',
-   MANAGER = 'MANAGER',
-   LOCAL_MANAGER = 'LOCAL_MANAGER',
-   PILOT = 'PILOT',
-   FINANCIAL = 'FINANCIAL',
+   USER = 'USER',
 }
 
 export enum LAYOUT_OPTIONS {

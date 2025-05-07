@@ -6,18 +6,26 @@ import { userType } from '@/types';
 import { getStatusBadge } from '@core/components/table-utils/get-status-badge';
 import AvatarCard from '@core/ui/avatar-card';
 import { getUserBirthday } from '@/utils/format';
+import { LoadingSpinner } from '@/components/loading-spinner';
 
 export const UserDetails = ({ id }: { id: string }) => {
+
    const [userDetails, setUserDetails] = useState<userType>({} as userType);
+   const [loading, setLoading] = useState(true);
+
    const { birthdate, age } = getUserBirthday(userDetails.birthdate);
 
    useEffect(() => {
       const getUserDetails = async () => {
+
+         setLoading(true);
          try {
             const response = await api.get<userType>(`/users/${id}`);
             setUserDetails(response.data);
          } catch (error) {
             console.error('Erro ao buscar usuários:', error);
+         } finally {
+            setLoading(false);
          }
       };
       getUserDetails();
@@ -38,6 +46,14 @@ export const UserDetails = ({ id }: { id: string }) => {
       }
    }
 
+   if (loading) {
+      return (
+         <div className="flex h-full w-full items-center justify-center p-10">
+            <LoadingSpinner />
+         </div>
+      );
+   }
+
    return (
       <main>
          <div className="mb-4 flex flex-row items-center justify-between">
@@ -46,7 +62,7 @@ export const UserDetails = ({ id }: { id: string }) => {
                   src={
                      userDetails.avatar
                         ? `/avatar/${userDetails.avatar}`
-                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(userDetails.name)}&background=97CFB7&color=ffffff`
+                        : `https://ui-avatars.com/api/?name=${encodeURIComponent(userDetails.name)}&background=2563eb&color=ffffff`
                   }
                   name={userDetails.name}
                   description={age ? `${age} anos` : ''}

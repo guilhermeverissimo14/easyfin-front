@@ -8,10 +8,9 @@ import { z } from 'zod';
 import { toast } from "react-toastify";
 import { api } from '@/service/api';
 import { useModal } from '../modal-views/use-modal';
-import { CustomErrorLogin, userType } from '@/types';
+import { CustomErrorLogin} from '@/types';
 import { InputField } from '@/components/input/input-field';
 import { SelectField } from '@/components/input/select-field';
-import { apiCall } from '@/helpers/apiHelper';
 import { cpfCnpjMask, moneyMask, phoneNumberMask } from '@/utils/format';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
@@ -50,11 +49,7 @@ interface FormUserProps {
 
 export const FormUser = ({ roleOptions, getUsers }: FormUserProps) => {
    const [loading, setLoading] = useState(false);
-   const [isLocalManager, setIsLocalManager] = useState(false);
-   const [isLocalManagerPilot, setIsLocalManagerPilot] = useState(false);
-   const [localManagerOptions, setLocalManagerOptions] = useState<
-      OptionsSelect[]
-   >([]);
+
 
    const { closeModal } = useModal();
 
@@ -83,10 +78,6 @@ export const FormUser = ({ roleOptions, getUsers }: FormUserProps) => {
       setLoading(true);
 
       const requestData = { ...data };
-
-      if (!isLocalManager) {
-         delete requestData.localManagerId;
-      }
 
       if (!requestData.phone) {
          delete requestData.phone;
@@ -125,39 +116,6 @@ export const FormUser = ({ roleOptions, getUsers }: FormUserProps) => {
          setLoading(false);
       }
    };
-
-   const getLocalManager = async () => {
-      try {
-         const response = await apiCall(() => api.get<userType[]>('/users'));
-
-         if (!response) {
-            return;
-         }
-
-         const localManagerFiltered = response.data
-            .filter((user) => user.role === 'LOCAL_MANAGER')
-            .map((localManager) => ({
-               label: localManager.name,
-               value: localManager.id,
-            }));
-
-         setLocalManagerOptions(localManagerFiltered);
-      } catch (error) {
-         console.error('Erro ao buscar usuários:', error);
-      }
-   };
-
-   useEffect(() => {
-      const userRole = (JSON.parse(localStorage.getItem('eas:user') as string) as userType).role;
-      if (userRole !== 'LOCAL_MANAGER') {
-         setIsLocalManager(true);
-      } else {
-         setIsLocalManager(false);
-      }
-
-      if (isLocalManager) getLocalManager();
-
-   }, [isLocalManager]);
 
    return (
       <form
@@ -238,44 +196,12 @@ export const FormUser = ({ roleOptions, getUsers }: FormUserProps) => {
                      options={roleOptions}
                      onChange={(selected) => {
                         onChange(selected);
-                        setIsLocalManagerPilot(selected === 'pilot');
                      }}
                      value={value || ''}
                      error={errors.role?.message}
                   />
                )}
             />
-
-            {isLocalManagerPilot && isLocalManager && (
-               <InputField
-                  label="Comissão po hectares (opcional)"
-                  placeholder="Digite um valor"
-                  type="text"
-                  register={register('commission')}
-                  error={errors.commission?.message}
-                  onChange={(e) => {
-                     const value = e.target.value;
-                     setValue('commission', moneyMask(value));
-                  }}
-               />
-            )}
-
-            {isLocalManagerPilot && isLocalManager && (
-               <Controller
-                  control={control}
-                  name="localManagerId"
-                  render={({ field: { value, onChange } }) => (
-                     <SelectField
-                        label="Gerente local"
-                        placeholder="Selecione o gerente local"
-                        options={localManagerOptions}
-                        onChange={(selected) => onChange(selected)}
-                        value={value || ''}
-                        error={errors.localManagerId?.message}
-                     />
-                  )}
-               />
-            )}
 
             <Button
                disabled={loading}

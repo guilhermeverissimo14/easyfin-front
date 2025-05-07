@@ -26,7 +26,7 @@ export default function ModalForm({ title, width = false, children }: ModalFormP
                <PiXBold className="h-auto w-5" />
             </ActionIcon>
          </div>
-         <div className=" max-h-[80vh] md:max-h-[85vh] overflow-hidden overflow-y-auto  pr-4">{children}</div>
+         <div className=" max-h-[80vh] md:max-h-[80vh] overflow-hidden overflow-y-auto  pr-4">{children}</div>
       </div>
    );
 }
