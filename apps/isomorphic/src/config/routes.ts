@@ -162,4 +162,6 @@ export const routes = {
    customers: '/customers',
    suppliers: '/suppliers',
    taxRates: '/tax-rates',
+   bankAccounts: '/bank-accounts',
+   constCenters: '/cost-centers',
 };

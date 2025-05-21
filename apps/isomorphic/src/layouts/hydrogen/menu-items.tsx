@@ -1,7 +1,9 @@
 import { routes } from '@/config/routes';
 import {
+   PiBankDuotone,
    PiChartBarDuotone,
    PiCurrencyCircleDollarDuotone,
+   PiGridFourDuotone,
    PiHandshakeDuotone,
    PiPercentDuotone,
    PiStackDuotone,
@@ -40,6 +42,18 @@ export const menuItems = [
       name: 'Aliquotas',
       href: routes.taxRates,
       icon:<PiPercentDuotone/>,
+   },
+
+   {
+      name: 'Contas Bancárias',
+      href: routes.bankAccounts,
+      icon:  <PiBankDuotone />,
+   },
+
+   {
+      name : 'Centro de Custo',
+      href: routes.constCenters,
+      icon: <PiGridFourDuotone/>,
    },
    
    {

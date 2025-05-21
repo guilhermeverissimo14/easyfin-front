@@ -1,6 +1,23 @@
 import { UserRole } from '@/config/enums';
 
 
+export interface constCentersModel{
+   id: string;
+   name: string;
+   createdAt: Date;
+   updatedAt: Date;
+}
+
+export interface BankAccount {
+   id: string;
+   bank: string;
+   agency: string;
+   account: string;
+   type: 'C' | 'S'; // 'C' for checking, 'S' for savings
+   createdAt: Date;
+   updatedAt: Date;
+}
+
 export interface TaxRateModel {
    id: string;
    year: number;
