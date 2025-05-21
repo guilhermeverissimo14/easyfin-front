@@ -22,7 +22,7 @@ export const menuItemsUsers = [
       dropdownItems: [
          {
             name: 'Gastos',
-            href: routes.financial.addExpenditure,
+            href: routes.financial.expenditure,
          },
       ],
    },

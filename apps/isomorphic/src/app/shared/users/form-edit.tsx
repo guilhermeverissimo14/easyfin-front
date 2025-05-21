@@ -9,7 +9,7 @@ import { toast } from "react-toastify";
 
 import { useModal } from '../modal-views/use-modal';
 import { api } from '@/service/api';
-import { CustomErrorLogin, OptionsSelect, userType } from '@/types';
+import { CustomErrorLogin, userType } from '@/types';
 import { InputField } from '@/components/input/input-field';
 import { cpfCnpjMask, formatMoney, phoneNumberMask } from '@/utils/format';
 import { LoadingSpinner } from '@/components/loading-spinner';

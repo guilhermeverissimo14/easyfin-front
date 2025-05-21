@@ -1,6 +1,16 @@
 import { UserRole } from '@/config/enums';
 
 
+export interface TaxRateModel {
+   id: string;
+   year: number;
+   month: number;
+   issqnTaxRate: number;
+   effectiveTaxRate: number;
+   updatedAt: Date;
+   createdAt: Date;
+}
+
 export interface AddressType{
    cep: string;
    logradouro: string;

@@ -3,6 +3,7 @@ import {
    PiChartBarDuotone,
    PiCurrencyCircleDollarDuotone,
    PiHandshakeDuotone,
+   PiPercentDuotone,
    PiStackDuotone,
    PiUserGearDuotone,
 } from 'react-icons/pi';
@@ -34,6 +35,12 @@ export const menuItems = [
       href: routes.suppliers,
       icon: <PiStackDuotone />,
    },
+
+   {
+      name: 'Aliquotas',
+      href: routes.taxRates,
+      icon:<PiPercentDuotone/>,
+   },
    
    {
       name: 'Financeiro',
@@ -44,29 +51,9 @@ export const menuItems = [
             name: 'Despesas',
             href: routes.financial.expenditure,
          },
-         {
-            name: 'Meus gastos',
-            href: routes.financial.addExpenditure,
-         },
-         {
-            name: 'Aprovar gastos',
-            href: routes.UserFinancial,
-         },
-         {
-            name: 'Folha',
-            href: routes.financial.payrolls,
-         },
+         
       ],
    },
-   // {
-   //    name: 'Produtores',
-   //    href: routes.producers,
-   //    icon: <PiTractorDuotone />,
-   // },
-   // {
-   //    name: 'Contratos',
-   //    href: routes.contracts,
-   //    icon: <PiFileTextDuotone />,
-   // },
+  
 
 ];
