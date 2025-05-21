@@ -91,7 +91,7 @@ export const ListSupplierColumn = (getList: () => void) => {
         },
       }) => (
         <TableRowActionGroup
-          isVisibleDelete={false}
+          isVisibleDelete={true}
           isVisible={true}
           isVisibleEdit={true}
           openModalList={() =>
@@ -114,6 +114,12 @@ export const ListSupplierColumn = (getList: () => void) => {
               size: 'lg',
             })
           }
+          deletePopoverTitle="Excluir Fornecedor"
+          deletePopoverDescription={`Tem certeza que deseja excluir o fornecedor "${row.original.name}"?`}
+          onDelete={async () => {
+            await api.delete(`/suppliers/${row.original.id}`);
+            getList();
+          }}
         />
       ),
     }),

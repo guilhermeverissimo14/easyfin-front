@@ -91,7 +91,7 @@ export const ListCustomerColumn = (getList: () => void) => {
         },
       }) => (
         <TableRowActionGroup
-          isVisibleDelete={false}
+          isVisibleDelete={true}
           isVisible={true}
           isVisibleEdit={true}
           openModalList={() =>
@@ -114,6 +114,12 @@ export const ListCustomerColumn = (getList: () => void) => {
               size: 'lg',
             })
           }
+          deletePopoverTitle="Excluir esse cliente?"
+          deletePopoverDescription={`Tem certeza que deseja excluir o cliente"${row.original.name}"?`}
+          onDelete={async () => {
+            await api.delete(`/customers/${row.original.id}`);
+            getList();
+          }}
         />
       ),
     }),
