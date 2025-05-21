@@ -1,5 +1,11 @@
 import { UserRole } from '@/config/enums';
 
+export interface PaymentTermModel{
+   id: string;
+   description: string;
+   tax: number;
+   term: number;
+}
 
 export interface constCentersModel{
    id: string;

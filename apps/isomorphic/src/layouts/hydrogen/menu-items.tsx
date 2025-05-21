@@ -1,4 +1,5 @@
 import { routes } from '@/config/routes';
+import { icon } from 'leaflet';
 import {
    PiBankDuotone,
    PiChartBarDuotone,
@@ -8,6 +9,7 @@ import {
    PiPercentDuotone,
    PiStackDuotone,
    PiUserGearDuotone,
+   PiFileCDuotone
 } from 'react-icons/pi';
 
 export const menuItems = [
@@ -54,6 +56,12 @@ export const menuItems = [
       name : 'Centro de Custo',
       href: routes.constCenters,
       icon: <PiGridFourDuotone/>,
+   },
+
+   {
+      name: "Condições de Pagamento",
+      href: routes.paymentTerms,
+      icon: <PiFileCDuotone />,
    },
    
    {

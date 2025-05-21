@@ -164,4 +164,5 @@ export const routes = {
    taxRates: '/tax-rates',
    bankAccounts: '/bank-accounts',
    constCenters: '/cost-centers',
+   paymentTerms: '/payment-terms',
 };
