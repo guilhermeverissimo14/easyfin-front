@@ -15,16 +15,14 @@ export function SidebarMenu() {
    const pathname = usePathname();
    const user = localStorage.getItem('eas:user');
 
-   const parsedUser: LocalUser | null = user
-      ? (JSON.parse(user) as LocalUser)
-      : null;
+   const parsedUser: LocalUser | null = user ? (JSON.parse(user) as LocalUser) : null;
 
    const userRole = parsedUser?.role;
    let itemsToRender;
 
-   if (userRole === 'USER' as string) {
+   if (userRole === ('USER' as string)) {
       itemsToRender = menuItemsUsers;
-   }else {
+   } else {
       itemsToRender = menuItems;
    }
 
@@ -32,9 +30,7 @@ export function SidebarMenu() {
       <div className="mt-4 pb-3 3xl:mt-6">
          {itemsToRender.map((item, index) => {
             const isActive = pathname === (item?.href as string);
-            const pathnameExistInDropdowns: any = item?.dropdownItems?.filter(
-               (dropdownItem) => dropdownItem.href === pathname
-            );
+            const pathnameExistInDropdowns: any = item?.dropdownItems?.filter((dropdownItem) => dropdownItem.href === pathname);
             const isDropdownOpen = Boolean(pathnameExistInDropdowns?.length);
 
             return (
@@ -59,9 +55,7 @@ export function SidebarMenu() {
                                           <span
                                              className={cn(
                                                 'me-2 inline-flex h-5 w-5 items-center justify-center rounded-md [&>svg]:h-[20px] [&>svg]:w-[20px]',
-                                                isDropdownOpen
-                                                   ? 'text-primary'
-                                                   : 'text-gray-800 dark:text-gray-500 dark:group-hover:text-gray-700'
+                                                isDropdownOpen ? 'text-primary' : 'text-gray-800 dark:text-gray-500 dark:group-hover:text-gray-700'
                                              )}
                                           >
                                              {item?.icon}
@@ -80,49 +74,41 @@ export function SidebarMenu() {
                                  </div>
                               )}
                            >
-                              {item?.dropdownItems?.map(
-                                 (dropdownItem, index) => {
-                                    const isChildActive =
-                                       pathname ===
-                                       (dropdownItem?.href as string);
+                              {item?.dropdownItems?.map((dropdownItem, index) => {
+                                 const isChildActive = pathname === (dropdownItem?.href as string);
 
-                                    return (
-                                       <Link
-                                          href={dropdownItem?.href}
-                                          key={dropdownItem?.name + index}
-                                          className={cn(
-                                             'mx-3.5 mb-0.5 flex items-center justify-between rounded-md px-3.5 py-2 font-medium capitalize last-of-type:mb-1 lg:last-of-type:mb-2 2xl:mx-5',
-                                             isChildActive
-                                                ? 'text-primary'
-                                                : 'text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900'
-                                          )}
-                                       >
-                                          <div className="flex items-center truncate">
-                                             <span
-                                                className={cn(
-                                                   'me-[18px] ms-1 inline-flex h-1 w-1 rounded-full bg-current transition-all duration-200',
-                                                   isChildActive
-                                                      ? 'bg-primary ring-[1px] ring-primary'
-                                                      : 'opacity-40'
-                                                )}
-                                             />{' '}
-                                             <span className="truncate">
-                                                {dropdownItem?.name}
-                                             </span>
-                                          </div>
-                                          {/* {dropdownItem?.badge?.length ? (
+                                 return (
+                                    <Link
+                                       href={dropdownItem?.href}
+                                       key={dropdownItem?.name + index}
+                                       className={cn(
+                                          'mx-3.5 mb-0.5 flex items-center justify-between rounded-md px-3.5 py-2 font-medium last-of-type:mb-1 lg:last-of-type:mb-2 2xl:mx-5',
+                                          isChildActive
+                                             ? 'text-primary'
+                                             : 'text-gray-500 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900'
+                                       )}
+                                    >
+                                       <div className="flex items-center truncate">
+                                          <span
+                                             className={cn(
+                                                'me-[18px] ms-1 inline-flex h-1 w-1 rounded-full bg-current transition-all duration-200',
+                                                isChildActive ? 'bg-primary ring-[1px] ring-primary' : 'opacity-40'
+                                             )}
+                                          />{' '}
+                                          <span className="truncate">{dropdownItem?.name}</span>
+                                       </div>
+                                       {/* {dropdownItem?.badge?.length ? (
                             <StatusBadge status={dropdownItem?.badge} />
                           ) : null} */}
-                                       </Link>
-                                    );
-                                 }
-                              )}
+                                    </Link>
+                                 );
+                              })}
                            </Collapse>
                         ) : (
                            <Link
                               href={item?.href}
                               className={cn(
-                                 'group relative mx-3 my-0.5 flex items-center justify-between rounded-md px-3 py-2 font-medium capitalize lg:my-1 2xl:mx-5 2xl:my-2',
+                                 'group relative mx-3 my-0.5 flex items-center justify-between rounded-md px-3 py-2 font-medium lg:my-1 2xl:mx-5 2xl:my-2',
                                  isActive
                                     ? 'before:top-2/5 text-primary before:absolute before:-start-3 before:block before:h-4/5 before:w-1 before:rounded-ee-md before:rounded-se-md before:bg-primary 2xl:before:-start-5'
                                     : 'text-gray-700 transition-colors duration-200 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-700/90'
@@ -133,9 +119,7 @@ export function SidebarMenu() {
                                     <span
                                        className={cn(
                                           'me-2 inline-flex size-5 items-center justify-center rounded-md [&>svg]:size-5',
-                                          isActive
-                                             ? 'text-primary'
-                                             : 'text-gray-800 dark:text-gray-500 dark:group-hover:text-gray-700'
+                                          isActive ? 'text-primary' : 'text-gray-800 dark:text-gray-500 dark:group-hover:text-gray-700'
                                        )}
                                     >
                                        {item?.icon}
