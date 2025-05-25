@@ -2,20 +2,8 @@
 
 import { Fragment, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import {
-  ActionIcon,
-  Empty,
-  SearchNotFoundIcon,
-  Button,
-  Title,
-  Input,
-  cn,
-} from "rizzui";
-import {
-  PiFileTextDuotone,
-  PiMagnifyingGlassBold,
-  PiXBold,
-} from "react-icons/pi";
+import { ActionIcon, Empty, SearchNotFoundIcon, Button, Title, Input, cn } from "rizzui";
+import { PiFileTextDuotone, PiMagnifyingGlassBold, PiXBold } from "react-icons/pi";
 import { pageLinks } from "./page-links.data";
 
 export default function SearchList({ onClose }: { onClose?: () => void }) {
@@ -26,10 +14,7 @@ export default function SearchList({ onClose }: { onClose?: () => void }) {
   if (searchText.length > 0) {
     menuItemsFiltered = pageLinks.filter((item: any) => {
       const label = item.name;
-      return (
-        label.match(searchText.toLowerCase()) ||
-        (label.toLowerCase().match(searchText.toLowerCase()) && label)
-      );
+      return label.match(searchText.toLowerCase()) || (label.toLowerCase().match(searchText.toLowerCase()) && label);
     });
   }
 
@@ -53,9 +38,7 @@ export default function SearchList({ onClose }: { onClose?: () => void }) {
           onChange={(e) => setSearchText(() => e.target.value)}
           placeholder="Pesquise uma página"
           className="flex-1"
-          prefix={
-            <PiMagnifyingGlassBold className="h-[18px] w-[18px] text-gray-600" />
-          }
+          prefix={<PiMagnifyingGlassBold className="h-[18px] w-[18px] text-gray-600" />}
           suffix={
             searchText && (
               <Button
@@ -72,12 +55,7 @@ export default function SearchList({ onClose }: { onClose?: () => void }) {
             )
           }
         />
-        <ActionIcon
-          size="sm"
-          variant="text"
-          className="ms-3 text-gray-500 hover:text-gray-700"
-          onClick={onClose}
-        >
+        <ActionIcon size="sm" variant="text" className="ms-3 text-gray-500 hover:text-gray-700" onClick={onClose}>
           <PiXBold className="h-5 w-5" />
         </ActionIcon>
       </div>
@@ -85,17 +63,9 @@ export default function SearchList({ onClose }: { onClose?: () => void }) {
       <div className="custom-scrollbar max-h-[60vh] overflow-y-auto border-t border-gray-300 px-2 py-4">
         <>
           {menuItemsFiltered.length === 0 ? (
-            <Empty
-              className="scale-75"
-              image={<SearchNotFoundIcon />}
-              text="No Result Found"
-              textClassName="text-xl"
-            />
+            <Empty className="scale-75" image={<SearchNotFoundIcon />} text="No Result Found" textClassName="text-xl" />
           ) : (
-            <Title
-              as="h6"
-              className="mb-5 px-3 font-semibold dark:text-gray-700"
-            >
+            <Title as="h6" className="mb-5 px-3 font-semibold dark:text-gray-700">
               Quick Page Links
             </Title>
           )}
@@ -114,21 +84,14 @@ export default function SearchList({ onClose }: { onClose?: () => void }) {
                   </span>
 
                   <span className="ms-3 grid gap-0.5">
-                    <span className="font-medium capitalize text-gray-900 dark:text-gray-700">
-                      {item.name}
-                    </span>
-                    <span className="text-gray-500">
-                      {item?.href as string}
-                    </span>
+                    <span className="font-medium capitalize text-gray-900 dark:text-gray-700">{item.name}</span>
+                    <span className="text-gray-500">{item?.href as string}</span>
                   </span>
                 </Link>
               ) : (
                 <Title
                   as="h6"
-                  className={cn(
-                    "mb-1 px-3 text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-500",
-                    index !== 0 && "mt-6 4xl:mt-7"
-                  )}
+                  className={cn("mb-1 px-3 text-xs font-semibold uppercase tracking-widest text-gray-500 dark:text-gray-500", index !== 0 && "mt-6 4xl:mt-7")}
                 >
                   {item.name}
                 </Title>

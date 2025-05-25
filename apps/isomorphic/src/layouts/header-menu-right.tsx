@@ -13,7 +13,7 @@ export default function HeaderMenuRight() {
 
    return (
       <div className="ms-auto grid shrink-0 grid-cols-2 items-center gap-2 text-gray-700 xs:gap-3 xl:gap-4">
-         <NotificationDropdown setHasNotification={setHasNotification} userId={user.id}>
+         {/* <NotificationDropdown setHasNotification={setHasNotification} userId={user.id}>
             <ActionIcon
                aria-label="Notification"
                variant="text"
@@ -24,7 +24,7 @@ export default function HeaderMenuRight() {
                   <Badge renderAsDot color="warning" enableOutlineRing className="absolute right-2.5 top-2.5 -translate-y-1/3 translate-x-1/2" />
                )}
             </ActionIcon>
-         </NotificationDropdown>
+         </NotificationDropdown> */}
 
          <ProfileMenu />
       </div>
