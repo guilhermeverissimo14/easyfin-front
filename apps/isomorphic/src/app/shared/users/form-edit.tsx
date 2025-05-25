@@ -115,7 +115,7 @@ export const FormEdit = ({ getUsers, id }: FormUserProps) => {
       } catch (error) {
          console.error('Erro ao buscar usuários:', error);
       } finally {
-         setLoadingUser(true);
+         setLoadingUser(false);
       }
    };
 
