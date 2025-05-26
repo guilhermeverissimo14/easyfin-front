@@ -64,12 +64,12 @@ export function formatMoney(value: number): string {
 
 export function formatMoneyBrl(value: number): string {
    return new Intl.NumberFormat('pt-BR', {
-     style: 'currency',
-     currency: 'BRL',
-     minimumFractionDigits: 2,
-     maximumFractionDigits: 2,
+      style: 'currency',
+      currency: 'BRL',
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
    }).format(value);
- }
+}
 
 interface UserBirthdayInfo {
    birthdate: string;
@@ -92,4 +92,9 @@ export function getUserBirthday(birthdateString: string): UserBirthdayInfo {
       : 0;
 
    return { birthdate, age };
+}
+
+export function formatDate(dateString: string): string {
+   const date = parseISO(dateString);
+   return format(date, 'dd/MM/yyyy', { locale: ptBR });
 }

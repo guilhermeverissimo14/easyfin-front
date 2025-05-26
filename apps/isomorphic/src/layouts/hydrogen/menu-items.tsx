@@ -1,5 +1,4 @@
 import { routes } from '@/config/routes';
-import { GiBanknote } from 'react-icons/gi';
 import { LuPiggyBank } from 'react-icons/lu';
 import { GiMoneyStack } from 'react-icons/gi';
 
@@ -106,8 +105,7 @@ export const menuItems = [
          },
          {
             name: 'Livro Caixa',
-            href: '#',
-            //href: routes.financial.report,
+            href: routes.cashBook,
          },
       ],
    },

@@ -1,4 +1,3 @@
-
 export const routes = {
    searchAndFilter: {
       realEstate: '/search/real-estate',
@@ -165,4 +164,5 @@ export const routes = {
    bankAccounts: '/bank-accounts',
    constCenters: '/cost-centers',
    paymentTerms: '/payment-terms',
+   cashBook: '/cash-book',
 };

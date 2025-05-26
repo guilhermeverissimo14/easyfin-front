@@ -1,14 +1,14 @@
 import { UserRole } from '@/config/enums';
 
 export interface PaymentMethod {
-  id: string;
-  name: string;
-  requiresBank: boolean;
-  createdAt: string;
-  updatedAt: string;
+   id: string;
+   name: string;
+   requiresBank: boolean;
+   createdAt: string;
+   updatedAt: string;
 }
 
-export interface PaymentTermModel{
+export interface PaymentTermModel {
    id: string;
    paymentMethodId: string;
    condition: string;
@@ -18,7 +18,7 @@ export interface PaymentTermModel{
    updatedAt: string;
 }
 
-export interface constCentersModel{
+export interface constCentersModel {
    id: string;
    name: string;
    createdAt: Date;
@@ -45,7 +45,7 @@ export interface TaxRateModel {
    createdAt: Date;
 }
 
-export interface AddressType{
+export interface AddressType {
    cep: string;
    logradouro: string;
    complemento: string | null;
@@ -62,35 +62,35 @@ export interface AddressType{
    erro: boolean;
 }
 
-export interface CustomerType{
-   id: string
-   cnpj: string
-   name: string
-   email: string | null
-   phone: string | null
-   address: string | null
-   zipCode: string | null
-   city: string | null
-   state: string | null
-   country: string | null
-   contact: string | null
-   retIss: boolean
-   active: boolean
+export interface CustomerType {
+   id: string;
+   cnpj: string;
+   name: string;
+   email: string | null;
+   phone: string | null;
+   address: string | null;
+   zipCode: string | null;
+   city: string | null;
+   state: string | null;
+   country: string | null;
+   contact: string | null;
+   retIss: boolean;
+   active: boolean;
 }
-export interface SupplierType{
-   id: string
-   cnpj: string
-   name: string
-   email: string | null
-   phone: string | null
-   address: string | null
-   zipCode: string | null
-   city: string | null
-   state: string | null
-   country: string | null
-   contact: string | null
-   retIss: boolean
-   active: boolean
+export interface SupplierType {
+   id: string;
+   cnpj: string;
+   name: string;
+   email: string | null;
+   phone: string | null;
+   address: string | null;
+   zipCode: string | null;
+   city: string | null;
+   state: string | null;
+   country: string | null;
+   contact: string | null;
+   retIss: boolean;
+   active: boolean;
 }
 
 export interface OptionsSelect {
@@ -139,7 +139,6 @@ export interface User {
    user: UserData;
 }
 
-
 export interface WSNotification {
    id: string;
    type: string;
@@ -158,4 +157,17 @@ export interface Notifications {
    message: string;
    read: boolean;
    createdAt: Date;
+}
+
+export interface ICashBook {
+   id: string;
+   date: string;
+   historic: string;
+   value: number;
+   type: string; // 'C' para crédito, 'D' para débito
+   description: string;
+   costCenter: string | null;
+   balance: number;
+   createdAt?: Date;
+   updatedAt?: Date;
 }
