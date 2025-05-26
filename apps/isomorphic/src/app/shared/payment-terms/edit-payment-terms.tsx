@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from 'rizzui';
 import { z } from 'zod';
@@ -9,27 +9,36 @@ import { toast } from "react-toastify";
 
 import { api } from '@/service/api';
 import { useModal } from '../modal-views/use-modal';
-import { CustomErrorLogin, PaymentTermModel } from '@/types';
+import { CustomErrorLogin, PaymentMethod, PaymentTermModel } from '@/types';
 import { InputField } from '@/components/input/input-field';
 import { LoadingSpinner } from '@/components/loading-spinner';
+import { SelectField } from '@/components/input/select-field';
 
+// Validação com consistência entre parcelas e condição
 const paymentTermSchema = z.object({
-    description: z
+    description: z.string().nonempty('Descrição não pode ser vazia'),
+    condition: z
         .string()
-        .min(3, 'Descrição deve ter no mínimo 3 caracteres')
-        .nonempty('Descrição não pode ser vazia'),
-    term: z
-        .string()
-        .nonempty('Prazo não pode ser vazio')
-        .refine((val) => !isNaN(Number(val)) && Number(val) >= 0, {
-            message: 'Prazo deve ser um número positivo',
+        .nonempty('Condição não pode ser vazia')
+        .refine((val) => /^\d+(,\d+)*$/.test(val), {
+            message: 'Condição deve ser no formato "30,60,90" (sem espaços)',
         }),
-    tax: z
+    installments: z
         .string()
-        .default('0')
-        .refine((val) => !isNaN(Number(val.replace(',', '.'))) && Number(val.replace(',', '.')) >= 0 && Number(val.replace(',', '.')) <= 100, {
-            message: 'Taxa deve ser um número entre 0 e 100',
+        .nonempty('Número de parcelas não pode ser vazio')
+        .refine((val) => !isNaN(Number(val)) && Number(val) > 0, {
+            message: 'Número de parcelas deve ser um número positivo',
         }),
+    paymentMethodId: z
+        .string()
+        .nonempty('Método de pagamento não pode ser vazio'),
+}).refine((data) => {
+    const days = data.condition?.split(',').filter(Boolean);
+    const numInstallments = Number(data.installments);
+    return !isNaN(numInstallments) && days.length === numInstallments;
+}, {
+    message: 'Você definiu uma quantidade de parcelas, mas informou uma condição diferente',
+    path: ['condition'],
 });
 
 type PaymentTermFormData = z.infer<typeof paymentTermSchema>;
@@ -43,6 +52,8 @@ export const EditPaymentTerm = ({ id, getPaymentTerms }: EditPaymentTermProps) =
     const [loading, setLoading] = useState(false);
     const [loadingPaymentTerm, setLoadingPaymentTerm] = useState(true);
     const [paymentTermDetails, setPaymentTermDetails] = useState<PaymentTermModel | null>(null);
+    const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
+    const [loadingMethods, setLoadingMethods] = useState(true);
     
     const { closeModal } = useModal();
 
@@ -50,10 +61,28 @@ export const EditPaymentTerm = ({ id, getPaymentTerms }: EditPaymentTermProps) =
         register,
         handleSubmit,
         setValue,
+        control,
         formState: { errors },
     } = useForm<PaymentTermFormData>({
         resolver: zodResolver(paymentTermSchema),
     });
+
+    // Buscar métodos de pagamento
+    useEffect(() => {
+        const fetchPaymentMethods = async () => {
+            try {
+                const response = await api.get<PaymentMethod[]>('/payment-methods');
+                setPaymentMethods(response.data);
+            } catch (error) {
+                console.error('Erro ao buscar métodos de pagamento:', error);
+                toast.error('Não foi possível carregar os métodos de pagamento');
+            } finally {
+                setLoadingMethods(false);
+            }
+        };
+
+        fetchPaymentMethods();
+    }, []);
 
     // Buscar dados da condição de pagamento existente
     useEffect(() => {
@@ -65,11 +94,10 @@ export const EditPaymentTerm = ({ id, getPaymentTerms }: EditPaymentTermProps) =
                 
                 // Preencher o formulário com os dados existentes
                 setValue('description', response.data.description);
-                setValue('term', response.data.term.toString());
+                setValue('condition', response.data.condition);
+                setValue('installments', response.data.installments.toString());
+                setValue('paymentMethodId', response.data.paymentMethodId);
                 
-                // Formatar a taxa para exibir com vírgula no lugar de ponto
-                const formattedTax = response.data.tax.toString().replace('.', ',');
-                setValue('tax', formattedTax);
             } catch (error) {
                 toast.error('Erro ao buscar dados da condição de pagamento');
                 console.error('Erro ao buscar condição de pagamento:', error);
@@ -84,10 +112,14 @@ export const EditPaymentTerm = ({ id, getPaymentTerms }: EditPaymentTermProps) =
     const onSubmit = async (data: PaymentTermFormData) => {
         setLoading(true);
 
+        // Remove espaços da condição, se houver
+        const conditionWithoutSpaces = data.condition.replace(/\s+/g, '');
+
         const requestData = {
             description: data.description,
-            term: Number(data.term),
-            tax: Number(parseFloat(data.tax.replace(',', '.'))),
+            condition: conditionWithoutSpaces,
+            installments: Number(data.installments),
+            paymentMethodId: data.paymentMethodId,
         };
 
         try {
@@ -105,25 +137,13 @@ export const EditPaymentTerm = ({ id, getPaymentTerms }: EditPaymentTermProps) =
         }
     };
 
-    // Função para formatar número como percentual
-    const formatAsPercentage = (value: string) => {
+    const formatCondition = (value: string) => {
         let cleaned = value.replace(/[^\d,]/g, '');
-    
-        const parts = cleaned.split(',');
-        if (parts.length > 2) {
-            cleaned = parts[0] + ',' + parts[1];
-        }
-
-        if (cleaned.includes(',')) {
-            const [int, dec] = cleaned.split(',');
-            cleaned = int + ',' + dec.slice(0, 2);
-        }
-
-        cleaned = cleaned.replace(/^0+(?=\d)/, '');
+        cleaned = cleaned.replace(/\s+/g, '');
         return cleaned;
     };
 
-    if (loadingPaymentTerm) {
+    if (loadingPaymentTerm || loadingMethods) {
         return (
             <div className="flex h-full w-full items-center justify-center p-10">
                 <LoadingSpinner />
@@ -137,6 +157,38 @@ export const EditPaymentTerm = ({ id, getPaymentTerms }: EditPaymentTermProps) =
             onSubmit={handleSubmit(onSubmit)}
         >
             <div className="w-full space-y-5">
+                <Controller
+                    control={control}
+                    name="paymentMethodId"
+                    render={({ field: { value, onChange } }) => (
+                        <SelectField
+                            label="Método de Pagamento"
+                            placeholder="Selecione o método de pagamento"
+                            options={paymentMethods.map(method => ({
+                                label: method.name,
+                                value: method.id
+                            }))}
+                            onChange={(selected) => {
+                                onChange(selected);
+                            }}
+                            value={value || ''}
+                            error={errors.paymentMethodId?.message}
+                        />
+                    )}
+                />
+
+                <InputField
+                    label="Condição (dias das parcelas)"
+                    placeholder="Ex: 30,60,90"
+                    type="text"
+                    register={register('condition')}
+                    error={errors.condition?.message}
+                    onChange={(e) => {
+                        const value = formatCondition(e.target.value);
+                        setValue('condition', value);
+                    }}
+                />
+
                 <InputField
                     label="Descrição"
                     placeholder="Digite a descrição da condição de pagamento"
@@ -146,27 +198,14 @@ export const EditPaymentTerm = ({ id, getPaymentTerms }: EditPaymentTermProps) =
                 />
 
                 <InputField
-                    label="Prazo (dias)"
-                    placeholder="Digite o prazo em dias"
+                    label="Número de parcelas"
+                    placeholder="Digite o número de parcelas"
                     type="text"
-                    register={register('term')}
-                    error={errors.term?.message}
+                    register={register('installments')}
+                    error={errors.installments?.message}
                     onChange={(e) => {
-                        // Allow only numbers
                         const value = e.target.value.replace(/\D/g, '');
-                        setValue('term', value);
-                    }}
-                />
-
-                <InputField
-                    label="Taxa (%)"
-                    placeholder="0,00"
-                    type="text"
-                    register={register('tax')}
-                    error={errors.tax?.message}
-                    onChange={(e) => {
-                        const value = formatAsPercentage(e.target.value);
-                        setValue('tax', value);
+                        setValue('installments', value);
                     }}
                 />
 

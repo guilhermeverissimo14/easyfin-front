@@ -1,10 +1,21 @@
 import { UserRole } from '@/config/enums';
 
+export interface PaymentMethod {
+  id: string;
+  name: string;
+  requiresBank: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface PaymentTermModel{
    id: string;
+   paymentMethodId: string;
+   condition: string;
    description: string;
-   tax: number;
-   term: number;
+   installments: number;
+   createdAt: string;
+   updatedAt: string;
 }
 
 export interface constCentersModel{
