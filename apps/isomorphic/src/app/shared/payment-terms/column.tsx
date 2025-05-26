@@ -16,29 +16,7 @@ const columnHelper = createColumnHelper<PaymentTermModel>();
 export const ListPaymentTermColumn = (getList: () => void) => {
   const { openModal } = useModal();
   const isMobile = window.innerWidth < 768;
-  const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
-  
-  // Buscar métodos de pagamento para exibir seus nomes
-  useEffect(() => {
-    const fetchPaymentMethods = async () => {
-      try {
-        const response = await api.get<PaymentMethod[]>('/payment-methods');
-        setPaymentMethods(response.data);
-      } catch (error) {
-        console.error('Erro ao buscar métodos de pagamento:', error);
-      }
-    };
 
-    fetchPaymentMethods();
-  }, []);
-
-  // Função para obter nome do método de pagamento pelo ID
-  const getPaymentMethodName = (id: string) => {
-    const method = paymentMethods.find(m => m.id === id);
-    return method?.name || 'Não especificado';
-  };
-
-  // Função para formatar a condição de pagamento
   const formatCondition = (condition: string) => {
     return condition.split(',').join(', ') + ' dias';
   };
@@ -53,7 +31,7 @@ export const ListPaymentTermColumn = (getList: () => void) => {
     columnHelper.accessor('condition', {
       id: 'condition',
       size: 150,
-      header: 'Condição (dias)',
+      header: 'Prazo em dias',
       cell: ({ row }) => <span>{formatCondition(row.original.condition)}</span>,
     }),
     columnHelper.accessor('installments', {
@@ -66,8 +44,28 @@ export const ListPaymentTermColumn = (getList: () => void) => {
       id: 'paymentMethod',
       size: 180,
       header: 'Método de Pagamento',
-      cell: ({ row }) => <span>{getPaymentMethodName(row.original.paymentMethodId)}</span>,
+      cell: ({ row }) => {
+
+        const [paymentMethod, setPaymentMethod] = useState<string>('N/A');
+
+        useEffect(() => {
+          const fetchPaymentMethod = async () => {
+            try {
+              const response = await api.get<PaymentMethod[]>('/payment-methods');
+              const foundMethod = response.data.find(pm => pm.id === row.original.paymentMethodId);
+              setPaymentMethod(foundMethod ? foundMethod.name : 'N/A');
+            } catch (error) {
+              console.error('Erro ao buscar método de pagamento:', error);
+            }
+          };
+
+          fetchPaymentMethod();
+        }, [row.original.paymentMethodId]);
+
+        return <span>{paymentMethod}</span>;
+      },
     }),
+    
     columnHelper.display({
       id: 'actions',
       size: 120,
