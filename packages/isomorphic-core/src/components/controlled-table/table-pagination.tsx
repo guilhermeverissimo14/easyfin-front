@@ -17,20 +17,9 @@ export type TablePaginationProps = {
   paginatorClassName?: string;
 } & PaginationProps;
 
-export default function TablePagination({
-  pageSize,
-  setPageSize,
-  total,
-  paginatorClassName = "mt-5 xs:mt-6 sm:mt-7",
-  ...props
-}: TablePaginationProps) {
+export default function TablePagination({ pageSize, setPageSize, total, paginatorClassName = "mt-5 xs:mt-6 sm:mt-7", ...props }: TablePaginationProps) {
   return (
-    <div
-      className={cn(
-        "table-pagination flex items-center justify-center sm:justify-between",
-        paginatorClassName
-      )}
-    >
+    <div className={cn("table-pagination flex items-center justify-center sm:justify-between", paginatorClassName)}>
       {!setPageSize ? (
         total && (
           <div className="hidden text-gray-500 sm:inline-flex">

@@ -165,4 +165,6 @@ export const routes = {
    constCenters: '/cost-centers',
    paymentTerms: '/payment-terms',
    cashBook: '/cash-book',
+   accountsPayable: '/accounts-payable',
+   accountsReceivable: '/accounts-receivable',
 };

@@ -95,13 +95,11 @@ export const menuItems = [
          },
          {
             name: 'Contas a Pagar',
-            href: '#',
-            //href: routes.financial.payables,
+            href: routes.accountsPayable,
          },
          {
             name: 'Contas a Receber',
-            href: '#',
-            //href: routes.financial.receivables,
+            href: routes.accountsReceivable,
          },
          {
             name: 'Livro Caixa',

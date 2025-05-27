@@ -171,3 +171,16 @@ export interface ICashBook {
    createdAt?: Date;
    updatedAt?: Date;
 }
+
+export interface IAccountsPayable {
+   id: string;
+   documentNumber: string;
+   supplierId: string;
+   supplierName: string;
+   status: string;
+   launchDate: string;
+   dueDate: string;
+   installmentNumber: number;
+   totalInstallments: number;
+   value: number;
+}

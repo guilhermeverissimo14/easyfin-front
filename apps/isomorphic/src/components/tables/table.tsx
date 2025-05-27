@@ -43,7 +43,7 @@ export default function TableComponent({
          initialState: {
             pagination: {
                pageIndex: 0,
-               pageSize: 10,
+               pageSize: 25,
             },
          },
          enableColumnResizing: false,
@@ -74,12 +74,7 @@ export default function TableComponent({
          {loading ? (
             <SkeletonLoader />
          ) : (
-            <DndContext
-               collisionDetection={closestCenter}
-               modifiers={[restrictToHorizontalAxis]}
-               onDragEnd={handleDragEndColumn}
-               sensors={sensors}
-            >
+            <DndContext collisionDetection={closestCenter} modifiers={[restrictToHorizontalAxis]} onDragEnd={handleDragEndColumn} sensors={sensors}>
                <Table
                   table={table}
                   variant={variant}
