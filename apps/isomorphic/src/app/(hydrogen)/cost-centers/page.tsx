@@ -74,6 +74,7 @@ export default function CostCenters() {
                 breadcrumb={pageHeader.breadcrumb}
                 title={pageHeader.title}
                 data={costCenters}
+                columns={ListCostCenterColumn(getCostCenters)}
                 fileName="centros-de-custo"
                 header=""
                 action="Cadastrar centro de custo"

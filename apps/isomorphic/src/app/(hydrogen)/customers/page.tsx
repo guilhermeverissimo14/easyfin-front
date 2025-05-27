@@ -74,6 +74,7 @@ export default function Customers() {
                      size: 'lg',
                   })
                }
+               columns={ListCustomerColumn(getCustomers)}
                breadcrumb={pageHeader.breadcrumb}
                title={pageHeader.title}
                data={dataUser}

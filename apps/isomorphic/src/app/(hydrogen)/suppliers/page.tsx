@@ -77,6 +77,7 @@ export default function Suppliers() {
                 breadcrumb={pageHeader.breadcrumb}
                 title={pageHeader.title}
                 data={dataUser}
+                columns={ListSupplierColumn(getSuppliers)}
                 fileName="fornecedores"
                 header=""
                 action="Cadastar fornecedor"

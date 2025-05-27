@@ -74,6 +74,7 @@ export default function PaymentTerms() {
                 breadcrumb={pageHeader.breadcrumb}
                 title={pageHeader.title}
                 data={paymentTerms}
+                columns={ListPaymentTermColumn(getPaymentTerms)}
                 fileName="condicoes-de-pagamento"
                 header=""
                 action="Cadastrar condição"

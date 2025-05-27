@@ -74,6 +74,7 @@ export default function BankAccounts() {
                 breadcrumb={pageHeader.breadcrumb}
                 title={pageHeader.title}
                 data={bankAccounts}
+                columns={ListBankAccountColumn(getBankAccounts)}
                 fileName="contas-bancarias"
                 header=""
                 action="Cadastrar conta bancária"

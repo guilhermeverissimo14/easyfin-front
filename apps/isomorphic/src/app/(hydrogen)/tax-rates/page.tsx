@@ -74,6 +74,7 @@ export default function TaxRates() {
                 breadcrumb={pageHeader.breadcrumb}
                 title={pageHeader.title}
                 data={taxRates}
+                columns={ListTaxRateColumn(getTaxRates)}
                 fileName="aliquotas"
                 header=""
                 action="Cadastrar alíquota"
