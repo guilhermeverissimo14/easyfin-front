@@ -89,8 +89,9 @@ export default function AccountsPayable() {
             }
             breadcrumb={pageHeader.breadcrumb}
             title={pageHeader.title}
+            columns={ListAccountsPayableColumn(getData)}
             data={data}
-            fileName="contas-bancarias"
+            fileName="contas-a-pagar"
             header=""
             action="Lançar Conta"
             icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
