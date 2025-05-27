@@ -94,7 +94,8 @@ export default function CashBook() {
             breadcrumb={pageHeader.breadcrumb}
             title={pageHeader.title}
             data={transactions}
-            fileName="contas-bancarias"
+            columns={ListCashBookColumn(getTransactions)}
+            fileName="livro-caixa"
             header=""
             action="Registrar Lançamento"
             icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}

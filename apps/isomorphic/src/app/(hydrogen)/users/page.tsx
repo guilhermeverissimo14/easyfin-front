@@ -93,6 +93,7 @@ export default function Users() {
             breadcrumb={pageHeader.breadcrumb}
             title={pageHeader.title}
             data={dataUser}
+            columns={ListUserColumn(getUsers)}
             fileName="usuarios"
             header=""
             action="Criar usuário"

@@ -10,6 +10,7 @@ type TableLayoutProps = {
    title: string;
    data: unknown[];
    header: string;
+   columns: any; 
    fileName: string;
    action?: string | null;
    icon: React.ReactNode | null;
@@ -22,6 +23,7 @@ export default function TableLayout({
    navigation,
    title,
    data,
+   columns,
    header,
    fileName,
    children,
@@ -34,7 +36,7 @@ export default function TableLayout({
       <>
          <PageHeader title={title} {...props}>
             <div className="mt-4 flex items-center gap-3 @lg:mt-0">
-               <ExportButton data={data} fileName={fileName} header={header} />
+               <ExportButton columns={columns} data={data} fileName={fileName} />
                {action && (
                   <Button
                      as="span"
