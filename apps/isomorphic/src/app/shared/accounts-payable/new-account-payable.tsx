@@ -15,7 +15,7 @@ import { moneyMask } from '@/utils/format';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
 
-const bankAccountSchema = z.object({
+const newAccountPayableSchema = z.object({
    supplierId: z.string().nonempty('Fornecedor não pode ser vazio'),
    documentDate: z.date().optional().nullable(),
    launchDate: z.date().optional().nullable(),
@@ -27,7 +27,7 @@ const bankAccountSchema = z.object({
    plannedPaymentMethod: z.string().optional(),
 });
 
-type BankAccountFormData = z.infer<typeof bankAccountSchema>;
+type NewAccountPayableFormData = z.infer<typeof newAccountPayableSchema>;
 
 interface NewAccountPayableProps {
    getAccounts: () => void;
@@ -43,11 +43,11 @@ export const NewAccountPayable = ({ getAccounts }: NewAccountPayableProps) => {
       setValue,
       formState: { errors },
       control,
-   } = useForm<BankAccountFormData>({
-      resolver: zodResolver(bankAccountSchema),
+   } = useForm<NewAccountPayableFormData>({
+      resolver: zodResolver(newAccountPayableSchema),
    });
 
-   const onSubmit = async (data: BankAccountFormData) => {};
+   const onSubmit = async (data: NewAccountPayableFormData) => {};
 
    const supplierOptions = [
       { label: 'Fornecedor A', value: '123' },

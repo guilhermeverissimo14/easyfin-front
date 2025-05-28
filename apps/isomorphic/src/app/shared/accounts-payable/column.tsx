@@ -10,10 +10,14 @@ import { Button } from 'rizzui/button';
 import { ActionIcon } from 'rizzui/action-icon';
 import PencilIcon from '@core/components/icons/pencil';
 import EyeIcon from '@core/components/icons/eye';
+import { useModal } from '../modal-views/use-modal';
+import ModalForm from '@/components/modal/modal-form';
+import { SettleAccountPayable } from './settle-account-payable';
 
 const columnHelper = createColumnHelper<IAccountsPayable>();
 
 export const ListAccountsPayableColumn = (getList: () => void) => {
+   const { openModal } = useModal();
    const isMobile = window.innerWidth < 768;
 
    const columns = [
@@ -34,9 +38,11 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
          size: 60,
          header: 'Status',
          cell: ({ row }) =>
-            row.original.status === 'Pendente' ? (
+            row.original.status === 'Aberto' ? (
                <div className="w-20">
-                  <div className="border-1 cursor-pointer rounded-md border border-gray-500 px-2 py-1 text-center">Pendente</div>
+                  <div className="border-1 cursor-pointer rounded-md border border-[#ABD2EF] bg-[#ABD2EF] px-2 py-1 text-center text-white">
+                     Aberto
+                  </div>
                </div>
             ) : row.original.status === 'Atrasado' ? (
                <div className="w-20">
@@ -73,7 +79,21 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
             <div className="flex items-center justify-end">
                <div className="flex items-center">
                   <Tooltip size="sm" content="Liquidar" placement="top" color="invert">
-                     <Button onClick={() => {}} as="span" className="cursor-pointer bg-white px-2 hover:bg-transparent">
+                     <Button
+                        onClick={() => {
+                           openModal({
+                              view: (
+                                 <ModalForm title="Pagamento">
+                                    <SettleAccountPayable getAccounts={getList} account={row.original} />
+                                 </ModalForm>
+                              ),
+                              size: 'sm',
+                              customSize: 'max-w-2xl',
+                           });
+                        }}
+                        as="span"
+                        className="cursor-pointer bg-white px-2 hover:bg-transparent"
+                     >
                         <ActionIcon as="span" size="sm" variant="outline" aria-label="Liquidar">
                            <PiCashRegister size={24} className="text-gray-500 hover:text-gray-700" />
                         </ActionIcon>
