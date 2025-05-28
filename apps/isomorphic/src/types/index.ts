@@ -178,6 +178,7 @@ export interface IAccountsPayable {
    supplierId: string;
    supplierName: string;
    status: string;
+   documentDate: string;
    launchDate: string;
    dueDate: string;
    installmentNumber: number;
@@ -187,18 +188,10 @@ export interface IAccountsPayable {
    interest?: number;
    fine?: number;
    discount?: number;
+   costCenterId?: string;
+   paymentMethodId?: string;
    plannedPaymentMethod?: string;
-}
-
-export interface IAccountPayable {
-   id: string;
-   documentNumber: string;
-   supplierId: string;
-   supplierName: string;
-   status: string;
-   launchDate: string;
-   dueDate: string;
-   installmentNumber: number;
-   totalInstallments: number;
-   value: number;
+   observation?: string;
+   createdAt?: Date;
+   updatedAt?: Date;
 }

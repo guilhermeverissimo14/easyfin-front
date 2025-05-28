@@ -11,13 +11,16 @@ import { api } from '@/service/api';
 import { useModal } from '../modal-views/use-modal';
 import { InputField } from '@/components/input/input-field';
 import { SelectField } from '@/components/input/select-field';
-import { moneyMask } from '@/utils/format';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
+import { moneyMask } from '@/utils/format';
 import { IAccountsPayable } from '@/types';
 
-const settleAccountPayableSchema = z.object({
+const editAccountPayableSchema = z.object({
    id: z.string().optional(),
+   documentNumber: z.string().optional(),
+   documentDate: z.date().optional().nullable(),
+   launchDate: z.date().optional().nullable(),
    dueDate: z.date().optional().nullable(),
    discount: z.string().optional(),
    fine: z.string().optional(),
@@ -25,22 +28,19 @@ const settleAccountPayableSchema = z.object({
    observation: z.string().optional(),
    costCenterId: z.string().optional(),
    paymentMethodId: z.string().nonempty('Método de pagamento não pode ser vazio'),
-   paymentDate: z.date().optional().nullable(),
    value: z.string().nonempty('Valor não pode ser vazio'),
-   bankId: z.string().optional(),
 });
 
-type SettleAccountFormData = z.infer<typeof settleAccountPayableSchema>;
+type EditAccountFormData = z.infer<typeof editAccountPayableSchema>;
 
-interface SettleAccountPayableProps {
+interface EditAccountPayableProps {
    getAccounts: () => void;
    account: IAccountsPayable;
 }
 
-export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPayableProps) => {
+export const EditAccountPayable = ({ getAccounts, account }: EditAccountPayableProps) => {
    const [loading, setLoading] = useState(false);
    const { closeModal } = useModal();
-   const [showBankSelect, setShowBankSelect] = useState(false);
 
    const {
       register,
@@ -48,11 +48,24 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
       setValue,
       formState: { errors },
       control,
-   } = useForm<SettleAccountFormData>({
-      resolver: zodResolver(settleAccountPayableSchema),
+   } = useForm<EditAccountFormData>({
+      resolver: zodResolver(editAccountPayableSchema),
    });
 
-   const onSubmit = async (data: SettleAccountFormData) => {};
+   const onSubmit = async (data: EditAccountFormData) => {
+      setLoading(true);
+      try {
+         // Call API to update account payable
+         await api.put(`/accounts-payable/${data.id}`, data);
+         toast.success('Conta a pagar atualizada com sucesso!');
+         getAccounts();
+         closeModal();
+      } catch (error) {
+         toast.error('Erro ao atualizar conta a pagar.');
+      } finally {
+         setLoading(false);
+      }
+   };
 
    const costCenterOptions = [
       { label: 'Despesas Refeição', value: 'Despesas Refeição' },
@@ -70,16 +83,17 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
       { label: 'Pix', value: 'pix' },
    ];
 
-   const bankOptions = [
-      { label: 'Banco do Brasil - Agência 1234 - CC 56789-0', value: '55dff79d-d166-44e4-b1b9-71c5855fd2a0' },
-      { label: 'Itaú - Agência 4321 - CC 98765-0', value: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
-   ];
-
    useEffect(() => {
       setValue('id', account.id);
-      setValue('discount', moneyMask('R$ 0,00'));
-      setValue('fine', 'R$ 0,00');
-      setValue('interest', moneyMask('R$ 0,00'));
+      setValue('documentNumber', account.documentNumber || '');
+      setValue('documentDate', account.documentDate ? new Date(account.documentDate) : null);
+      setValue('launchDate', account.launchDate ? new Date(account.launchDate) : null);
+      setValue('dueDate', account.dueDate ? new Date(account.dueDate) : null);
+      setValue('discount', moneyMask(String(account.discount)));
+      setValue('fine', moneyMask(String(account.fine)));
+      setValue('interest', moneyMask(String(account.interest)));
+      setValue('value', moneyMask(String(account.value)));
+      setValue('observation', account.observation || '');
    }, [account, setValue]);
 
    return (
@@ -90,47 +104,81 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
             </div>
          </div>
 
-         <div className="flex flex-row justify-between md:col-span-3">
-            <div className="flex flex-col items-start justify-center md:col-span-1">
-               <span className="text-sm text-gray-500">
-                  Documento <span className="font-semibold">{account.documentNumber}</span>
-               </span>
-               <span className="text-xs text-gray-500">
-                  Parcela {account.installmentNumber} de {account.totalInstallments}
-               </span>
-            </div>
+         <div className="grid grid-cols-1 gap-4 md:col-span-3 md:grid-cols-2">
+            <InputField
+               label="Número do Documento"
+               placeholder="Informe o número do documento"
+               type="text"
+               register={register('documentNumber')}
+               error={errors.documentNumber?.message}
+               maxLength={50}
+            />
 
-            <div className="flex flex-col items-start justify-center md:col-span-1">
-               <span className="text-sm text-gray-500">
-                  Valor: <span className="font-semibold">{moneyMask(String(account.value))}</span>
-               </span>
-               <span className="text-xs text-gray-500">Lançamento: {new Date(account.launchDate).toLocaleDateString('pt-BR')}</span>
-            </div>
-
-            <div className="flex flex-col items-start justify-center md:col-span-1">
-               <div className="text-sm text-gray-500">
-                  <div className="flex flex-row items-center gap-2">
-                     Situação:{' '}
-                     {account.status === 'Aberto' ? (
-                        <div className="w-22">
-                           <div className="border-1 cursor-pointer rounded-md border border-[#ABD2EF] bg-[#ABD2EF] px-2 text-center text-xs text-white">
-                              Aberto
-                           </div>
-                        </div>
-                     ) : account.status === 'Atrasado' ? (
-                        <div className="w-22">
-                           <div className="border-1 cursor-pointer rounded-md border border-red-400 bg-red-400 px-2 text-center text-xs text-white">
-                              Vencido
-                           </div>
-                        </div>
-                     ) : null}
-                  </div>
-                  <span className="text-xs text-gray-500">Vencimento: {new Date(account.dueDate).toLocaleDateString('pt-BR')}</span>
-               </div>
-            </div>
+            <InputField
+               label="Valor"
+               placeholder=""
+               type="text"
+               register={register('value')}
+               error={errors.value?.message}
+               maxLength={50}
+               onChange={(e) => {
+                  const value = moneyMask(e.target.value);
+                  setValue('value', value);
+               }}
+            />
          </div>
 
-         <hr className="my-3 md:col-span-3" />
+         <div className="grid grid-cols-1 gap-4 md:col-span-3 md:grid-cols-2">
+            <Controller
+               control={control}
+               name="documentDate"
+               render={({ field: { onChange, value } }) => (
+                  <DatePicker
+                     label="Data Documento"
+                     selected={value}
+                     onChange={onChange}
+                     dateFormat="dd/MM/yyyy"
+                     showMonthYearDropdown
+                     minDate={new Date('2000-02-01')}
+                     maxDate={new Date()}
+                     scrollableMonthYearDropdown
+                     placeholderText="Data do documento"
+                     popperPlacement="bottom-end"
+                     inputProps={{
+                        variant: 'outline',
+                        inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+                     }}
+                     className="flex-grow [&>label>span]:font-medium"
+                     locale={ptBR}
+                  />
+               )}
+            />
+
+            <Controller
+               control={control}
+               name="dueDate"
+               render={({ field: { onChange, value } }) => (
+                  <DatePicker
+                     label="Data Vencimento"
+                     selected={value}
+                     onChange={onChange}
+                     dateFormat="dd/MM/yyyy"
+                     showMonthYearDropdown
+                     minDate={new Date('2000-02-01')}
+                     maxDate={new Date()}
+                     scrollableMonthYearDropdown
+                     placeholderText="Data de vencimento"
+                     popperPlacement="bottom-end"
+                     inputProps={{
+                        variant: 'outline',
+                        inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+                     }}
+                     className="flex-grow [&>label>span]:font-medium"
+                     locale={ptBR}
+                  />
+               )}
+            />
+         </div>
 
          <InputField
             label="Multa"
@@ -188,13 +236,10 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
                name="paymentMethodId"
                render={({ field: { value, onChange } }) => (
                   <SelectField
-                     label="Método de Pagamento"
+                     label="Método de Pagamento Previsto"
                      placeholder="Selecione o Método de Pagamento"
                      options={paymentMethodOptions}
-                     onChange={(selected) => {
-                        onChange(selected);
-                        setShowBankSelect(selected !== 'money');
-                     }}
+                     onChange={onChange}
                      value={value || ''}
                      error={errors.paymentMethodId?.message}
                   />
@@ -209,9 +254,7 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
                      label="Centro de Custo "
                      placeholder="Selecione o centro de custo"
                      options={costCenterOptions}
-                     onChange={(selected) => {
-                        onChange(selected);
-                     }}
+                     onChange={onChange}
                      value={value || ''}
                      error={errors.costCenterId?.message}
                   />
@@ -219,30 +262,9 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
             />
          </div>
 
-         {showBankSelect && (
-            <div className="md:col-span-3">
-               <Controller
-                  control={control}
-                  name="bankId"
-                  render={({ field: { value, onChange } }) => (
-                     <SelectField
-                        label="Banco"
-                        placeholder="Qual banco será utilizado?"
-                        options={bankOptions}
-                        onChange={(selected) => {
-                           onChange(selected);
-                        }}
-                        value={value || ''}
-                        error={errors.bankId?.message}
-                     />
-                  )}
-               />
-            </div>
-         )}
-
          <div className="md:col-span-3">
             <Button disabled={loading} className="w-full" type="submit" size="lg">
-               <span>{loading ? 'Salvando...' : 'Liquidar'}</span>
+               <span>{loading ? 'Salvando...' : 'Confirmar'}</span>
             </Button>
          </div>
       </form>

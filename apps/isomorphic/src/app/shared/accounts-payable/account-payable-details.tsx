@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { useModal } from '../modal-views/use-modal';
-import { Button } from 'rizzui';
 import { moneyMask } from '@/utils/format';
 import { IAccountsPayable } from '@/types';
 import Image from 'next/image';
@@ -41,12 +40,12 @@ export const AccountPayableDetails = ({ account }: AccountPayableDetailsProps) =
          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div>
                <p className="flex flex-col text-sm text-gray-500">
-                  <span className="bg-gray-100 p-1 font-semibold">Data Lançamento</span>{' '}
+                  <span className="bg-gray-100 p-1 font-semibold">Data Emissão</span>
                   <span className="p-1">{new Date(account.launchDate).toLocaleDateString('pt-BR')}</span>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
-                  <span className="bg-gray-100 p-1 font-semibold">Data Emissão</span>
-                  <span className="p-1">{new Date(account.launchDate).toLocaleDateString('pt-BR')}</span>
+                  <span className="bg-gray-100 p-1 font-semibold">Data Documento</span>
+                  <span className="p-1">{new Date(account.documentDate).toLocaleDateString('pt-BR')}</span>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Data Vencimento</span>{' '}
@@ -59,7 +58,7 @@ export const AccountPayableDetails = ({ account }: AccountPayableDetailsProps) =
                   <span className="bg-gray-100 p-1 font-semibold">Documento</span> <span className="p-1">{account.documentNumber}</span>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
-                  <span className="bg-gray-100 p-1 font-semibold">Parcelas</span>
+                  <span className="bg-gray-100 p-1 font-semibold">Parcela</span>
                   <span className="p-1">
                      {account.installmentNumber} de {account.totalInstallments}
                   </span>

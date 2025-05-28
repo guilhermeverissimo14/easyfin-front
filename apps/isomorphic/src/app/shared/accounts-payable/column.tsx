@@ -14,6 +14,8 @@ import { useModal } from '../modal-views/use-modal';
 import ModalForm from '@/components/modal/modal-form';
 import { SettleAccountPayable } from './settle-account-payable';
 import { AccountPayableDetails } from './account-payable-details';
+import { EditAccountPayable } from './edit-account-payable';
+import TableRowActionGroup from '@core/components/table-utils/table-row-action-group';
 
 const columnHelper = createColumnHelper<IAccountsPayable>();
 
@@ -102,7 +104,20 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
                   </Tooltip>
 
                   <Tooltip size="sm" content="Editar" placement="top" color="invert">
-                     <Button onClick={() => {}} as="span" className="cursor-pointer bg-white px-2 hover:bg-transparent">
+                     <Button
+                        onClick={() => {
+                           openModal({
+                              view: (
+                                 <ModalForm title="Editar documento">
+                                    <EditAccountPayable getAccounts={getList} account={row.original} />
+                                 </ModalForm>
+                              ),
+                              size: 'sm',
+                           });
+                        }}
+                        as="span"
+                        className="cursor-pointer bg-white px-2 hover:bg-transparent"
+                     >
                         <ActionIcon as="span" size="sm" variant="outline" aria-label="Editar">
                            <PencilIcon className="size-4 text-gray-500 hover:text-gray-700" />
                         </ActionIcon>
@@ -128,6 +143,20 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
                            <EyeIcon className="size-4 text-gray-500 hover:text-gray-700" />
                         </ActionIcon>
                      </Button>
+                  </Tooltip>
+
+                  <Tooltip size="sm" content="Remover" placement="top" color="invert">
+                     <TableRowActionGroup
+                        isVisibleDelete={true}
+                        isVisibleEdit={false}
+                        isVisible={false}
+                        deletePopoverTitle="Excluir conta a pagar?"
+                        deletePopoverDescription={`Tem certeza que deseja excluir o Documento ${row.original.documentNumber}?`}
+                        onDelete={async () => {
+                           await api.delete(`/accounts-payable/${row.original.id}`);
+                           getList();
+                        }}
+                     />
                   </Tooltip>
                </div>
             </div>

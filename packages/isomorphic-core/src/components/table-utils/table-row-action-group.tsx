@@ -7,6 +7,7 @@ import DeletePopover from "../delete-popover";
 import ImageIcon from "../icons/image-solid";
 import CommentsIcon from "../icons/comments";
 import PageBlankIcon from "../icons/page-blank";
+import TrashIcon from "../icons/trash";
 
 export default function TableRowActionGroup({
   openModalEdit,
@@ -25,7 +26,7 @@ export default function TableRowActionGroup({
   isVisibleEdit,
   deletePopoverTitle,
   deletePopoverDescription,
-  onDelete
+  onDelete,
 }: {
   openModalEdit?: () => void;
   openModalList?: () => void;
@@ -51,11 +52,7 @@ export default function TableRowActionGroup({
     <Flex align="center" justify="end" gap="0" className={className}>
       {isVisibleEdit && (
         <Tooltip size="sm" content="Editar" placement="top" color="invert">
-          <Button
-            onClick={!editPayroll ? openModalEdit : navigationEdit}
-            as="span"
-            className=" bg-white cursor-pointer hover:bg-transparent px-2"
-          >
+          <Button onClick={!editPayroll ? openModalEdit : navigationEdit} as="span" className=" bg-white cursor-pointer hover:bg-transparent px-2">
             <ActionIcon as="span" size="sm" variant="outline" aria-label="Editar">
               <PencilIcon className="size-4 text-black" />
             </ActionIcon>
@@ -64,23 +61,9 @@ export default function TableRowActionGroup({
       )}
 
       {isVisible && (
-        <Tooltip
-          size="sm"
-          content="Visualizar"
-          placement="top"
-          color="invert"
-        >
-          <Button
-            onClick={openModalList}
-            as="span"
-            className=" bg-white cursor-pointer hover:bg-transparent px-2"
-          >
-            <ActionIcon
-              as="span"
-              size="sm"
-              variant="outline"
-              aria-label="Visualizar"
-            >
+        <Tooltip size="sm" content="Visualizar" placement="top" color="invert">
+          <Button onClick={openModalList} as="span" className=" bg-white cursor-pointer hover:bg-transparent px-2">
+            <ActionIcon as="span" size="sm" variant="outline" aria-label="Visualizar">
               <EyeIcon className="size-4 text-black " />
             </ActionIcon>
           </Button>
@@ -88,23 +71,9 @@ export default function TableRowActionGroup({
       )}
 
       {isVisibleImg && (
-        <Tooltip
-          size="sm"
-          content="Visualizar Comprovante"
-          placement="top"
-          color="invert"
-        >
-          <Button
-            onClick={openModalImage}
-            as="span"
-            className=" bg-white cursor-pointer hover:bg-transparent px-2"
-          >
-            <ActionIcon
-              as="span"
-              size="sm"
-              variant="outline"
-              aria-label="Visualizar Comprovante"
-            >
+        <Tooltip size="sm" content="Visualizar Comprovante" placement="top" color="invert">
+          <Button onClick={openModalImage} as="span" className=" bg-white cursor-pointer hover:bg-transparent px-2">
+            <ActionIcon as="span" size="sm" variant="outline" aria-label="Visualizar Comprovante">
               <ImageIcon className="size-4 text-black fill-red-500 " />
             </ActionIcon>
           </Button>
@@ -112,62 +81,32 @@ export default function TableRowActionGroup({
       )}
 
       {isVisibleNote && (
-        <Tooltip
-          size="sm"
-          content="Adicionar comentário"
-          placement="top"
-          color="invert"
-        >
-          <Button
-            onClick={openModalNote}
-            as="span"
-            className=" bg-white cursor-pointer hover:bg-transparent px-2"
-          >
-            <ActionIcon
-              as="span"
-              size="sm"
-              variant="outline"
-              aria-label="Adicionar Nota"
-            >
+        <Tooltip size="sm" content="Adicionar comentário" placement="top" color="invert">
+          <Button onClick={openModalNote} as="span" className=" bg-white cursor-pointer hover:bg-transparent px-2">
+            <ActionIcon as="span" size="sm" variant="outline" aria-label="Adicionar Nota">
               <CommentsIcon className="size-4 text-black " />
             </ActionIcon>
           </Button>
         </Tooltip>
       )}
 
-
       {isVisibleDelete && (
-        <DeletePopover
-          title={deletePopoverTitle}
-          description={deletePopoverDescription}
-          onDelete={onDelete}
-        />
+        <Tooltip size="sm" content="Remover" placement="top" color="invert">
+          <Button as="span" className=" bg-white cursor-pointer hover:bg-transparent px-2">
+            <DeletePopover title={deletePopoverTitle} description={deletePopoverDescription} onDelete={onDelete} />
+          </Button>
+        </Tooltip>
       )}
 
       {copySheet && (
-          <Tooltip
-            size="sm"
-            content="Clonar folha"
-            placement="top"
-            color="invert"
-          >
-            <Button
-              onClick={navigationCopySheet}
-              as="span"
-              className=" bg-white cursor-pointer hover:bg-transparent px-2"
-            >
-              <ActionIcon
-                as="span"
-                size="sm"
-                variant="outline"
-                aria-label="Clonar folha"
-              >
-                <PageBlankIcon className="size-4 text-black " />
-              </ActionIcon>
-            </Button>
-          </Tooltip>
+        <Tooltip size="sm" content="Clonar folha" placement="top" color="invert">
+          <Button onClick={navigationCopySheet} as="span" className=" bg-white cursor-pointer hover:bg-transparent px-2">
+            <ActionIcon as="span" size="sm" variant="outline" aria-label="Clonar folha">
+              <PageBlankIcon className="size-4 text-black " />
+            </ActionIcon>
+          </Button>
+        </Tooltip>
       )}
-
     </Flex>
   );
 }
