@@ -183,4 +183,22 @@ export interface IAccountsPayable {
    installmentNumber: number;
    totalInstallments: number;
    value: number;
+   userId?: string;
+   interest?: number;
+   fine?: number;
+   discount?: number;
+   plannedPaymentMethod?: string;
+}
+
+export interface IAccountPayable {
+   id: string;
+   documentNumber: string;
+   supplierId: string;
+   supplierName: string;
+   status: string;
+   launchDate: string;
+   dueDate: string;
+   installmentNumber: number;
+   totalInstallments: number;
+   value: number;
 }

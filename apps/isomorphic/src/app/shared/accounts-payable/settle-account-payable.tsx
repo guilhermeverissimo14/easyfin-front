@@ -14,13 +14,14 @@ import { SelectField } from '@/components/input/select-field';
 import { moneyMask } from '@/utils/format';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
+import { IAccountPayable } from '@/types';
 
 const settleAccountPayableSchema = z.object({
    id: z.string().optional(),
    dueDate: z.date().optional().nullable(),
-   discount: z.string().optional().default('R$ 0,00'), // desconto
-   fine: z.string().optional().default('0'), // multa
-   interest: z.string().optional().default('R$ 0,00'), // juros
+   discount: z.string().optional(),
+   fine: z.string().optional(),
+   interest: z.string().optional(),
    observation: z.string().optional(),
    costCenterId: z.string().optional(),
    paymentMethodId: z.string().nonempty('Método de pagamento não pode ser vazio'),
@@ -30,19 +31,6 @@ const settleAccountPayableSchema = z.object({
 });
 
 type SettleAccountFormData = z.infer<typeof settleAccountPayableSchema>;
-
-interface IAccountPayable {
-   id: string;
-   documentNumber: string;
-   supplierId: string;
-   supplierName: string;
-   status: string;
-   launchDate: string;
-   dueDate: string;
-   installmentNumber: number;
-   totalInstallments: number;
-   value: number;
-}
 
 interface SettleAccountPayableProps {
    getAccounts: () => void;
