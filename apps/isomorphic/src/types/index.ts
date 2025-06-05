@@ -195,3 +195,31 @@ export interface IAccountsPayable {
    createdAt?: Date;
    updatedAt?: Date;
 }
+
+export interface IAccountsReceivable {
+   id: string;
+   documentNumber: string;
+   customerId: string;
+   customerName: string;
+   status: string;
+   documentDate: string;
+   launchDate: string;
+   dueDate: string;
+   receiptDate?: string;
+   value: number;
+   receivedValue?: number;
+   discount?: number;
+   fine?: number;
+   interest?: number;
+   installmentNumber: number;
+   totalInstallments: number;
+   costCenterId?: string;
+   bankAccountId?: string;
+   plannedPaymentMethod?: string;
+   paymentMethodId?: string;
+   userId?: string;
+   observation?: string;
+   createdAt?: Date;
+   updatedAt?: Date;
+   cancelledAt?: Date | null;
+}
