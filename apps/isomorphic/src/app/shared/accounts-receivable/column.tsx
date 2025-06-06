@@ -1,6 +1,6 @@
 'use client';
 
-import { createColumnHelper } from '@tanstack/react-table';
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { api } from '@/service/api';
 import { IAccountsReceivable } from '@/types';
 import { formatDate, moneyMask } from '@/utils/format';
@@ -17,7 +17,17 @@ import { AccountReceivableDetails } from './account-receivable-details';
 import { EditAccountReceivable } from './edit-account-receivable';
 import TableRowActionGroup from '@core/components/table-utils/table-row-action-group';
 
-const columnHelper = createColumnHelper<IAccountsReceivable>();
+type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
+   dataType?: 'date' | 'currency' | string
+}
+
+const columnHelper = createColumnHelper<IAccountsReceivable>() as {
+   accessor<TValue extends keyof IAccountsReceivable | null>(
+      accessor: TValue,
+      config: CustomColumnDef<IAccountsReceivable, TValue extends null ? unknown : IAccountsReceivable[TValue extends keyof IAccountsReceivable ? TValue : never]>
+   ): CustomColumnDef<IAccountsReceivable, any>;
+   display(config: CustomColumnDef<IAccountsReceivable, any>): CustomColumnDef<IAccountsReceivable, any>;
+}
 
 export const ListAccountsReceivableColumn = (getList: () => void) => {
    const { openModal } = useModal();
@@ -63,12 +73,14 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
                <span className="text-red-500">{formatDate(row.original.dueDate)}</span>
             </div>
          ),
+         dataType: 'date',
       }),
       columnHelper.accessor('value', {
          id: 'value',
          size: 100,
          header: 'Valor',
          cell: ({ row }) => <span>{moneyMask(String(row.original.value))}</span>,
+         dataType: 'currency',
       }),
       columnHelper.display({
          id: 'actions',

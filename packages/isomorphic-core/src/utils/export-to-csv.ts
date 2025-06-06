@@ -8,6 +8,8 @@ export interface ColumnDefinition {
   id?: string;
   cell?: (info: any) => React.ReactNode;
   includeInExport?: boolean;
+  // Nova propriedade para definir o tipo de dados na exportação
+  dataType?: 'string' | 'number' | 'date' | 'currency';
 }
 
 export async function exportToXLSX(
@@ -31,7 +33,7 @@ export async function exportToXLSX(
   
   worksheet.addRow(headers);
   
- 
+  // Configuração de estilo do cabeçalho
   const headerRow = worksheet.getRow(1);
   headerRow.eachCell((cell:any) => {
     cell.font = { bold: true, size: 12, color: { argb: 'FF000000' } };
@@ -51,18 +53,15 @@ export async function exportToXLSX(
   });
   headerRow.height = 25; 
   
- 
+  // Processamento das linhas de dados
   for (const row of data || []) {
     const rowData: any[] = [];
     
     for (const column of exportColumns) {
-     
       let value;
       
-     
       const columnId = column.id || (typeof column.accessor === 'string' ? column.accessor : '');
       
-    
       if (typeof column.accessor === 'string') {
         value = getNestedValue(row, column.accessor);
       } 
@@ -77,7 +76,6 @@ export async function exportToXLSX(
       }
       
       else if (column.cell) {
-       
         const info = {
           row: { original: row },
           getValue: () => getNestedValue(row, columnId),
@@ -92,17 +90,22 @@ export async function exportToXLSX(
         }
       }
 
+      // Processa o valor com base no tipo de dados definido
+      if (column.dataType === 'number' || column.dataType === 'currency') {
+        value = convertToNumber(value);
+      }
+
       rowData.push(value !== undefined ? value : '');
     }
     
     worksheet.addRow(rowData);
   }
   
- 
+  // Configuração de estilo das células de dados
   for (let rowIndex = 2; rowIndex <= data.length + 1; rowIndex++) {
     const dataRow = worksheet.getRow(rowIndex);
-    dataRow.eachCell((cell:any) => {
-      
+    dataRow.eachCell((cell:any, colIndex:number) => {
+      // Configuração básica para todas as células
       cell.border = {
         top: { style: 'thin' },
         left: { style: 'thin' },
@@ -110,13 +113,20 @@ export async function exportToXLSX(
         right: { style: 'thin' }
       };
       cell.alignment = { vertical: 'middle' };
+      
+      // Define formato numérico para colunas do tipo número ou moeda
+      const column = exportColumns[colIndex - 1];
+      if (column && column.dataType === 'number') {
+        cell.numFmt = '#,##0.00';
+      } else if (column && column.dataType === 'currency') {
+        cell.numFmt = 'R$ #,##0.00';
+      }
     });
-    dataRow.height = 22; 
+    dataRow.height = 22;
   }
 
-  
+  // Ajuste automático da largura das colunas
   worksheet.columns.forEach((column:any, index:any) => {
-   
     const headerLength = headers[index]?.length || 10;
     const maxContentLength = Math.max(
       ...data.map(row => {
@@ -129,11 +139,27 @@ export async function exportToXLSX(
     column.width = Math.max(15, headerLength * 1.2, maxContentLength + 2);
   });
 
- 
+  // Gera e baixa o arquivo
   const buffer = await workbook.xlsx.writeBuffer();
   saveAs(new Blob([buffer]), `${fileName}.xlsx`);
 }
 
+// Função auxiliar para converter string de moeda para número
+function convertToNumber(value: any): number {
+  if (typeof value === 'number') return value;
+  
+  if (typeof value === 'string') {
+    // Remove símbolos de moeda e formatação
+    const cleanValue = value
+      .replace(/[^\d.,]/g, '') // Remove tudo exceto números, pontos e vírgulas
+      .replace(/\./g, '')      // Remove pontos de separação de milhar
+      .replace(',', '.');      // Substitui vírgula por ponto decimal
+    
+    return Number(cleanValue) || 0;
+  }
+  
+  return 0;
+}
 
 function getNestedValue(obj: any, path: string): any {
   if (!path) return undefined;

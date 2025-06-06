@@ -1,6 +1,6 @@
 'use client';
 
-import { createColumnHelper } from '@tanstack/react-table';
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { api } from '@/service/api';
 import { IAccountsPayable } from '@/types';
 import { formatDate, moneyMask } from '@/utils/format';
@@ -17,7 +17,18 @@ import { AccountPayableDetails } from './account-payable-details';
 import { EditAccountPayable } from './edit-account-payable';
 import TableRowActionGroup from '@core/components/table-utils/table-row-action-group';
 
-const columnHelper = createColumnHelper<IAccountsPayable>();
+
+type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
+   dataType?: 'date' | 'currency' | string
+}
+
+const columnHelper = createColumnHelper<IAccountsPayable>() as {
+   accessor<TValue extends keyof IAccountsPayable | null>(
+      accessor: TValue,
+      config: CustomColumnDef<IAccountsPayable, TValue extends null ? unknown : IAccountsPayable[TValue extends keyof IAccountsPayable ? TValue : never]>
+   ): CustomColumnDef<IAccountsPayable, any>;
+   display(config: CustomColumnDef<IAccountsPayable, any>): CustomColumnDef<IAccountsPayable, any>;
+}
 
 export const ListAccountsPayableColumn = (getList: () => void) => {
    const { openModal } = useModal();
@@ -63,12 +74,14 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
                <span className="text-red-500">{formatDate(row.original.dueDate)}</span>
             </div>
          ),
+         dataType: 'date',
       }),
       columnHelper.accessor('value', {
          id: 'value',
          size: 100,
          header: 'Valor',
          cell: ({ row }) => <span>{moneyMask(String(row.original.value))}</span>,
+         dataType: 'currency',
       }),
       columnHelper.display({
          id: 'actions',

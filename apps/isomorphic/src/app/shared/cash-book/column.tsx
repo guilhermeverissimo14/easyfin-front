@@ -1,11 +1,19 @@
 'use client';
 
-import { createColumnHelper } from '@tanstack/react-table';
-import { api } from '@/service/api';
+import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { ICashBook } from '@/types';
 import { formatDate, moneyMask } from '@/utils/format';
 
-const columnHelper = createColumnHelper<ICashBook>();
+type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
+  dataType?: 'date' | 'currency' | string
+}
+
+const columnHelper = createColumnHelper<ICashBook>() as {
+  accessor<TValue extends keyof ICashBook | null>(
+    accessor: TValue,
+    config: CustomColumnDef<ICashBook, TValue extends null ? unknown : ICashBook[TValue extends keyof ICashBook ? TValue : never]>
+  ): CustomColumnDef<ICashBook, any>;
+}
 
 export const ListCashBookColumn = (getList: () => void) => {
    const isMobile = window.innerWidth < 768;
@@ -16,6 +24,7 @@ export const ListCashBookColumn = (getList: () => void) => {
          size: 120,
          header: 'Data',
          cell: ({ row }) => <span className="font-medium">{formatDate(row.original.date)}</span>,
+         dataType: 'date',
       }),
       columnHelper.accessor('historic', {
          id: 'historic',
@@ -28,6 +37,7 @@ export const ListCashBookColumn = (getList: () => void) => {
          size: 100,
          header: 'Valor',
          cell: ({ row }) => <span>{moneyMask(String(row.original.value))}</span>,
+         dataType: 'currency', 
       }),
       columnHelper.accessor('type', {
          id: 'type',
@@ -52,6 +62,7 @@ export const ListCashBookColumn = (getList: () => void) => {
          size: 120,
          header: 'Saldo',
          cell: ({ row }) => <span>{moneyMask(String(row.original.balance))}</span>,
+         dataType: 'currency',
       }),
    ];
 
