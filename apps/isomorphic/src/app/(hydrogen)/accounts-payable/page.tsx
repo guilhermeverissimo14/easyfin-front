@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { PiPlusBold } from 'react-icons/pi';
-
+import { MdOutlineManageSearch } from 'react-icons/md';
 import TableComponent from '@/components/tables/table';
 import ModalForm from '@/components/modal/modal-form';
 import { useModal } from '@/app/shared/modal-views/use-modal';
@@ -12,6 +12,7 @@ import { HeaderInfoDetails } from '@/app/shared/accounts-payable/header-info-det
 import TableLayout from '../tables/table-layout';
 import { IAccountsPayable } from '@/types';
 import { NewAccountPayable } from '@/app/shared/accounts-payable/new-account-payable';
+import { FilterAccountsPayable } from '@/app/shared/accounts-payable/filter-account-payable';
 
 const accountsPayableMock: IAccountsPayable[] = [
    {
@@ -93,6 +94,16 @@ export default function AccountsPayable() {
                   size: 'md',
                })
             }
+            openModalFilter={() =>
+               openModal({
+                  view: (
+                     <ModalForm title="Pesquisa Avançada">
+                        <FilterAccountsPayable getAccounts={getData} />
+                     </ModalForm>
+                  ),
+                  size: 'md',
+               })
+            }
             breadcrumb={pageHeader.breadcrumb}
             title={pageHeader.title}
             columns={ListAccountsPayableColumn(getData)}
@@ -100,7 +111,9 @@ export default function AccountsPayable() {
             fileName="contas-a-pagar"
             header=""
             action="Lançar Conta"
+            filter="Pesquisa avançada"
             icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
+            iconFilter={<MdOutlineManageSearch className="me-1.5 h-[17px] w-[17px]" />}
          >
             <HeaderInfoDetails />
             <TableComponent
