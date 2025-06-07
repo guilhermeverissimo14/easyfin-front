@@ -13,7 +13,7 @@ import { InputField } from '@/components/input/input-field';
 import { SelectField } from '@/components/input/select-field';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
-import { formatCurrency, moneyMask } from '@/utils/format';
+import { adjustToBrazilTimezone, formatCurrency, moneyMask } from '@/utils/format';
 import { IAccountsReceivable } from '@/types';
 
 const editAccountReceivableSchema = z.object({
@@ -146,8 +146,8 @@ export const EditAccountReceivable = ({ getAccounts, account }: EditAccountRecei
          const formattedData = {
             customerId: data.customerId,
             documentNumber: data.documentNumber || "",
-            documentDate: data.documentDate ? data.documentDate.toISOString() : null,
-            dueDate: data.dueDate ? data.dueDate.toISOString() : null,
+            documentDate: adjustToBrazilTimezone(data.documentDate ? data.documentDate : new Date()),
+            dueDate: adjustToBrazilTimezone(data.dueDate ? data.dueDate : new Date()),
             value: Number(unmaskedValue),
             discount: Number(unmaskedDiscount),
             fine: Number(unmaskedFine),

@@ -11,7 +11,7 @@ import { api } from '@/service/api';
 import { useModal } from '../modal-views/use-modal';
 import { InputField } from '@/components/input/input-field';
 import { SelectField } from '@/components/input/select-field';
-import { moneyMask } from '@/utils/format';
+import { adjustToBrazilTimezone, moneyMask } from '@/utils/format';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
 
@@ -97,8 +97,8 @@ export const NewAccountPayable = ({ getAccounts }: NewAccountPayableProps) => {
             supplierId: data.supplierId,
             documentNumber: data.documentNumber || "",
             plannedPaymentMethod: data.plannedPaymentMethod || "",
-            documentDate: data.documentDate ? data.documentDate.toISOString() : new Date().toISOString(),
-            dueDate: data.dueDate ? data.dueDate.toISOString() : new Date().toISOString(),
+            documentDate: adjustToBrazilTimezone(data.documentDate ? data.documentDate : new Date()),
+            dueDate: adjustToBrazilTimezone(data.dueDate ? data.dueDate : new Date()),
             value: Number(unmaskedValue),
             costCenterId: data.costCenterId || "",
             observation: data.observation || ""

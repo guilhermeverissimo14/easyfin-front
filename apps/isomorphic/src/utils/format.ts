@@ -1,6 +1,13 @@
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+export const adjustToBrazilTimezone = (date: Date | null | undefined) => {
+   if (!date) return null;
+
+   const adjusted = new Date(date.getTime() - 3 * 60 * 60 * 1000);
+   return adjusted.toISOString();
+};
+
 export const cpfCnpjMask = (value: string) => {
    const cleanedValue = value.replace(/\D/g, '');
 

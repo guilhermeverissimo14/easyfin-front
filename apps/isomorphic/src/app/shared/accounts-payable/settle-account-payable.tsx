@@ -11,7 +11,7 @@ import { api } from '@/service/api';
 import { useModal } from '../modal-views/use-modal';
 import { InputField } from '@/components/input/input-field';
 import { SelectField } from '@/components/input/select-field';
-import { formatCurrency, moneyMask } from '@/utils/format';
+import { adjustToBrazilTimezone, formatCurrency, moneyMask } from '@/utils/format';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
 import { IAccountsPayable } from '@/types';
@@ -79,7 +79,7 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
           discount: unmaskedDiscount,
           observation: data.observation || '',
           paymentMethodId: data.paymentMethodId,
-          paymentDate: data.paymentDate ? data.paymentDate.toISOString() : new Date().toISOString(),
+          paymentDate: adjustToBrazilTimezone(data.paymentDate ? data.paymentDate : new Date()),
           costCenterId: data.costCenterId || ''
         };
     

@@ -13,7 +13,7 @@ import { InputField } from '@/components/input/input-field';
 import { SelectField } from '@/components/input/select-field';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
-import { formatCurrency, moneyMask } from '@/utils/format';
+import { adjustToBrazilTimezone, formatCurrency, moneyMask } from '@/utils/format';
 import { IAccountsPayable } from '@/types';
 
 const editAccountPayableSchema = z.object({
@@ -142,11 +142,11 @@ export const EditAccountPayable = ({ getAccounts, account }: EditAccountPayableP
             ? data.interest.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
             : '0';
 
-         const formattedData = {
+          const formattedData = {
             supplierId: data.supplierId,
             documentNumber: data.documentNumber,
-            documentDate: data.documentDate ? data.documentDate.toISOString() : null,
-            dueDate: data.dueDate ? data.dueDate.toISOString() : null,
+            documentDate: adjustToBrazilTimezone(data.documentDate),
+            dueDate: adjustToBrazilTimezone(data.dueDate),
             value: Number(unmaskedValue),
             discount: Number(unmaskedDiscount),
             fine: Number(unmaskedFine),
@@ -154,7 +154,7 @@ export const EditAccountPayable = ({ getAccounts, account }: EditAccountPayableP
             costCenterId: data.costCenterId,
             plannedPaymentMethod: data.plannedPaymentMethod,
             observation: data.observation || ""
-         };
+          };
 
          await api.put(`/accounts-payable/${account.id}`, formattedData);
 
