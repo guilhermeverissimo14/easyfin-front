@@ -11,7 +11,7 @@ import { api } from '@/service/api';
 import { useModal } from '../modal-views/use-modal';
 import { InputField } from '@/components/input/input-field';
 import { SelectField } from '@/components/input/select-field';
-import { moneyMask } from '@/utils/format';
+import { formatCurrency, moneyMask } from '@/utils/format';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
 import { IAccountsPayable } from '@/types';
@@ -41,6 +41,9 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
    const [loading, setLoading] = useState(false);
    const { closeModal } = useModal();
    const [showBankSelect, setShowBankSelect] = useState(false);
+   const [costCenters, setCostCenters] = useState([]);
+   const [paymentMethods, setPaymentMethods] = useState([]);
+   const [bankAccounts, setBankAccounts] = useState([]);
 
    const {
       register,
@@ -52,34 +55,126 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
       resolver: zodResolver(settleAccountPayableSchema),
    });
 
-   const onSubmit = async (data: SettleAccountFormData) => {};
-
-   const costCenterOptions = [
-      { label: 'Despesas Refeição', value: 'Despesas Refeição' },
-      { label: 'Compras', value: 'Compras' },
-      { label: 'Fornecedores', value: 'Fornecedores' },
-      { label: 'Fretes Transportes', value: 'Fretes Transportes' },
-   ];
-
-   const paymentMethodOptions = [
-      { label: 'Boleto Bancário', value: 'ticket' },
-      { label: 'Dinheiro', value: 'money' },
-      { label: 'Cartão de Crédito', value: 'credit_card' },
-      { label: 'Cartão de Débito', value: 'debit_card' },
-      { label: 'Transferência Bancária', value: 'bank_transfer' },
-      { label: 'Pix', value: 'pix' },
-   ];
-
-   const bankOptions = [
-      { label: 'Banco do Brasil - Agência 1234 - CC 56789-0', value: '55dff79d-d166-44e4-b1b9-71c5855fd2a0' },
-      { label: 'Itaú - Agência 4321 - CC 98765-0', value: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
-   ];
+   const onSubmit = async (data: SettleAccountFormData) => {
+      setLoading(true);
+      
+      try {
+       
+        const unmaskedFine = data.fine
+          ? parseFloat(data.fine.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
+          : 0;
+        
+        const unmaskedInterest = data.interest
+          ? parseFloat(data.interest.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
+          : 0;
+        
+        const unmaskedDiscount = data.discount
+          ? parseFloat(data.discount.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
+          : 0;
+    
+      
+        const payload = {
+          fine: unmaskedFine,
+          interest: unmaskedInterest,
+          discount: unmaskedDiscount,
+          observation: data.observation || '',
+          paymentMethodId: data.paymentMethodId,
+          paymentDate: data.paymentDate ? data.paymentDate.toISOString() : new Date().toISOString(),
+          costCenterId: data.costCenterId || ''
+        };
+    
+      
+        if (showBankSelect && data.bankId) {
+        }
+    
+       
+        await api.post(`/accounts-payable/${account.id}/settle`, payload);
+        
+        
+        toast.success('Pagamento registrado com sucesso!');
+        getAccounts(); 
+        closeModal();
+      } catch (error: any) {
+        
+        console.error('Erro ao liquidar conta:', error);
+        const errorMessage = error.response?.data?.message || 'Não foi possível registrar o pagamento';
+        toast.error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+   };
 
    useEffect(() => {
-      setValue('id', account.id);
-      setValue('discount', moneyMask('R$ 0,00'));
-      setValue('fine', 'R$ 0,00');
-      setValue('interest', moneyMask('R$ 0,00'));
+      const fetchData = async () => {
+        try {
+          
+          const costCentersResponse = await api.get('/cost-centers');
+          setCostCenters(costCentersResponse.data.map((center: any) => ({
+            label: center.name,
+            value: center.id
+          })));
+    
+          
+          const paymentMethodsResponse = await api.get('/payment-methods');
+          setPaymentMethods(paymentMethodsResponse.data.map((method: any) => ({
+            label: method.name,
+            value: method.id,
+            requiresBank: method.requiresBank
+          })));
+    
+          
+          const bankAccountsResponse = await api.get('/bank-accounts');
+          setBankAccounts(bankAccountsResponse.data.map((bank: any) => ({
+            label: `${bank.bank} - Agência ${bank.agency} - CC ${bank.account}`,
+            value: bank.id
+          })));
+    
+        } catch (error) {
+          console.error("Erro ao carregar dados:", error);
+          toast.error("Erro ao carregar dados necessários");
+        }
+      };
+    
+      fetchData();
+    }, []);
+
+ useEffect(() => {
+
+
+
+
+
+      const fetchAccountDetails = async () => {
+
+         try {
+            setLoading(true);
+            const response = await api.get(`/accounts-payable/${account.id}`);
+
+            if (!response) {
+               throw new Error(`Error fetching account details: ${response}`);
+            }
+
+           
+            const data = await response.data;
+
+            setValue('dueDate', data.dueDate ? new Date(data.dueDate) : null);
+            setValue('value', formatCurrency(data.value));
+            setValue('discount', formatCurrency(data.discount || 0));
+            setValue('fine', formatCurrency(data.fine || 0));
+            setValue('interest', formatCurrency(data.interest || 0));
+            setValue('costCenterId', data.costCenter?.id || '');
+            setValue('paymentMethodId', data.paymentMethodId?.id || '');
+            setValue('observation', data.observation || '');
+
+         } catch (err) {
+            console.error('Error fetching account details:', err);
+
+         } finally {
+            setLoading(false);
+         }
+      };
+
+      fetchAccountDetails();
    }, [account, setValue]);
 
    return (
@@ -102,7 +197,7 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
 
             <div className="flex flex-col items-start justify-center md:col-span-1">
                <span className="text-sm text-gray-500">
-                  Valor: <span className="font-semibold">{moneyMask(String(account.value))}</span>
+                  Valor: <span className="font-semibold">{formatCurrency(account.value)}</span>
                </span>
                <span className="text-xs text-gray-500">Lançamento: {new Date(account.launchDate).toLocaleDateString('pt-BR')}</span>
             </div>
@@ -190,10 +285,9 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
                   <SelectField
                      label="Método de Pagamento"
                      placeholder="Selecione o Método de Pagamento"
-                     options={paymentMethodOptions}
+                     options={paymentMethods.length > 0 ? paymentMethods : []}
                      onChange={(selected) => {
                         onChange(selected);
-                        setShowBankSelect(selected !== 'money');
                      }}
                      value={value || ''}
                      error={errors.paymentMethodId?.message}
@@ -208,7 +302,7 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
                   <SelectField
                      label="Centro de Custo "
                      placeholder="Selecione o centro de custo"
-                     options={costCenterOptions}
+                     options={costCenters.length > 0 ? costCenters : []}
                      onChange={(selected) => {
                         onChange(selected);
                      }}
@@ -217,6 +311,33 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
                   />
                )}
             />
+         </div>
+         
+         <div className="md:col-span-3">
+           <Controller
+             control={control}
+             name="paymentDate"
+             render={({ field: { onChange, value } }) => (
+               <DatePicker
+                 label="Data de Pagamento"
+                 selected={value || new Date()}
+                 onChange={onChange}
+                 dateFormat="dd/MM/yyyy"
+                 showMonthYearDropdown
+                 minDate={new Date('2000-02-01')}
+                 maxDate={new Date()}
+                 scrollableMonthYearDropdown
+                 placeholderText="Data de pagamento"
+                 popperPlacement="bottom-end"
+                 inputProps={{
+                   variant: 'outline',
+                   inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+                 }}
+                 className="flex-grow [&>label>span]:font-medium"
+                 locale={ptBR}
+               />
+             )}
+           />
          </div>
 
          {showBankSelect && (
@@ -228,7 +349,7 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
                      <SelectField
                         label="Banco"
                         placeholder="Qual banco será utilizado?"
-                        options={bankOptions}
+                        options={bankAccounts.length > 0 ? bankAccounts : []}
                         onChange={(selected) => {
                            onChange(selected);
                         }}

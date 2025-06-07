@@ -85,10 +85,6 @@ export const EditAccountPayable = ({ getAccounts, account }: EditAccountPayableP
 
    useEffect(() => {
 
-
-
-
-
       const fetchAccountDetails = async () => {
 
          try {
