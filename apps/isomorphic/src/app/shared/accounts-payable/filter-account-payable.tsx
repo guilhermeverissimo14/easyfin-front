@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from 'rizzui';
@@ -10,11 +10,11 @@ import { toast } from 'react-toastify';
 import { api } from '@/service/api';
 import { useModal } from '../modal-views/use-modal';
 import { SelectField } from '@/components/input/select-field';
-import { moneyMask } from '@/utils/format';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
+import { FilterParams } from '@/types';
 
-const newAccountPayableSchema = z.object({
+const filterSchema = z.object({
    supplierId: z.string().optional(),
    costCenterId: z.string().optional(),
    status: z.string().optional(),
@@ -25,56 +25,117 @@ const newAccountPayableSchema = z.object({
    dueDateEnd: z.date().optional().nullable(),
 });
 
-type NewAccountPayableFormData = z.infer<typeof newAccountPayableSchema>;
+type FilterFormData = z.infer<typeof filterSchema>;
 
-interface NewAccountPayableProps {
-   getAccounts: () => void;
+interface FilterAccountsPayableProps {
+   getAccounts: (filters?: FilterParams) => void;
 }
 
-export const FilterAccountsPayable = ({ getAccounts }: NewAccountPayableProps) => {
+export const FilterAccountsPayable = ({ getAccounts }: FilterAccountsPayableProps) => {
    const [loading, setLoading] = useState(false);
+   const [suppliers, setSuppliers] = useState<{label: string, value: string}[]>([]);
+   const [costCenters, setCostCenters] = useState<{label: string, value: string}[]>([]);
+   const [paymentMethods, setPaymentMethods] = useState<{label: string, value: string}[]>([]);
    const { closeModal } = useModal();
 
    const {
-      register,
       handleSubmit,
-      setValue,
       formState: { errors },
       control,
-   } = useForm<NewAccountPayableFormData>({
-      resolver: zodResolver(newAccountPayableSchema),
+      reset
+   } = useForm<FilterFormData>({
+      resolver: zodResolver(filterSchema),
    });
 
-   const onSubmit = async (data: NewAccountPayableFormData) => {};
+   // Carregar dados para os selects
+   useEffect(() => {
+      const fetchData = async () => {
+         try {
+            setLoading(true);
+            
+            // Buscar fornecedores da API
+            const suppliersResponse = await api.get('/suppliers');
+            setSuppliers(
+               suppliersResponse.data.map((supplier: any) => ({
+                  label: supplier.name,
+                  value: supplier.id
+               }))
+            );
+            
+            // Buscar centros de custo da API
+            const costCentersResponse = await api.get('/cost-centers');
+            setCostCenters(
+               costCentersResponse.data.map((center: any) => ({
+                  label: center.name,
+                  value: center.id
+               }))
+            );
+            
+            // Buscar métodos de pagamento da API
+            const paymentMethodsResponse = await api.get('/payment-methods');
+            setPaymentMethods(
+               paymentMethodsResponse.data.map((method: any) => ({
+                  label: method.name,
+                  value: method.id
+               }))
+            );
+         } catch (error) {
+            console.error("Erro ao carregar dados:", error);
+            toast.error("Erro ao carregar dados para filtros");
+         } finally {
+            setLoading(false);
+         }
+      };
 
-   const supplierOptions = [
-      { label: 'Fornecedor A', value: '123' },
-      { label: 'Fornecedor B', value: '124' },
-      { label: 'Fornecedor C', value: '125' },
-      { label: 'Fornecedor D', value: '126' },
-   ];
+      fetchData();
+   }, []);
+
+   const onSubmit = async (data: FilterFormData) => {
+      setLoading(true);
+      
+      try {
+         // Formatar as datas para o formato esperado pela API
+         const filters: FilterParams = {};
+         
+         if (data.supplierId) filters.supplierId = data.supplierId;
+         if (data.costCenterId) filters.costCenterId = data.costCenterId;
+         if (data.status) filters.status = data.status;
+         if (data.paymentMethodId) filters.paymentMethodId = data.paymentMethodId;
+         
+         if (data.documentDateStart) {
+            filters.documentDateStart = data.documentDateStart.toISOString().split('T')[0];
+         }
+         
+         if (data.documentDateEnd) {
+            filters.documentDateEnd = data.documentDateEnd.toISOString().split('T')[0];
+         }
+         
+         if (data.dueDateStart) {
+            filters.dueDateStart = data.dueDateStart.toISOString().split('T')[0];
+         }
+         
+         if (data.dueDateEnd) {
+            filters.dueDateEnd = data.dueDateEnd.toISOString().split('T')[0];
+         }
+         
+         // Chamar a função para buscar dados filtrados
+         await getAccounts(filters);
+         
+         toast.success('Filtro aplicado com sucesso');
+         closeModal();
+      } catch (error) {
+         console.error('Erro ao aplicar filtro:', error);
+         toast.error('Não foi possível aplicar o filtro');
+      } finally {
+         setLoading(false);
+      }
+   };
 
    const statusOptions = [
       { label: 'Pendente', value: 'PENDING' },
+      { label: 'Vencido', value: 'OVERDUE' },
       { label: 'Pago', value: 'PAID' },
-      { label: 'Atrasado', value: 'OVERDUE' },
-      { label: 'Cancelado', value: 'CANCELED' },
-   ];
-
-   const costCenterOptions = [
-      { label: 'Despesas Refeição', value: 'Despesas Refeição' },
-      { label: 'Compras', value: 'Compras' },
-      { label: 'Fornecedores', value: 'Fornecedores' },
-      { label: 'Fretes Transportes', value: 'Fretes Transportes' },
-   ];
-
-   const paymentMethodOptions = [
-      { label: 'Boleto Bancário', value: 'ticket' },
-      { label: 'Dinheiro', value: 'money' },
-      { label: 'Cartão de Crédito', value: 'credit_card' },
-      { label: 'Cartão de Débito', value: 'debit_card' },
-      { label: 'Transferência Bancária', value: 'bank_transfer' },
-      { label: 'Pix', value: 'pix' },
+      { label: 'Cancelado', value: 'CANCELLED' }
    ];
 
    return (
@@ -87,7 +148,7 @@ export const FilterAccountsPayable = ({ getAccounts }: NewAccountPayableProps) =
                   <SelectField
                      label="Fornecedor"
                      placeholder="Selecione o Fornecedor"
-                     options={supplierOptions}
+                     options={suppliers}
                      onChange={(selected) => {
                         onChange(selected);
                      }}
@@ -106,7 +167,7 @@ export const FilterAccountsPayable = ({ getAccounts }: NewAccountPayableProps) =
                   <SelectField
                      label="Centro de Custo"
                      placeholder="Selecione o centro de custo"
-                     options={costCenterOptions}
+                     options={costCenters}
                      onChange={(selected) => {
                         onChange(selected);
                      }}
@@ -141,7 +202,7 @@ export const FilterAccountsPayable = ({ getAccounts }: NewAccountPayableProps) =
                <SelectField
                   label="Método de Pagamento"
                   placeholder="Selecione o método de pagamento"
-                  options={paymentMethodOptions}
+                  options={paymentMethods}
                   onChange={(selected) => {
                      onChange(selected);
                   }}
@@ -162,7 +223,7 @@ export const FilterAccountsPayable = ({ getAccounts }: NewAccountPayableProps) =
                   dateFormat="dd/MM/yyyy"
                   showMonthYearDropdown
                   minDate={new Date('2000-02-01')}
-                  maxDate={new Date()}
+                  maxDate={new Date('2100-01-01')}
                   scrollableMonthYearDropdown
                   placeholderText="Data do documento (início)"
                   popperPlacement="bottom-end"
@@ -187,7 +248,7 @@ export const FilterAccountsPayable = ({ getAccounts }: NewAccountPayableProps) =
                   dateFormat="dd/MM/yyyy"
                   showMonthYearDropdown
                   minDate={new Date('2000-02-01')}
-                  maxDate={new Date()}
+                  maxDate={new Date('2100-01-01')}
                   scrollableMonthYearDropdown
                   placeholderText="Data do documento (fim)"
                   popperPlacement="bottom-end"
@@ -212,7 +273,7 @@ export const FilterAccountsPayable = ({ getAccounts }: NewAccountPayableProps) =
                   dateFormat="dd/MM/yyyy"
                   showMonthYearDropdown
                   minDate={new Date('2000-02-01')}
-                  maxDate={new Date()}
+                  maxDate={new Date('2100-01-01')}
                   scrollableMonthYearDropdown
                   placeholderText="Data de vencimento (início)"
                   popperPlacement="bottom-end"
@@ -237,7 +298,7 @@ export const FilterAccountsPayable = ({ getAccounts }: NewAccountPayableProps) =
                   dateFormat="dd/MM/yyyy"
                   showMonthYearDropdown
                   minDate={new Date('2000-02-01')}
-                  maxDate={new Date()}
+                  maxDate={new Date('2100-01-01')}
                   scrollableMonthYearDropdown
                   placeholderText="Data de vencimento (fim)"
                   popperPlacement="bottom-end"
@@ -251,8 +312,32 @@ export const FilterAccountsPayable = ({ getAccounts }: NewAccountPayableProps) =
             )}
          />
 
-         <div className="md:col-span-2">
-            <Button disabled={loading} className="w-full" type="submit" size="lg">
+         <div className="md:col-span-2 flex gap-2">
+            <Button 
+               type="button" 
+               variant="outline" 
+               className="w-full" 
+               onClick={() => {
+                  reset({
+                     supplierId: '',
+                     costCenterId: '',
+                     status: '',
+                     paymentMethodId: '',
+                     documentDateStart: null,
+                     documentDateEnd: null,
+                     dueDateStart: null,
+                     dueDateEnd: null
+                  });
+               }}
+            >
+               Limpar
+            </Button>
+            <Button 
+               disabled={loading} 
+               className="w-full" 
+               type="submit" 
+               size="lg"
+            >
                <span>{loading ? 'Carregando...' : 'Pesquisar'}</span>
             </Button>
          </div>

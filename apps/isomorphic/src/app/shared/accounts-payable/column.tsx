@@ -3,7 +3,7 @@
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { api } from '@/service/api';
 import { IAccountsPayable } from '@/types';
-import { formatDate, moneyMask } from '@/utils/format';
+import { formatCurrency, formatDate } from '@/utils/format';
 import { PiCashRegister } from 'react-icons/pi';
 import { Tooltip } from 'rizzui/tooltip';
 import { Button } from 'rizzui/button';
@@ -51,18 +51,45 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
          id: 'status',
          size: 60,
          header: 'Status',
-         cell: ({ row }) =>
-            row.original.status === 'Aberto' ? (
-               <div className="w-20">
-                  <div className="border-1 cursor-pointer rounded-md border border-[#ABD2EF] bg-[#ABD2EF] px-2 py-1 text-center text-white">
-                     Aberto
+         cell: ({ row }) => {
+            const status = row.original.status;
+
+            if (status === "PENDING") {
+               return (
+                  <div className="w-20">
+                     <div className="border-1 cursor-pointer rounded-md border border-[#ABD2EF] bg-[#ABD2EF] px-2 py-1 text-center text-white">
+                        Aberto
+                     </div>
                   </div>
-               </div>
-            ) : row.original.status === 'Atrasado' ? (
-               <div className="w-20">
-                  <div className="border-1 cursor-pointer rounded-md border border-red-400 bg-red-400 px-2 py-1 text-center text-white">Vencido</div>
-               </div>
-            ) : null,
+               );
+            } else if (status === "OVERDUE") {
+               return (
+                  <div className="w-20">
+                     <div className="border-1 cursor-pointer rounded-md border border-red-400 bg-red-400 px-2 py-1 text-center text-white">
+                        Vencido
+                     </div>
+                  </div>
+               );
+            } else if (status === "PAID") {
+               return (
+                  <div className="w-22">
+                     <div className="border-1 cursor-pointer rounded-md border border-green-400 bg-green-400 px-2 py-1 text-center text-white">
+                        Pago
+                     </div>
+                  </div>
+               );
+            } else if (status === "CANCELED") {
+               return (
+                  <div className="w-22">
+                     <div className="border-1 cursor-pointer rounded-md border border-gray-400 bg-gray-400 px-2 py-1 text-center text-white">
+                        Cancelado
+                     </div>
+                  </div>
+               );
+            }
+
+            return status;
+         },
       }),
       columnHelper.accessor('dueDate', {
          id: 'dueDate',
@@ -80,7 +107,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
          id: 'value',
          size: 100,
          header: 'Valor',
-         cell: ({ row }) => <span>{moneyMask(String(row.original.value))}</span>,
+         cell: ({ row }) => <span>{formatCurrency(row.original.value)}</span>,
          dataType: 'currency',
       }),
       columnHelper.display({
@@ -143,7 +170,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
                            openModal({
                               view: (
                                  <ModalForm title="Informações do documento">
-                                    <AccountPayableDetails account={row.original} />
+                                    <AccountPayableDetails id={row.original.id as any} />
                                  </ModalForm>
                               ),
                               size: 'sm',

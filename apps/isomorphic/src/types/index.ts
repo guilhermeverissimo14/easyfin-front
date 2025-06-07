@@ -1,5 +1,58 @@
 import { UserRole } from '@/config/enums';
 
+
+export interface AccountsPayableResponse {
+  id: string;
+  supplier: {
+    id: string;
+    name: string;
+  };
+  documentNumber: string;
+  documentDate: string;
+  launchDate: string;
+  dueDate: string;
+  paymentDate: string | null;
+  value: number;
+  paidValue: number;
+  discount: number;
+  fine: number;
+  interest: number;
+  installmentNumber: number;
+  totalInstallments: number;
+   user: {
+    id: string;
+    name: string;
+  };
+  costCenter: {
+    id: string | null;
+    name: string | null;
+  };
+  plannedPaymentMethod: {
+    id: string;
+    name: string;
+  };
+  paymentMethod: {
+    id: string | null;
+    name: string | null;
+  };
+  userId: string;
+  observation: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FilterParams {
+  supplierId?: string;
+  costCenterId?: string;
+  status?: string;
+  paymentMethodId?: string;
+  documentDateStart?: string;
+  documentDateEnd?: string;
+  dueDateStart?: string;
+  dueDateEnd?: string;
+}
+
 export interface PaymentMethod {
    id: string;
    name: string;
@@ -170,6 +223,13 @@ export interface ICashBook {
    balance: number;
    createdAt?: Date;
    updatedAt?: Date;
+}
+
+export enum PaymentStatus {
+  "PENDING",
+  "PAID" ,
+  "CANCELLED",
+  "OVERDUE",
 }
 
 export interface IAccountsPayable {

@@ -55,6 +55,14 @@ export const moneyMask = (value: string) => {
    return formattedValue;
 };
 
+export const formatCurrency = (value: number): string => {
+   return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+   }).format(value);
+};
+
+
 export function formatMoney(value: number): string {
    return value
       .toFixed(2)
@@ -84,11 +92,11 @@ export function getUserBirthday(birthdateString: string): UserBirthdayInfo {
 
    const age = birthdateParsed
       ? today.getFullYear() -
-        birthdateParsed.getFullYear() -
-        (today.getMonth() < birthdateParsed.getMonth() ||
-        (today.getMonth() === birthdateParsed.getMonth() && today.getDate() < birthdateParsed.getDate())
-           ? 1
-           : 0)
+      birthdateParsed.getFullYear() -
+      (today.getMonth() < birthdateParsed.getMonth() ||
+         (today.getMonth() === birthdateParsed.getMonth() && today.getDate() < birthdateParsed.getDate())
+         ? 1
+         : 0)
       : 0;
 
    return { birthdate, age };
