@@ -147,6 +147,7 @@ export interface BankAccount {
    type: 'C' | 'S'; // 'C' for checking, 'S' for savings
    createdAt: Date;
    updatedAt: Date;
+   active: boolean;
 }
 
 export interface TaxRateModel {

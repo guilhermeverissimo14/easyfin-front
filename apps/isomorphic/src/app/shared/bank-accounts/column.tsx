@@ -8,18 +8,19 @@ import { BankAccount } from '@/types';
 import ModalForm from '@/components/modal/modal-form';
 import { EditBankAccount } from './edit-bank-account';
 import BankAccountDetails from './bank-account-details';
+import UpdateStatusPopover from '@/components/popover/popover-status';
+import { getStatusBadge } from '@core/components/table-utils/get-status-badge';
 
 const columnHelper = createColumnHelper<BankAccount>();
-
-// Map para converter o tipo da conta para texto legível
-const accountTypeMap = {
-  'C': 'Corrente',
-  'S': 'Poupança'
-};
 
 export const ListBankAccountColumn = (getList: () => void) => {
   const { openModal } = useModal();
   const isMobile = window.innerWidth < 768;
+
+  const handleUpdateStatus = async (accountId: string, newStatus: boolean) => {
+    await api.patch(`/bank-accounts/${accountId}/toggle-status`, { active: newStatus });
+    getList();
+  };
 
   const columns = [
     columnHelper.accessor('bank', {
@@ -50,6 +51,23 @@ export const ListBankAccountColumn = (getList: () => void) => {
         </span>
       ),
     }),
+
+     columnHelper.display({
+             id: 'active',
+             size: 80,
+             header: 'Status',
+             cell: ({ row }) => (
+                <div className="flex items-center">
+                   <UpdateStatusPopover
+                      title="Atualizar Status"
+                      message={row.original.active ? 'Deseja bloquear o usuário?' : 'Deseja reativar este usuário?'}
+                      onConfirm={() => handleUpdateStatus(row.original.id, !row.original.active)}
+                   >
+                      {getStatusBadge(row.original.active ?? false, row.original.active ? 'Ativo' : 'Bloqueado')}
+                   </UpdateStatusPopover>
+                </div>
+             ),
+          }),
     columnHelper.display({
       id: 'actions',
       size: 120,
