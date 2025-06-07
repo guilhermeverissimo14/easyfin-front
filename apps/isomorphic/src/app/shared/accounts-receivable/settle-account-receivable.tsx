@@ -6,12 +6,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from 'rizzui';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
+import { ptBR } from 'date-fns/locale';
+import { DatePicker } from '@core/ui/datepicker';
 
 import { api } from '@/service/api';
 import { useModal } from '../modal-views/use-modal';
 import { InputField } from '@/components/input/input-field';
 import { SelectField } from '@/components/input/select-field';
-import { moneyMask } from '@/utils/format';
+import { moneyMask, formatCurrency } from '@/utils/format';
 import { IAccountsReceivable } from '@/types';
 
 const settleAccountReceivableSchema = z.object({
@@ -23,7 +25,7 @@ const settleAccountReceivableSchema = z.object({
    observation: z.string().optional(),
    costCenterId: z.string().optional(),
    paymentMethodId: z.string().nonempty('Método de pagamento não pode ser vazio'),
-   receiptDate: z.date().optional().nullable(),
+   paymentDate: z.date().optional().nullable(),
    value: z.string().nonempty('Valor não pode ser vazio'),
    bankId: z.string().optional(),
 });
@@ -39,6 +41,9 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
    const [loading, setLoading] = useState(false);
    const { closeModal } = useModal();
    const [showBankSelect, setShowBankSelect] = useState(false);
+   const [costCenters, setCostCenters] = useState([]);
+   const [paymentMethods, setPaymentMethods] = useState([]);
+   const [bankAccounts, setBankAccounts] = useState([]);
 
    const {
       register,
@@ -50,34 +55,117 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
       resolver: zodResolver(settleAccountReceivableSchema),
    });
 
-   const onSubmit = async (data: SettleAccountFormData) => {};
+   const onSubmit = async (data: SettleAccountFormData) => {
+      setLoading(true);
+      
+      try {
 
-   const costCenterOptions = [
-      { label: 'Despesas Refeição', value: 'Despesas Refeição' },
-      { label: 'Compras', value: 'Compras' },
-      { label: 'Fornecedores', value: 'Fornecedores' },
-      { label: 'Fretes Transportes', value: 'Fretes Transportes' },
-   ];
+        const unmaskedFine = data.fine
+          ? parseFloat(data.fine.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
+          : 0;
+        
+        const unmaskedInterest = data.interest
+          ? parseFloat(data.interest.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
+          : 0;
+        
+        const unmaskedDiscount = data.discount
+          ? parseFloat(data.discount.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
+          : 0;
+    
 
-   const paymentMethodOptions = [
-      { label: 'Boleto Bancário', value: 'ticket' },
-      { label: 'Dinheiro', value: 'money' },
-      { label: 'Cartão de Crédito', value: 'credit_card' },
-      { label: 'Cartão de Débito', value: 'debit_card' },
-      { label: 'Transferência Bancária', value: 'bank_transfer' },
-      { label: 'Pix', value: 'pix' },
-   ];
+        const payload = {
+          fine: unmaskedFine,
+          interest: unmaskedInterest,
+          discount: unmaskedDiscount,
+          observation: data.observation || '',
+          paymentMethodId: data.paymentMethodId,
+          paymentDate: data.paymentDate ? data.paymentDate.toISOString() : new Date().toISOString(),
+          costCenterId: data.costCenterId || ''
+        };
 
-   const bankOptions = [
-      { label: 'Banco do Brasil - Agência 1234 - CC 56789-0', value: '55dff79d-d166-44e4-b1b9-71c5855fd2a0' },
-      { label: 'Itaú - Agência 4321 - CC 98765-0', value: 'a1b2c3d4-e5f6-7890-abcd-ef1234567890' },
-   ];
+        await api.post(`/accounts-receivable/${account.id}/receive`, payload);
+        
+
+        toast.success('Recebimento registrado com sucesso!');
+        getAccounts();
+        closeModal(); 
+      } catch (error: any) {
+
+        console.error('Erro ao receber conta:', error);
+        const errorMessage = error.response?.data?.message || 'Não foi possível registrar o recebimento';
+        toast.error(errorMessage);
+      } finally {
+        setLoading(false);
+      }
+   };
 
    useEffect(() => {
-      setValue('id', account.id);
-      setValue('discount', moneyMask('R$ 0,00'));
-      setValue('fine', 'R$ 0,00');
-      setValue('interest', moneyMask('R$ 0,00'));
+      const fetchData = async () => {
+        try {
+          // Fetch cost centers
+          const costCentersResponse = await api.get('/cost-centers');
+          setCostCenters(costCentersResponse.data.map((center: any) => ({
+            label: center.name,
+            value: center.id
+          })));
+    
+          // Fetch payment methods
+          const paymentMethodsResponse = await api.get('/payment-methods');
+          setPaymentMethods(paymentMethodsResponse.data.map((method: any) => ({
+            label: method.name,
+            value: method.id,
+            requiresBank: method.requiresBank
+          })));
+    
+          // Fetch bank accounts
+          const bankAccountsResponse = await api.get('/bank-accounts');
+          setBankAccounts(bankAccountsResponse.data.map((bank: any) => ({
+            label: `${bank.bank} - Agência ${bank.agency} - CC ${bank.account}`,
+            value: bank.id
+          })));
+    
+        } catch (error) {
+          console.error("Erro ao carregar dados:", error);
+          toast.error("Erro ao carregar dados necessários");
+        }
+      };
+    
+      fetchData();
+   }, []);
+
+   useEffect(() => {
+      const fetchAccountDetails = async () => {
+         try {
+            setLoading(true);
+            const response = await api.get(`/accounts-receivable/${account.id}`);
+
+            if (!response) {
+               throw new Error(`Error fetching account details: ${response}`);
+            }
+            
+            const data = await response.data;
+            
+            setValue('id', account.id);
+            setValue('discount', formatCurrency(data.discount || 0));
+            setValue('fine', formatCurrency(data.fine));
+            setValue('interest', formatCurrency(data.interest || 0));
+            setValue('paymentDate', new Date());
+            setValue('value', formatCurrency(data.value || 0));
+            setValue('costCenterId', data.costCenter?.id || '');
+         } catch (err) {
+            console.error('Error fetching account details:', err);
+            
+            setValue('id', account.id);
+            setValue('discount', moneyMask('R$ 0,00'));
+            setValue('fine', 'R$ 0,00');
+            setValue('interest', moneyMask('R$ 0,00'));
+            setValue('paymentDate', new Date());
+         } finally {
+            setLoading(false);
+         }
+      };
+
+      fetchAccountDetails();
    }, [account, setValue]);
 
    return (
@@ -188,10 +276,9 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
                   <SelectField
                      label="Método de Pagamento"
                      placeholder="Selecione o Método de Pagamento"
-                     options={paymentMethodOptions}
+                     options={paymentMethods.length > 0 ? paymentMethods : []}
                      onChange={(selected) => {
                         onChange(selected);
-                        setShowBankSelect(selected !== 'money');
                      }}
                      value={value || ''}
                      error={errors.paymentMethodId?.message}
@@ -206,7 +293,7 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
                   <SelectField
                      label="Centro de Custo "
                      placeholder="Selecione o centro de custo"
-                     options={costCenterOptions}
+                     options={costCenters.length > 0 ? costCenters : []}
                      onChange={(selected) => {
                         onChange(selected);
                      }}
@@ -215,6 +302,33 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
                   />
                )}
             />
+         </div>
+         
+         <div className="md:col-span-3">
+           <Controller
+             control={control}
+             name="paymentDate"
+             render={({ field: { onChange, value } }) => (
+               <DatePicker
+                 label="Data de Recebimento"
+                 selected={value || new Date()}
+                 onChange={onChange}
+                 dateFormat="dd/MM/yyyy"
+                 showMonthYearDropdown
+                 minDate={new Date('2000-02-01')}
+                 maxDate={new Date()}
+                 scrollableMonthYearDropdown
+                 placeholderText="Data de recebimento"
+                 popperPlacement="bottom-end"
+                 inputProps={{
+                   variant: 'outline',
+                   inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+                 }}
+                 className="flex-grow [&>label>span]:font-medium"
+                 locale={ptBR}
+               />
+             )}
+           />
          </div>
 
          {showBankSelect && (
@@ -226,7 +340,7 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
                      <SelectField
                         label="Banco"
                         placeholder="Qual banco será utilizado?"
-                        options={bankOptions}
+                        options={bankAccounts.length > 0 ? bankAccounts : []}
                         onChange={(selected) => {
                            onChange(selected);
                         }}

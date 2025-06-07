@@ -1,6 +1,66 @@
 import { UserRole } from '@/config/enums';
 
 
+
+export interface AccountsReceivableResponse {
+  id: string;
+  customer: {
+    id: string;
+    name: string;
+  };
+  documentNumber: string;
+  documentDate: string;
+  launchDate: string;
+  dueDate: string;
+  paymentDate: string | null;
+  value: number;
+  paidValue: number;
+  discount: number;
+  fine: number;
+  interest: number;
+  installmentNumber: number;
+  totalInstallments: number;
+  user: {
+    id: string;
+    name: string;
+  };
+  costCenter: {
+    id: string | null;
+    name: string | null;
+  };
+  plannedPaymentMethod: {
+    id: string;
+    name: string;
+  };
+  paymentMethod: {
+    id: string | null;
+    name: string | null;
+  };
+  observation: string;
+  status: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface IAccountsReceivable {
+  id: string;
+  documentNumber: string;
+  customerId: string;
+  customerName: string;
+  status: string;
+  documentDate: string;
+  launchDate: string;
+  dueDate: string;
+  installmentNumber: number;
+  totalInstallments: number;
+  value: number;
+  plannedPaymentMethod?: string;
+  costCenterId?: string;
+  costCenterName: string;
+  observation?: string;
+  paymentDate: string;
+}
+
 export interface AccountsPayableResponse {
   id: string;
   supplier: {
@@ -43,6 +103,7 @@ export interface AccountsPayableResponse {
 }
 
 export interface FilterParams {
+   customerId?: string;
   supplierId?: string;
   costCenterId?: string;
   status?: string;

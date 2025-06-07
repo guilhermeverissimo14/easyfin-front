@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from 'rizzui';
@@ -17,13 +17,12 @@ import { DatePicker } from '@core/ui/datepicker';
 
 const newAccountReceivableSchema = z.object({
    customerId: z.string().nonempty('Cliente não pode ser vazio'),
-   documentDate: z.date().optional().nullable(),
-   launchDate: z.date().optional().nullable(),
-   dueDate: z.date().optional().nullable(),
+   documentDate: z.date().nullable().optional(),
+   dueDate: z.date().nullable().optional(),
    value: z.string().nonempty('Valor não pode ser vazio'),
    documentNumber: z.string().optional(),
    observation: z.string().optional(),
-   costCenter: z.string().optional(),
+   costCenterId: z.string().optional(),
    plannedPaymentMethod: z.string().optional(),
 });
 
@@ -35,6 +34,9 @@ interface NewAccountReceivableProps {
 
 export const NewAccountReceivable = ({ getAccounts }: NewAccountReceivableProps) => {
    const [loading, setLoading] = useState(false);
+   const [customers, setCustomers] = useState([]);
+   const [costCenters, setCostCenters] = useState([]);
+   const [paymentMethods, setPaymentMethods] = useState([]);
    const { closeModal } = useModal();
 
    const {
@@ -43,39 +45,79 @@ export const NewAccountReceivable = ({ getAccounts }: NewAccountReceivableProps)
       setValue,
       formState: { errors },
       control,
+      reset
    } = useForm<NewAccountReceivableFormData>({
       resolver: zodResolver(newAccountReceivableSchema),
+      defaultValues: {
+         documentDate: new Date(),
+         dueDate: new Date(),
+      }
    });
 
-   const onSubmit = async (data: NewAccountReceivableFormData) => {};
+   useEffect(() => {
+      const fetchData = async () => {
+         try {
+            const customersResponse = await api.get('/customers');
+            setCustomers(customersResponse.data.map((customer: any) => ({
+               label: customer.name,
+               value: customer.id
+            })));
 
-   const customerOptions = [
-      { label: 'Cliente A', value: '123' },
-      { label: 'Cliente B', value: '124' },
-      { label: 'Cliente C', value: '125' },
-      { label: 'Cliente D', value: '126' },
-   ];
+            const costCentersResponse = await api.get('/cost-centers');
+            setCostCenters(costCentersResponse.data.map((center: any) => ({
+               label: center.name,
+               value: center.id
+            })));
 
-   const accountTypeOptions = [
-      { label: 'Débito', value: 'D' },
-      { label: 'Crédito', value: 'C' },
-   ];
+            const paymentMethodsResponse = await api.get('/payment-methods');
+            setPaymentMethods(paymentMethodsResponse.data.map((method: any) => ({
+               label: method.name,
+               value: method.id
+            })));
+         } catch (error) {
+            console.error("Erro ao carregar dados:", error);
+            toast.error("Erro ao carregar dados necessários");
+         }
+      };
 
-   const costCenterOptions = [
-      { label: 'Despesas Refeição', value: 'Despesas Refeição' },
-      { label: 'Compras', value: 'Compras' },
-      { label: 'Fornecedores', value: 'Fornecedores' },
-      { label: 'Fretes Transportes', value: 'Fretes Transportes' },
-   ];
+      fetchData();
+   }, []);
 
-   const paymentMethodOptions = [
-      { label: 'Boleto Bancário', value: 'ticket' },
-      { label: 'Dinheiro', value: 'money' },
-      { label: 'Cartão de Crédito', value: 'credit_card' },
-      { label: 'Cartão de Débito', value: 'debit_card' },
-      { label: 'Transferência Bancária', value: 'bank_transfer' },
-      { label: 'Pix', value: 'pix' },
-   ];
+   const onSubmit = async (data: NewAccountReceivableFormData) => {
+      setLoading(true);
+      
+      try {
+         const unmaskedValue = data.value
+            .replace(/[^\d,.-]/g, '') 
+            .replace(/\./g, '')     
+            .replace(',', '.');    
+
+         const formattedData = {
+            customerId: data.customerId,
+            documentNumber: data.documentNumber || "",
+            plannedPaymentMethod: data.plannedPaymentMethod || "",
+            documentDate: data.documentDate ? data.documentDate.toISOString() : new Date().toISOString(),
+            dueDate: data.dueDate ? data.dueDate.toISOString() : new Date().toISOString(),
+            value: Number(unmaskedValue),
+            costCenterId: data.costCenterId || "",
+            observation: data.observation || ""
+         };
+
+         await api.post('/accounts-receivable', formattedData);
+         
+         toast.success('Conta a receber registrada com sucesso!');
+         getAccounts();
+         reset();
+         closeModal(); 
+         
+      } catch (error: any) {
+         console.error('Erro ao registrar conta a receber:', error);
+         const errorMessage = error.response?.data?.message || 'Erro ao registrar conta a receber';
+         toast.error(errorMessage);
+      } finally {
+         setLoading(false);
+      }
+   };
 
    return (
       <form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
@@ -87,7 +129,7 @@ export const NewAccountReceivable = ({ getAccounts }: NewAccountReceivableProps)
                   <SelectField
                      label="Cliente"
                      placeholder="Selecione o Cliente"
-                     options={customerOptions}
+                     options={customers}
                      onChange={(selected) => {
                         onChange(selected);
                      }}
@@ -114,7 +156,7 @@ export const NewAccountReceivable = ({ getAccounts }: NewAccountReceivableProps)
                <SelectField
                   label="Método de Pagamento Previsto"
                   placeholder="Selecione o método de pagamento"
-                  options={paymentMethodOptions}
+                  options={paymentMethods}
                   onChange={(selected) => {
                      onChange(selected);
                   }}
@@ -160,7 +202,7 @@ export const NewAccountReceivable = ({ getAccounts }: NewAccountReceivableProps)
                   dateFormat="dd/MM/yyyy"
                   showMonthYearDropdown
                   minDate={new Date('2000-02-01')}
-                  maxDate={new Date()}
+                  maxDate={new Date('2100-01-01')}
                   scrollableMonthYearDropdown
                   placeholderText="Data de vencimento"
                   popperPlacement="bottom-end"
@@ -188,17 +230,17 @@ export const NewAccountReceivable = ({ getAccounts }: NewAccountReceivableProps)
 
          <Controller
             control={control}
-            name="costCenter"
+            name="costCenterId"
             render={({ field: { value, onChange } }) => (
                <SelectField
-                  label="Centro de Custo "
+                  label="Centro de Custo"
                   placeholder="Selecione o centro de custo"
-                  options={costCenterOptions}
+                  options={costCenters}
                   onChange={(selected) => {
                      onChange(selected);
                   }}
                   value={value || ''}
-                  error={errors.costCenter?.message}
+                  error={errors.costCenterId?.message}
                />
             )}
          />
@@ -206,7 +248,7 @@ export const NewAccountReceivable = ({ getAccounts }: NewAccountReceivableProps)
          <div className="md:col-span-2">
             <InputField
                label="Observação"
-               placeholder=""
+               placeholder="Informação adicional sobre a conta"
                type="text"
                register={register('observation')}
                error={errors.observation?.message}
@@ -216,7 +258,7 @@ export const NewAccountReceivable = ({ getAccounts }: NewAccountReceivableProps)
 
          <div className="md:col-span-2">
             <Button disabled={loading} className="w-full" type="submit" size="lg">
-               <span>{loading ? 'Carregando...' : 'Cadastrar'}</span>
+               <span>{loading ? 'Salvando...' : 'Cadastrar'}</span>
             </Button>
          </div>
       </form>
