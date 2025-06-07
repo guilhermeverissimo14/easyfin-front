@@ -2,9 +2,11 @@
 
 import React, { useEffect, useState } from 'react';
 import { useModal } from '../modal-views/use-modal';
-import { moneyMask } from '@/utils/format';
-import { AccountsPayableResponse, IAccountsPayable } from '@/types';
+import { formatCurrency } from '@/utils/format';
+import { AccountsPayableResponse } from '@/types';
 import Image from 'next/image';
+import { api } from '@/service/api';
+import { LoadingSpinner } from '@/components/loading-spinner';
 
 interface AccountPayableDetailsProps {
    id: number;
@@ -18,22 +20,21 @@ export const AccountPayableDetails = ({ id: id }: AccountPayableDetailsProps) =>
 
    useEffect(() => {
      const fetchAccountDetails = async () => {
-       if (id) return;
-       
+   
        try {
          setLoading(true);
-         const response = await fetch(`/api/accounts-payable/${id}`);
+         const response = await api.get(`/accounts-payable/${id}`);
          
-         if (!response.ok) {
-           throw new Error(`Error fetching account details: ${response.status}`);
+         if (!response) {
+           throw new Error(`Error fetching account details: ${response}`);
          }
          
-         const data = await response.json();
+         const data = await response.data;
          setAccount(data as AccountsPayableResponse);
        } catch (err) {
          console.error('Error fetching account details:', err);
          setError('Falha ao carregar os detalhes da conta');
-         // Fallback to initial account data if API call fails
+         
          setAccount(id as any);
        } finally {
          setLoading(false);
@@ -43,9 +44,13 @@ export const AccountPayableDetails = ({ id: id }: AccountPayableDetailsProps) =>
      fetchAccountDetails();
    }, [id]);
    
-   // if (loading) {
-   //   return <div className="flex justify-center p-4"><Spinner size="xl" /></div>;
-   // }
+   if (loading) {
+       return (
+         <div className="flex h-full w-full items-center justify-center p-10">
+           <LoadingSpinner />
+         </div>
+       );
+     }
    
    if (error && !account) {
      return <div className="text-red-500 p-4">{error}</div>;
@@ -56,8 +61,8 @@ export const AccountPayableDetails = ({ id: id }: AccountPayableDetailsProps) =>
    }
 
    const supplierName = account.supplier?.name;
-   const userName = account.user?.name || 'Eduardo Trindade';
-   const costCenterName = account.costCenter?.name || 'Compras';
+   const userName = account.user?.name;
+   const costCenterName = account.costCenter?.name;
    const plannedPaymentMethodName = account.plannedPaymentMethod?.name;
 
    return (
@@ -140,22 +145,22 @@ export const AccountPayableDetails = ({ id: id }: AccountPayableDetailsProps) =>
             <div>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Valor</span>
-                  <span className="p-1">{moneyMask(String(account.value))}</span>
+                  <span className="p-1">{formatCurrency(account.value)}</span>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Juros</span>
-                  <span className="p-1">{moneyMask(String(account.interest))}</span>
+                  <span className="p-1">{formatCurrency(account.interest)}</span>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Multa</span> 
-                  <span className="p-1">{moneyMask(String(account.fine))}</span>
+                  <span className="p-1">{formatCurrency(account.fine)}</span>
                </p>
             </div>
 
             <div>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Desconto</span> 
-                  <span className="p-1">{moneyMask(String(account.discount))}</span>
+                  <span className="p-1">{formatCurrency(account.discount)}</span>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Centro de Custo</span>

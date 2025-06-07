@@ -13,25 +13,24 @@ import { InputField } from '@/components/input/input-field';
 import { SelectField } from '@/components/input/select-field';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
-import { moneyMask } from '@/utils/format';
+import { formatCurrency, moneyMask } from '@/utils/format';
 import { IAccountsPayable } from '@/types';
 
 const editAccountPayableSchema = z.object({
-   id: z.string().optional(),
-   documentNumber: z.string().optional(),
-   documentDate: z.date().optional().nullable(),
-   launchDate: z.date().optional().nullable(),
-   dueDate: z.date().optional().nullable(),
+   supplierId: z.string().nonempty('Fornecedor não pode ser vazio'),
+   documentDate: z.date().nullable().optional(),
+   dueDate: z.date().nullable().optional(),
+   value: z.string().nonempty('Valor não pode ser vazio'),
+   documentNumber: z.string().nonempty('Número do documento não pode ser vazio'),
+   observation: z.string().optional(),
+   costCenterId: z.string().nonempty('Centro de custo não pode ser vazio'),
+   plannedPaymentMethod: z.string().nonempty('Método de pagamento não pode ser vazio'),
    discount: z.string().optional(),
    fine: z.string().optional(),
    interest: z.string().optional(),
-   observation: z.string().optional(),
-   costCenterId: z.string().optional(),
-   paymentMethodId: z.string().nonempty('Método de pagamento não pode ser vazio'),
-   value: z.string().nonempty('Valor não pode ser vazio'),
 });
 
-type EditAccountFormData = z.infer<typeof editAccountPayableSchema>;
+type EditAccountPayableFormData = z.infer<typeof editAccountPayableSchema>;
 
 interface EditAccountPayableProps {
    getAccounts: () => void;
@@ -40,6 +39,9 @@ interface EditAccountPayableProps {
 
 export const EditAccountPayable = ({ getAccounts, account }: EditAccountPayableProps) => {
    const [loading, setLoading] = useState(false);
+   const [suppliers, setSuppliers] = useState([]);
+   const [costCenters, setCostCenters] = useState([]);
+   const [paymentMethods, setPaymentMethods] = useState([]);
    const { closeModal } = useModal();
 
    const {
@@ -48,145 +50,262 @@ export const EditAccountPayable = ({ getAccounts, account }: EditAccountPayableP
       setValue,
       formState: { errors },
       control,
-   } = useForm<EditAccountFormData>({
+   } = useForm<EditAccountPayableFormData>({
       resolver: zodResolver(editAccountPayableSchema),
    });
 
-   const onSubmit = async (data: EditAccountFormData) => {
+   useEffect(() => {
+      const fetchData = async () => {
+         try {
+            const suppliersResponse = await api.get('/suppliers');
+            setSuppliers(suppliersResponse.data.map((supplier: any) => ({
+               label: supplier.name,
+               value: supplier.id
+            })));
+
+            const costCentersResponse = await api.get('/cost-centers');
+            setCostCenters(costCentersResponse.data.map((center: any) => ({
+               label: center.name,
+               value: center.id
+            })));
+
+            const paymentMethodsResponse = await api.get('/payment-methods');
+            setPaymentMethods(paymentMethodsResponse.data.map((method: any) => ({
+               label: method.name,
+               value: method.id
+            })));
+         } catch (error) {
+            console.error("Erro ao carregar dados:", error);
+            toast.error("Erro ao carregar dados necessários");
+         }
+      };
+
+      fetchData();
+   }, []);
+
+   useEffect(() => {
+
+
+
+
+
+      const fetchAccountDetails = async () => {
+
+         try {
+            setLoading(true);
+            const response = await api.get(`/accounts-payable/${account.id}`);
+
+            if (!response) {
+               throw new Error(`Error fetching account details: ${response}`);
+            }
+
+           
+            const data = await response.data;
+
+            setValue('supplierId', data.supplier.id || '');
+            setValue('documentNumber', data.documentNumber);
+            setValue('documentDate', data.documentDate ? new Date(data.documentDate) : null);
+            setValue('dueDate', data.dueDate ? new Date(data.dueDate) : null);
+            setValue('value', formatCurrency(data.value));
+            setValue('discount', formatCurrency(data.discount || 0));
+            setValue('fine', formatCurrency(data.fine || 0));
+            setValue('interest', formatCurrency(data.interest || 0));
+            setValue('costCenterId', data.costCenter?.id || '');
+            setValue('plannedPaymentMethod', data.plannedPaymentMethod?.id || '');
+            setValue('observation', data.observation || '');
+
+         } catch (err) {
+            console.error('Error fetching account details:', err);
+
+         } finally {
+            setLoading(false);
+         }
+      };
+
+      fetchAccountDetails();
+   }, [account, setValue]);
+
+   const onSubmit = async (data: EditAccountPayableFormData) => {
       setLoading(true);
+
       try {
-         // Call API to update account payable
-         await api.put(`/accounts-payable/${data.id}`, data);
-         toast.success('Conta a pagar atualizada com sucesso!');
+         const unmaskedValue = data.value
+            .replace(/[^\d,.-]/g, '')
+            .replace(/\./g, '')
+            .replace(',', '.');
+
+         const unmaskedDiscount = data.discount
+            ? data.discount.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
+            : '0';
+
+         const unmaskedFine = data.fine
+            ? data.fine.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
+            : '0';
+
+         const unmaskedInterest = data.interest
+            ? data.interest.replace(/[^\d,.-]/g, '').replace(/\./g, '').replace(',', '.')
+            : '0';
+
+         const formattedData = {
+            supplierId: data.supplierId,
+            documentNumber: data.documentNumber,
+            documentDate: data.documentDate ? data.documentDate.toISOString() : null,
+            dueDate: data.dueDate ? data.dueDate.toISOString() : null,
+            value: Number(unmaskedValue),
+            discount: Number(unmaskedDiscount),
+            fine: Number(unmaskedFine),
+            interest: Number(unmaskedInterest),
+            costCenterId: data.costCenterId,
+            plannedPaymentMethod: data.plannedPaymentMethod,
+            observation: data.observation || ""
+         };
+
+         await api.put(`/accounts-payable/${account.id}`, formattedData);
+
+         toast.success('Conta atualizada com sucesso!');
          getAccounts();
          closeModal();
-      } catch (error) {
-         toast.error('Erro ao atualizar conta a pagar.');
+      } catch (error: any) {
+         console.error('Erro ao atualizar conta:', error);
+         const errorMessage = error.response?.data?.message || 'Erro ao atualizar conta a pagar';
+         toast.error(errorMessage);
       } finally {
          setLoading(false);
       }
    };
 
-   const costCenterOptions = [
-      { label: 'Despesas Refeição', value: 'Despesas Refeição' },
-      { label: 'Compras', value: 'Compras' },
-      { label: 'Fornecedores', value: 'Fornecedores' },
-      { label: 'Fretes Transportes', value: 'Fretes Transportes' },
-   ];
-
-   const paymentMethodOptions = [
-      { label: 'Boleto Bancário', value: 'ticket' },
-      { label: 'Dinheiro', value: 'money' },
-      { label: 'Cartão de Crédito', value: 'credit_card' },
-      { label: 'Cartão de Débito', value: 'debit_card' },
-      { label: 'Transferência Bancária', value: 'bank_transfer' },
-      { label: 'Pix', value: 'pix' },
-   ];
-
-   useEffect(() => {
-      setValue('id', account.id);
-      setValue('documentNumber', account.documentNumber || '');
-      setValue('documentDate', account.documentDate ? new Date(account.documentDate) : null);
-      setValue('launchDate', account.launchDate ? new Date(account.launchDate) : null);
-      setValue('dueDate', account.dueDate ? new Date(account.dueDate) : null);
-      setValue('discount', moneyMask(String(account.discount)));
-      setValue('fine', moneyMask(String(account.fine)));
-      setValue('interest', moneyMask(String(account.interest)));
-      setValue('value', moneyMask(String(account.value)));
-      setValue('observation', account.observation || '');
-   }, [account, setValue]);
-
    return (
-      <form className="grid w-full grid-cols-1 gap-4 md:grid-cols-3" onSubmit={handleSubmit(onSubmit)}>
-         <div className="md:col-span-3">
-            <div className="flex items-center">
-               <p className="text-lg font-semibold">{account.supplierName}</p>
-            </div>
-         </div>
-
-         <div className="grid grid-cols-1 gap-4 md:col-span-3 md:grid-cols-2">
-            <InputField
-               label="Número do Documento"
-               placeholder="Informe o número do documento"
-               type="text"
-               register={register('documentNumber')}
-               error={errors.documentNumber?.message}
-               maxLength={50}
-            />
-
-            <InputField
-               label="Valor"
-               placeholder=""
-               type="text"
-               register={register('value')}
-               error={errors.value?.message}
-               maxLength={50}
-               onChange={(e) => {
-                  const value = moneyMask(e.target.value);
-                  setValue('value', value);
-               }}
-            />
-         </div>
-
-         <div className="grid grid-cols-1 gap-4 md:col-span-3 md:grid-cols-2">
+      <form className="grid w-full grid-cols-1 gap-4 md:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
+         <div className="md:col-span-2">
             <Controller
                control={control}
-               name="documentDate"
-               render={({ field: { onChange, value } }) => (
-                  <DatePicker
-                     label="Data Documento"
-                     selected={value}
-                     onChange={onChange}
-                     dateFormat="dd/MM/yyyy"
-                     showMonthYearDropdown
-                     minDate={new Date('2000-02-01')}
-                     maxDate={new Date()}
-                     scrollableMonthYearDropdown
-                     placeholderText="Data do documento"
-                     popperPlacement="bottom-end"
-                     inputProps={{
-                        variant: 'outline',
-                        inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+               name="supplierId"
+               render={({ field: { value, onChange } }) => (
+                  <SelectField
+                     label="Fornecedor"
+                     placeholder="Selecione o Fornecedor"
+                     options={suppliers}
+                     onChange={(selected) => {
+                        onChange(selected);
                      }}
-                     className="flex-grow [&>label>span]:font-medium"
-                     locale={ptBR}
-                  />
-               )}
-            />
-
-            <Controller
-               control={control}
-               name="dueDate"
-               render={({ field: { onChange, value } }) => (
-                  <DatePicker
-                     label="Data Vencimento"
-                     selected={value}
-                     onChange={onChange}
-                     dateFormat="dd/MM/yyyy"
-                     showMonthYearDropdown
-                     minDate={new Date('2000-02-01')}
-                     maxDate={new Date()}
-                     scrollableMonthYearDropdown
-                     placeholderText="Data de vencimento"
-                     popperPlacement="bottom-end"
-                     inputProps={{
-                        variant: 'outline',
-                        inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
-                     }}
-                     className="flex-grow [&>label>span]:font-medium"
-                     locale={ptBR}
+                     value={value || ''}
+                     error={errors.supplierId?.message}
                   />
                )}
             />
          </div>
 
          <InputField
+            label="Número do Documento"
+            placeholder="Informe o número do documento"
+            type="text"
+            register={register('documentNumber')}
+            error={errors.documentNumber?.message}
+            maxLength={50}
+         />
+
+         <Controller
+            control={control}
+            name="plannedPaymentMethod"
+            render={({ field: { value, onChange } }) => (
+               <SelectField
+                  label="Método de Pagamento Previsto"
+                  placeholder="Selecione o método de pagamento"
+                  options={paymentMethods}
+                  onChange={(selected) => {
+                     onChange(selected);
+                  }}
+                  value={value || ''}
+                  error={errors.plannedPaymentMethod?.message}
+               />
+            )}
+         />
+
+         <Controller
+            control={control}
+            name="documentDate"
+            render={({ field: { onChange, value } }) => (
+               <DatePicker
+                  label="Data do documento"
+                  selected={value}
+                  onChange={onChange}
+                  dateFormat="dd/MM/yyyy"
+                  showMonthYearDropdown
+                  minDate={new Date('2000-02-01')}
+                  maxDate={new Date()}
+                  scrollableMonthYearDropdown
+                  placeholderText="Data do documento"
+                  popperPlacement="bottom-end"
+                  inputProps={{
+                     variant: 'outline',
+                     inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+                  }}
+                  className="flex-grow [&>label>span]:font-medium"
+                  locale={ptBR}
+               />
+            )}
+         />
+
+         <Controller
+            control={control}
+            name="dueDate"
+            render={({ field: { onChange, value } }) => (
+               <DatePicker
+                  label="Vencimento"
+                  selected={value}
+                  onChange={onChange}
+                  dateFormat="dd/MM/yyyy"
+                  showMonthYearDropdown
+                  minDate={new Date('2000-02-01')}
+                  maxDate={new Date('2100-01-01')}
+                  scrollableMonthYearDropdown
+                  placeholderText="Data de vencimento"
+                  popperPlacement="bottom-end"
+                  inputProps={{
+                     variant: 'outline',
+                     inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+                  }}
+                  className="flex-grow [&>label>span]:font-medium"
+                  locale={ptBR}
+               />
+            )}
+         />
+
+         <InputField
+            label="Valor"
+            placeholder="Informe o valor"
+            type="text"
+            register={register('value')}
+            error={errors.value?.message}
+            onChange={(e) => {
+               const value = moneyMask(e.target.value);
+               setValue('value', value);
+            }}
+         />
+
+         <Controller
+            control={control}
+            name="costCenterId"
+            render={({ field: { value, onChange } }) => (
+               <SelectField
+                  label="Centro de Custo"
+                  placeholder="Selecione o centro de custo"
+                  options={costCenters}
+                  onChange={(selected) => {
+                     onChange(selected);
+                  }}
+                  value={value || ''}
+                  error={errors.costCenterId?.message}
+               />
+            )}
+         />
+
+         <InputField
             label="Multa"
-            placeholder=""
+            placeholder="Valor da multa, se houver"
             type="text"
             register={register('fine')}
             error={errors.fine?.message}
-            maxLength={50}
             onChange={(e) => {
                const value = moneyMask(e.target.value);
                setValue('fine', value);
@@ -195,11 +314,10 @@ export const EditAccountPayable = ({ getAccounts, account }: EditAccountPayableP
 
          <InputField
             label="Juros"
-            placeholder=""
+            placeholder="Valor do juros, se houver"
             type="text"
             register={register('interest')}
             error={errors.interest?.message}
-            maxLength={50}
             onChange={(e) => {
                const value = moneyMask(e.target.value);
                setValue('interest', value);
@@ -208,21 +326,20 @@ export const EditAccountPayable = ({ getAccounts, account }: EditAccountPayableP
 
          <InputField
             label="Desconto"
-            placeholder=""
+            placeholder="Valor do desconto, se houver"
             type="text"
             register={register('discount')}
             error={errors.discount?.message}
-            maxLength={50}
             onChange={(e) => {
                const value = moneyMask(e.target.value);
                setValue('discount', value);
             }}
          />
 
-         <div className="md:col-span-3">
+         <div className="md:col-span-2">
             <InputField
                label="Observação"
-               placeholder=""
+               placeholder="Informação adicional sobre a conta"
                type="text"
                register={register('observation')}
                error={errors.observation?.message}
@@ -230,41 +347,9 @@ export const EditAccountPayable = ({ getAccounts, account }: EditAccountPayableP
             />
          </div>
 
-         <div className="grid grid-cols-1 gap-4 md:col-span-3 md:grid-cols-2">
-            <Controller
-               control={control}
-               name="paymentMethodId"
-               render={({ field: { value, onChange } }) => (
-                  <SelectField
-                     label="Método de Pagamento Previsto"
-                     placeholder="Selecione o Método de Pagamento"
-                     options={paymentMethodOptions}
-                     onChange={onChange}
-                     value={value || ''}
-                     error={errors.paymentMethodId?.message}
-                  />
-               )}
-            />
-
-            <Controller
-               control={control}
-               name="costCenterId"
-               render={({ field: { value, onChange } }) => (
-                  <SelectField
-                     label="Centro de Custo "
-                     placeholder="Selecione o centro de custo"
-                     options={costCenterOptions}
-                     onChange={onChange}
-                     value={value || ''}
-                     error={errors.costCenterId?.message}
-                  />
-               )}
-            />
-         </div>
-
-         <div className="md:col-span-3">
+         <div className="md:col-span-2">
             <Button disabled={loading} className="w-full" type="submit" size="lg">
-               <span>{loading ? 'Salvando...' : 'Confirmar'}</span>
+               <span>{loading ? 'Salvando...' : 'Atualizar'}</span>
             </Button>
          </div>
       </form>
