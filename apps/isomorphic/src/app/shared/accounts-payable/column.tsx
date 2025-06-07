@@ -56,7 +56,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
 
             if (status === "PENDING") {
                return (
-                  <div className="w-20">
+                  <div className="w-22">
                      <div className="border-1 cursor-pointer rounded-md border border-[#ABD2EF] bg-[#ABD2EF] px-2 py-1 text-center text-white">
                         Aberto
                      </div>
@@ -64,7 +64,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
                );
             } else if (status === "OVERDUE") {
                return (
-                  <div className="w-20">
+                  <div className="w-22">
                      <div className="border-1 cursor-pointer rounded-md border border-red-400 bg-red-400 px-2 py-1 text-center text-white">
                         Vencido
                      </div>

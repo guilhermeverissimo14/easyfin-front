@@ -18,7 +18,7 @@ export const ListBankAccountColumn = (getList: () => void) => {
   const isMobile = window.innerWidth < 768;
 
   const handleUpdateStatus = async (accountId: string, newStatus: boolean) => {
-    await api.patch(`/bank-accounts/${accountId}/toggle-status`, { active: newStatus });
+    await api.put(`/bank-accounts/${accountId}`, { active: newStatus });
     getList();
   };
 

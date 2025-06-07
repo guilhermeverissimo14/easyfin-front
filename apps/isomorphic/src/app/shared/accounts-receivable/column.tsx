@@ -55,7 +55,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
 
             if (status === "PENDING") {
                return (
-                  <div className="w-20">
+                  <div className="w-22">
                      <div className="border-1 cursor-pointer rounded-md border border-[#ABD2EF] bg-[#ABD2EF] px-2 py-1 text-center text-white">
                         Aberto
                      </div>
