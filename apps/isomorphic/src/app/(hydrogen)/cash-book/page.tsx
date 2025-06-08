@@ -12,53 +12,15 @@ import { HeaderInfoDetails } from '@/app/shared/cash-book/header-info-details';
 import TableLayout from '../tables/table-layout';
 import { ICashBook } from '@/types';
 import { RegisterTransaction } from '@/app/shared/cash-book/register-transaction';
-
-const transactionsMock = [
-   {
-      id: '1',
-      date: '2025-05-24',
-      historic: 'Pix - Recebido',
-      value: 15000,
-      type: 'C',
-      description: 'Transferência de cliente X',
-      costCenter: 'Despesas Refeição',
-      balance: 525000,
-   },
-   {
-      id: '2',
-      date: '2025-05-24',
-      historic: 'Compra com Cartão',
-      value: 30000,
-      type: 'D',
-      description: 'Impostos FGTS',
-      costCenter: 'Compras',
-      balance: 495000,
-   },
-   {
-      id: '3',
-      date: '2025-05-25',
-      historic: 'Cobrança com Registro',
-      value: 20000,
-      type: 'C',
-      description: 'Recebimento de cobrança Z',
-      costCenter: 'Fretes Transportes',
-      balance: 515000,
-   },
-   {
-      id: '4',
-      date: '2025-05-26',
-      historic: 'Pagamento Fornecedor',
-      value: 20000,
-      type: 'D',
-      description: 'Pagamento de fornecedor Y',
-      costCenter: 'Fornecedores',
-      balance: 495000,
-   },
-];
+import { toast } from 'react-toastify';
 
 export default function CashBook() {
-   const [transactions, setTransactions] = useState<ICashBook[]>(transactionsMock);
-   const [loading, setLoading] = useState(false);
+   const [transactions, setTransactions] = useState<ICashBook[]>([]);
+   const [loading, setLoading] = useState(true);
+   const [settings, setSettings] = useState({
+      cashFlowDefault: 'BANK',
+      bankAccountDefault: '',
+   });
 
    const { openModal } = useModal();
 
@@ -74,9 +36,74 @@ export default function CashBook() {
       ],
    };
 
-   const getTransactions = () => {
-      setTransactions(transactionsMock);
+   const fetchSettings = async () => {
+      try {
+         const response = await api.get('/settings');
+         if (response?.data) {
+            setSettings({
+               cashFlowDefault: response.data.cashFlowDefault || 'BANK',
+               bankAccountDefault: response.data.bankAccountDefault || '',
+            });
+            return response.data;
+         }
+      } catch (error) {
+         console.error('Erro ao carregar configurações:', error);
+         toast.error('Erro ao carregar configurações do sistema');
+         return null;
+      }
    };
+
+   const getTransactions = async () => {
+      try {
+         setLoading(true);
+
+         const currentSettings = await fetchSettings();
+         const cashFlowMode = currentSettings?.cashFlowDefault || settings.cashFlowDefault;
+         const defaultBankId = currentSettings?.bankAccountDefault || settings.bankAccountDefault;
+
+         let response;
+
+         if (cashFlowMode === 'CASH') {
+            response = await api.get('/cash-flow/cash');
+         } else {
+            if (!defaultBankId) {
+               toast.warning('Nenhuma conta bancária padrão configurada. Configure nas configurações do sistema.');
+               setLoading(false);
+               setTransactions([]);
+               return;
+            }
+
+            response = await api.get(`/cash-flow/account/${defaultBankId}`);
+         }
+
+         if (response?.data) {
+            const formattedData = response.data.map((item: any) => ({
+               id: item.id,
+               date: item.date,
+               historic: item.historic,
+               value: parseFloat(item.value),
+               type: item.type === 'CREDIT' ? 'C' : 'D',
+               description: item.description || '',
+               costCenter: item.costCenter?.name || '',
+               balance: item.balance ? parseFloat(item.balance) : 0,
+            }));
+
+            setTransactions(formattedData);
+         } else {
+            setTransactions([]);
+         }
+      } catch (error) {
+         console.error('Erro ao carregar transações:', error);
+         toast.error('Erro ao carregar dados do livro caixa');
+         setTransactions([]);
+      } finally {
+         setLoading(false);
+      }
+   };
+
+   useEffect(() => {
+      getTransactions();
+   }, []);
 
    return (
       <div className="mt-8">
@@ -100,7 +127,10 @@ export default function CashBook() {
             action="Registrar Lançamento"
             icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
          >
-            <HeaderInfoDetails />
+            <HeaderInfoDetails
+               cashFlowMode={settings.cashFlowDefault}
+               bankAccountId={settings.bankAccountDefault}
+            />
             <TableComponent
                title=""
                column={ListCashBookColumn(getTransactions)}

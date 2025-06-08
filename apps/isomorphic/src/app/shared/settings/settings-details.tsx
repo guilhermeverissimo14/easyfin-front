@@ -1,103 +1,109 @@
 'use client';
 import { useEffect, useState } from 'react';
-import { apiCall } from '@/helpers/apiHelper';
 import { api } from '@/service/api';
 import { z } from 'zod';
-import { Button, Checkbox } from 'rizzui';
+import { Button } from 'rizzui';
 import { toast } from "react-toastify";
 import { Controller, useForm } from 'react-hook-form';
 
 import { zodResolver } from '@hookform/resolvers/zod';
-import { InputField } from '@/components/input/input-field';
-import { moneyMask } from '@/utils/format';
 import { SelectField } from '@/components/input/select-field';
+import { LoadingSpinner } from '@/components/loading-spinner';
 
 interface SettingsData {
-   commissionPerHectare: string;
-   localManagerCommission: string;
-   generalManagerCommission: string;
-   defaultPaymentMethod: string;
+   cashFlowDefault: string;
+   bankAccountDefault: string;
    updatedAt?: string;
 }
 
 const settingsSchema = z.object({
-   commissionPerHectare: z.string().min(1).optional(),
-   localManagerCommission: z.string().min(1).max(3).optional(),
-   generalManagerCommission: z.string().min(1).max(3).optional(),
-   defaultPaymentMethod: z.string().min(1).optional(),
+   cashFlowDefault: z.string().min(1, 'Modo padrão de fluxo de caixa é obrigatório'),
+   bankAccountDefault: z.string().optional(),
 });
 
 const SettingsDetails = () => {
    const [settings, setSettings] = useState<SettingsData | null>(null);
    const [loading, setLoading] = useState(true);
-   const [checkbox, setCheckbox] = useState(0);
+   const [bankAccounts, setBankAccounts] = useState([]);
 
    const {
-      register,
       handleSubmit,
       reset,
       setValue,
       control,
+      watch,
       formState: { errors },
    } = useForm<SettingsData>({
       resolver: zodResolver(settingsSchema),
+      defaultValues: {
+         cashFlowDefault: 'BANK',
+         bankAccountDefault: '',
+      }
    });
+
+   const cashFlowDefault = watch('cashFlowDefault');
+
+   const fetchBankAccounts = async () => {
+      try {
+         const response = await api.get('/bank-accounts');
+         if (response?.data) {
+            setBankAccounts(response.data.map((account: any) => ({
+               label: `${account.bank} - Agência ${account.agency} - CC ${account.account}`,
+               value: account.id
+            })));
+         }
+      } catch (error) {
+         console.error('Erro ao buscar contas bancárias:', error);
+         toast.error('Não foi possível carregar as contas bancárias');
+      }
+   };
 
    const fetchSettings = async () => {
       try {
-         const result = await apiCall(() => api.get('/settings'));
+         setLoading(true);
+         const response = await api.get('/settings');
 
-         if (!result) {
-            return;
+         if (!response?.data) {
+            throw new Error('Dados não encontrados');
          }
 
-         console.log('result.data.commissionPerHectare', result.data.commissionPerHectare);
-
+         const data = response.data;
+         
          const formattedData = {
-            commissionPerHectare: moneyMask((result.data.commissionPerHectare * 100).toString()),
-            localManagerCommission: (result.data.localManagerCommission * 100).toString(),
-            generalManagerCommission: (result.data.generalManagerCommission * 100).toString(),
-            defaultPaymentMethod: result.data.defaultPaymentMethod,
+            cashFlowDefault: data.cashFlowDefault || 'BANK',
+            bankAccountDefault: data.bankAccountDefault || '',
+            updatedAt: data.updatedAt
          };
 
          setSettings(formattedData);
          reset(formattedData);
       } catch (error) {
          console.error('Erro ao buscar as configurações:', error);
+         toast.error('Erro ao carregar configurações do sistema');
       } finally {
          setLoading(false);
       }
    };
 
-   const paymentOptions = [
-      { label: 'Boleto', value: 'BOLETO' },
-      { label: 'PIX', value: 'PIX' },
-      { label: 'Cartão de Crédito', value: 'CARTAO_CREDITO' },
-      { label: 'Cartão de Débito', value: 'CARTAO_DEBITO' },
+   const cashFlowOptions = [
+      { label: 'Dinheiro', value: 'CASH' },
+      { label: 'Banco', value: 'BANK' },
    ];
 
    async function onSubmit(data: SettingsData) {
       try {
          setLoading(true);
          const formattedData = {
-            commissionPerHectare: parseFloat(
-               data.commissionPerHectare
-                  ?.toString()
-                  .replace(/[^\d,]/g, '')
-                  .replace(',', '.') as string
-            ),
-            localManagerCommission: parseFloat(data.localManagerCommission) / 100,
-            generalManagerCommission: parseFloat(data.generalManagerCommission) / 100,
-            defaultPaymentMethod: data.defaultPaymentMethod.toUpperCase(),
+            cashFlowDefault: data.cashFlowDefault,
+            bankAccountDefault: data.bankAccountDefault || ''
          };
 
-         console.log('formattedData', formattedData);
-
-         await apiCall(() => api.put('/settings', formattedData));
-         fetchSettings();
+         await api.put('/settings', formattedData);
+         await fetchSettings();
 
          toast.success('Configurações atualizadas com sucesso!');
       } catch (error) {
+         console.error('Erro ao atualizar configurações:', error);
          toast.error('Erro ao atualizar as configurações. Verifique os campos e tente novamente.');
       } finally {
          setLoading(false);
@@ -105,88 +111,70 @@ const SettingsDetails = () => {
    }
 
    useEffect(() => {
-      fetchSettings();
+      Promise.all([
+         fetchSettings(),
+         fetchBankAccounts()
+      ]);
    }, []);
 
    return (
       <div className="py-4">
          {loading ? (
-            <div>Carregando configurações...</div>
+            <div className="flex h-40 items-center justify-center">
+               <LoadingSpinner />
+            </div>
          ) : (
             settings && (
                <form className="flex w-full flex-col items-center justify-center" onSubmit={handleSubmit(onSubmit)}>
-                  <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                     <InputField
-                        label="Comissão por Hectare (Padrão)"
-                        type="text"
-                        placeholder="Digite o valor por hectare"
-                        register={register('commissionPerHectare')}
-                        error={errors.commissionPerHectare?.message}
-                        onChange={(e) => {
-                           const value = e.target.value;
-                           setValue('commissionPerHectare', moneyMask(value));
-                        }}
-                     />
-
-                     <InputField
-                        label="Comissão do Gerente Geral (%)"
-                        type="text"
-                        placeholder="Digite o valor por hectare"
-                        maxLength={3}
-                        register={register('generalManagerCommission')}
-                        onChange={(e) => {
-                           const value = e.target.value;
-                           setValue('generalManagerCommission', value);
-                        }}
-                     />
-
-                     <InputField
-                        label="Comissão do Gerente Local (%)"
-                        type="text"
-                        placeholder="Digite o valor por hectare"
-                        register={register('localManagerCommission')}
-                        maxLength={3}
-                        onChange={(e) => {
-                           const value = e.target.value;
-                           setValue('localManagerCommission', value);
-                        }}
-                     />
-
+                  <div className="grid w-full grid-cols-1 gap-4 md:grid-cols-3">
                      <Controller
                         control={control}
-                        name="defaultPaymentMethod"
+                        name="cashFlowDefault"
                         render={({ field: { value, onChange } }) => (
                            <SelectField
-                              label="Método de Pagamento (Padrão)"
-                              placeholder="Selecione o método de pagamento"
-                              options={paymentOptions}
+                              label="Caixa"
+                              placeholder="Selecione o modo padrão"
+                              options={cashFlowOptions}
                               onChange={(selected) => {
                                  onChange(selected);
                               }}
                               value={value || ''}
+                              error={errors.cashFlowDefault?.message}
                            />
                         )}
                      />
+
+                     {cashFlowDefault === 'BANK' && (
+                        <Controller
+                           control={control}
+                           name="bankAccountDefault"
+                           render={({ field: { value, onChange } }) => (
+                              <SelectField
+                                 label="Conta bancária"
+                                 placeholder="Selecione a conta bancária padrão"
+                                 options={bankAccounts}
+                                 onChange={(selected) => {
+                                    onChange(selected);
+                                 }}
+                                 value={value || ''}
+                                 error={errors.bankAccountDefault?.message}
+                              />
+                           )}
+                        />
+                     )}
                   </div>
 
-                  <div className="mt-4 grid w-full grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-                     <Checkbox
-                        value={checkbox}
-                        defaultChecked={false}
-                        onChange={(e) => setCheckbox(e.target.checked ? 1 : 0)}
-                        label="Financeiro pode lançar folha de pagamento"
-                     />
+                  <div className="mt-8 flex w-full justify-end">
+                     <Button type="submit" className="w-full md:w-32" disabled={loading}>
+                        <span>{loading ? 'Salvando...' : 'Salvar'}</span>
+                     </Button>
                   </div>
-
-                  <Button type="submit" className="mt-4 w-full md:absolute md:bottom-16 md:right-8 md:w-32" disabled={loading}>
-                     <span>{loading ? 'Salvando...' : 'Salvar'}</span>
-                  </Button>
                </form>
             )
          )}
 
          {settings?.updatedAt && (
-            <div className="absolute bottom-4 right-4 text-xs text-gray-400">
+            <div className="mt-10 text-right text-xs text-gray-400">
                <strong>Atualizado pela última vez em:</strong> {new Date(settings.updatedAt).toLocaleString()}
             </div>
          )}

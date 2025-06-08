@@ -2,7 +2,7 @@
 
 import { ColumnDef, createColumnHelper } from '@tanstack/react-table';
 import { ICashBook } from '@/types';
-import { formatDate, moneyMask } from '@/utils/format';
+import { formatCurrency, formatDate, moneyMask } from '@/utils/format';
 
 type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
   dataType?: 'date' | 'currency' | string
@@ -36,7 +36,7 @@ export const ListCashBookColumn = (getList: () => void) => {
          id: 'value',
          size: 100,
          header: 'Valor',
-         cell: ({ row }) => <span>{moneyMask(String(row.original.value))}</span>,
+         cell: ({ row }) => <span>{formatCurrency(row.original.value)}</span>,
          dataType: 'currency', 
       }),
       columnHelper.accessor('type', {
@@ -61,7 +61,7 @@ export const ListCashBookColumn = (getList: () => void) => {
          id: 'balance',
          size: 120,
          header: 'Saldo',
-         cell: ({ row }) => <span>{moneyMask(String(row.original.balance))}</span>,
+         cell: ({ row }) => <span>{formatCurrency(row.original.balance)}</span>,
          dataType: 'currency',
       }),
    ];
