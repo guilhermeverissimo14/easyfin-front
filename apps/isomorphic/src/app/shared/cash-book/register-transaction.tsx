@@ -49,11 +49,20 @@ export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId,
       const fetchData = async () => {
          try {
             const bankAccountsResponse = await api.get('/bank-accounts');
-            setBankAccounts(bankAccountsResponse.data.map((account: any) => ({
-               label: `${account.bank} - Agência ${account.agency} - CC ${account.account}`,
-               value: account.id,
-               details: account
-            })));
+
+            const filterAccountSelected = bankAccountsResponse.data.filter((account:any) => {
+               if (bankAccountId) {
+                  return account.id === bankAccountId;
+               } else if (cashBookId) {
+                  return account.id === cashBookId;
+               }
+            })
+
+            setBankAccounts([{
+               label: `${filterAccountSelected[0].bank} - Agência ${filterAccountSelected[0].agency} - CC ${filterAccountSelected[0].account}`,
+               value: filterAccountSelected[0].id,
+               details: filterAccountSelected[0]
+            }]);
 
             const costCentersResponse = await api.get('/cost-centers');
             setCostCenters(costCentersResponse.data.map((center: any) => ({
@@ -107,7 +116,7 @@ export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId,
                bankAccountId: data.bankAccountId,
                date: adjustToBrazilTimezone(data.date || new Date()),
             };
-         } else if(cashFlowMode === 'CASH') {
+         } else if (cashFlowMode === 'CASH') {
             payload = {
                type: mappedType,
                value: Number(unmaskedValue),
@@ -119,7 +128,6 @@ export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId,
             };
          }
 
-console.log('Payload to be sent:', payload);
          await api.post('/cash-flow', payload);
 
          toast.success('Lançamento registrado com sucesso!');
