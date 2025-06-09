@@ -12,6 +12,7 @@ import TableLayout from '../tables/table-layout';
 import { ICashBook } from '@/types';
 import { RegisterTransaction } from '@/app/shared/cash-book/register-transaction';
 import { toast } from 'react-toastify';
+import { apiCall } from '@/helpers/apiHelper';
 
 export default function CashBook() {
    const [transactions, setTransactions] = useState<ICashBook[]>([]);
@@ -20,6 +21,7 @@ export default function CashBook() {
       cashFlowDefault: '',
       bankAccountDefault: '',
    });
+   const [cashBoxId, setCashBoxId] = useState<string | null>(null);
 
    const { openModal } = useModal();
    const headerInfoRef = useRef<HeaderInfoDetailsRef>(null);
@@ -38,8 +40,12 @@ export default function CashBook() {
 
    const fetchSettings = async () => {
       try {
-         const response = await api.get('/settings');
-         
+         const response = await apiCall(()=>api.get('/settings'));
+
+         if (!response?.data) {
+            return ;
+         }
+        
          if (response?.data) {
             setSettings({
                cashFlowDefault: response.data.cashFlowDefault || '',
@@ -65,11 +71,10 @@ export default function CashBook() {
          let response;
 
          if (cashFlowMode === 'CASH') {
-            response = await api.get('/cash-flow/cash');
-            console.log('Cash Transactions:', response.data);
+            response = await apiCall(()=>api.get('/cash-flow/cash'));
+            setCashBoxId(response?.data[0].cashBoxId);
          } else if (cashFlowMode === 'BANK') {
-            response = await api.get(`/cash-flow/account/${defaultBankId}`);
-            console.log('Bank Account Transactions:', response.data);
+            response = await apiCall(()=>api.get(`/cash-flow/account/${defaultBankId}`));
          }
 
          if (response?.data) {
@@ -113,6 +118,8 @@ export default function CashBook() {
                            getCashBook={getTransactions}
                            bankAccountId={settings.bankAccountDefault}
                            refreshTotals={() => headerInfoRef.current?.fetchTotals()}
+                           cashBookId={cashBoxId ?? undefined}
+                            cashFlowMode={settings.cashFlowDefault}
                         />
                      </ModalForm>
                   ),
@@ -132,6 +139,7 @@ export default function CashBook() {
                ref={headerInfoRef}
                cashFlowMode={settings.cashFlowDefault}
                bankAccountId={settings.bankAccountDefault}
+               cashBoxId={cashBoxId ?? undefined}
             />
             <TableComponent
                title=""

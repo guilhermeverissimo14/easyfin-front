@@ -11,6 +11,7 @@ import { formatCurrency } from '@/utils/format';
 interface HeaderInfoDetailsProps {
    cashFlowMode?: string;
    bankAccountId?: string;
+   cashBoxId?: string;
 }
 
 export interface HeaderInfoDetailsRef {
@@ -18,36 +19,41 @@ export interface HeaderInfoDetailsRef {
 }
 
 interface TotalData {
-   date: string;
    bankName?: string;
    bankAccountInfo?: string;
    totalEntries: number;
    totalExits: number;
    balance: number;
+   date?: Date;
 }
 
 export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDetailsProps>(
-   ({ cashFlowMode, bankAccountId }, ref) => {
-
+   ({ cashFlowMode, bankAccountId, cashBoxId }, ref) => {
+      
       const [loading, setLoading] = useState(true);
       const [totals, setTotals] = useState<TotalData | null>(null);
 
       const fetchTotals = async () => {
          try {
             setLoading(true);
+            let paramns;
+            if (cashFlowMode === 'BANK') {
+               paramns = { bankAccountId: bankAccountId || '' };
+            } else if (cashFlowMode === 'CASH') {
+               paramns = { cashId: cashBoxId|| '' };
+            }
 
             const response = await api.get('/cash-flow/totals-per-day', {
                params: {
-                  bankAccountId: bankAccountId || '',
-                  cashFlowMode: cashFlowMode || '',
+                  ...paramns,
                },
             });
 
             if (response?.data) {
                setTotals({
-                  date: response.data.date,
                   bankName: response.data.bankName,
                   bankAccountInfo: response.data.bankAccountInfo,
+                  date: response.data.date ? new Date(response.data.date) : undefined,
                   totalEntries: parseFloat(response.data.totalEntries || 0),
                   totalExits: parseFloat(response.data.totalExits || 0),
                   balance: parseFloat(response.data.balance || 0)
@@ -76,7 +82,9 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
                <div className="flex w-full flex-col justify-center space-y-2 text-sm text-gray-700 md:w-auto md:text-base">
                   <div className="flex flex-row items-center space-x-2 text-gray-600">
                      <IoCalendarOutline size={26} />
-                     <span className="text-xl font-semibold md:text-2xl">{totals?.date}</span>
+                     <span className="text-xl font-semibold md:text-2xl">
+                        {totals?.date ? totals.date.toLocaleDateString() : ''}
+                     </span>
                   </div>
                   <div className="ml-1 flex items-center space-x-3 text-green-600">
                      <FaDotCircle className="inline-block" />

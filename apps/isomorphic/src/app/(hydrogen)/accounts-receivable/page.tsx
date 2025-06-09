@@ -13,6 +13,7 @@ import { AccountsReceivableResponse, FilterParams, IAccountsReceivable } from '@
 import { NewAccountReceivable } from '@/app/shared/accounts-receivable/new-account-receivable';
 import { toast } from 'react-toastify';
 import { FilterAccountsReceivable } from '@/app/shared/accounts-receivable/filter-account-receivable';
+import { apiCall } from '@/helpers/apiHelper';
 
 export default function AccountsReceivable() {
   const [data, setData] = useState<IAccountsReceivable[]>([]);
@@ -74,8 +75,10 @@ export default function AccountsReceivable() {
       const queryParams = buildQueryParams(filters);
       const endpoint = `/accounts-receivable${queryParams ? `?${queryParams}` : ''}`;
       
-      const response = await api.get<AccountsReceivableResponse[]>(endpoint);
-      const mappedData = mapApiDataToAccountsReceivable(response.data);
+      const response = await apiCall(()=> api.get<AccountsReceivableResponse[]>(endpoint));
+        const mappedData = response && response.data
+        ? mapApiDataToAccountsReceivable(response.data)
+        : [];
       
       setData(mappedData);
       

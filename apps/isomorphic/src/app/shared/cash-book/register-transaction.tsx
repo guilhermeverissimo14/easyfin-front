@@ -21,7 +21,8 @@ const bankAccountSchema = z.object({
    costCenterId: z.string().optional(),
    historic: z.string().nonempty('Histórico não pode ser vazio'),
    description: z.string().optional(),
-   bankAccountId: z.string().nonempty('Conta bancária não pode ser vazia'),
+   bankAccountId: z.string().optional(),
+   cashBoxId: z.string().optional(),
    date: z.date({
       required_error: "Data do lançamento é obrigatória",
       invalid_type_error: "Data inválida",
@@ -35,16 +36,16 @@ interface RegisterTransactionProps {
    bankAccountId?: string;
    cashBookId?: string;
    refreshTotals?: () => void;
+   cashFlowMode?: string;
 }
 
-export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId, cashBookId}: RegisterTransactionProps) => {
+export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId, cashBookId, cashFlowMode }: RegisterTransactionProps) => {
    const [loading, setLoading] = useState(false);
    const { closeModal } = useModal();
    const [bankAccounts, setBankAccounts] = useState<{ label: string; value: string; details?: string }[]>([]);
    const [costCenters, setCostCenters] = useState([]);
 
    useEffect(() => {
-      
       const fetchData = async () => {
          try {
             const bankAccountsResponse = await api.get('/bank-accounts');
@@ -77,9 +78,10 @@ export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId,
       reset
    } = useForm<BankAccountFormData>({
       resolver: zodResolver(bankAccountSchema),
-      defaultValues:{
+      defaultValues: {
          date: new Date(),
-         bankAccountId: bankAccountId || '',
+         bankAccountId: bankAccountId || "",
+         cashBoxId: cashBookId || "",
       }
    });
 
@@ -94,21 +96,35 @@ export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId,
 
          const mappedType = data.type === 'D' ? 'DEBIT' : 'CREDIT';
 
-         const payload = {
-            type: mappedType,
-            value: Number(unmaskedValue),
-            historic: data.historic,
-            description: data.description || '',
-            costCenterId: data.costCenterId || '',
-            bankAccountId: data.bankAccountId,
-            date:adjustToBrazilTimezone(data.date || new Date()),
-         };
+         let payload;
+         if (cashFlowMode === 'BANK') {
+            payload = {
+               type: mappedType,
+               value: Number(unmaskedValue),
+               historic: data.historic,
+               description: data.description || '',
+               costCenterId: data.costCenterId || '',
+               bankAccountId: data.bankAccountId,
+               date: adjustToBrazilTimezone(data.date || new Date()),
+            };
+         } else if(cashFlowMode === 'CASH') {
+            payload = {
+               type: mappedType,
+               value: Number(unmaskedValue),
+               historic: data.historic,
+               description: data.description || '',
+               costCenterId: data.costCenterId || '',
+               cashBoxId: cashBookId,
+               date: adjustToBrazilTimezone(data.date || new Date()),
+            };
+         }
 
+console.log('Payload to be sent:', payload);
          await api.post('/cash-flow', payload);
 
          toast.success('Lançamento registrado com sucesso!');
          getCashBook();
-          if (refreshTotals) refreshTotals();
+         if (refreshTotals) refreshTotals();
          reset();
          closeModal();
       } catch (error: any) {
@@ -128,11 +144,18 @@ export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId,
    return (
       <form className="flex w-[100%] flex-col items-center justify-center" onSubmit={handleSubmit(onSubmit)}>
          <div className="w-full space-y-5">
-        
-            {bankAccounts && bankAccounts.length > 0 && (
+
+            {bankAccounts && bankAccounts.length > 0 && !cashBookId && (
                <div className="flex flex-col items-start justify-center space-y-1">
-                 <span className="font-bold">Conta bancária selecionada:</span>
-                 <span className="font-medium text-gray-700">{bankAccounts[0]?.label}</span>
+                  <span className="font-bold">Conta bancária selecionada:</span>
+                  <span className="font-medium text-gray-700">{bankAccounts[0]?.label}</span>
+               </div>
+            )}
+
+            {cashBookId && (
+               <div className="flex flex-col items-start justify-center space-y-1">
+                  <span className="font-bold">Caixa geral</span>
+                  <span className="font-medium text-gray-700">apenas dinheiro</span>
                </div>
             )}
 

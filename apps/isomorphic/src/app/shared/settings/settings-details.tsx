@@ -9,6 +9,7 @@ import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { SelectField } from '@/components/input/select-field';
 import { LoadingSpinner } from '@/components/loading-spinner';
+import { apiCall } from '@/helpers/apiHelper';
 
 interface SettingsData {
    cashFlowDefault: string;
@@ -45,7 +46,12 @@ const SettingsDetails = () => {
 
    const fetchBankAccounts = async () => {
       try {
-         const response = await api.get('/bank-accounts');
+         const response = await apiCall(()=> api.get('/bank-accounts'));
+
+          if (!response?.data) {
+            return
+         }
+      
          if (response?.data) {
             setBankAccounts(response.data.map((account: any) => ({
                label: `${account.bank} - Agência ${account.agency} - CC ${account.account}`,
@@ -62,11 +68,7 @@ const SettingsDetails = () => {
       try {
          setLoading(true);
          const response = await api.get('/settings');
-
-         if (!response?.data) {
-            throw new Error('Dados não encontrados');
-         }
-
+  
          const data = response.data;
          
          const formattedData = {
@@ -78,7 +80,7 @@ const SettingsDetails = () => {
          setSettings(formattedData);
          reset(formattedData);
       } catch (error) {
-         console.error('Erro ao buscar as configurações:', error);
+         // console.error('Erro ao buscar as configurações:', error);
          toast.error('Erro ao carregar configurações do sistema');
       } finally {
          setLoading(false);

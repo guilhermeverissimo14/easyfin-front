@@ -13,6 +13,7 @@ import { AccountsPayableResponse, FilterParams, IAccountsPayable } from '@/types
 import { NewAccountPayable } from '@/app/shared/accounts-payable/new-account-payable';
 import { FilterAccountsPayable } from '@/app/shared/accounts-payable/filter-account-payable';
 import { toast } from 'react-toastify';
+import { apiCall } from '@/helpers/apiHelper';
 
 
 export default function AccountsPayable() {
@@ -76,8 +77,8 @@ export default function AccountsPayable() {
       const queryParams = buildQueryParams(filters);
       const endpoint = `/accounts-payable${queryParams ? `?${queryParams}` : ''}`;
       
-      const response = await api.get<AccountsPayableResponse[]>(endpoint);
-      const mappedData = mapApiDataToAccountsPayable(response.data);
+      const response = await apiCall(()=> api.get<AccountsPayableResponse[]>(endpoint));
+      const mappedData = response && response.data ? mapApiDataToAccountsPayable(response.data) : [];
       
       setData(mappedData);
       
