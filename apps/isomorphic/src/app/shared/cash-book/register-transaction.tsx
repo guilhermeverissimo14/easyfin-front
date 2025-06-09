@@ -32,15 +32,19 @@ type BankAccountFormData = z.infer<typeof bankAccountSchema>;
 
 interface RegisterTransactionProps {
    getCashBook: () => void;
+   bankAccountId?: string;
+   cashBookId?: string;
+   refreshTotals?: () => void;
 }
 
-export const RegisterTransaction = ({ getCashBook }: RegisterTransactionProps) => {
+export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId, cashBookId}: RegisterTransactionProps) => {
    const [loading, setLoading] = useState(false);
    const { closeModal } = useModal();
-   const [bankAccounts, setBankAccounts] = useState([]);
+   const [bankAccounts, setBankAccounts] = useState<{ label: string; value: string; details?: string }[]>([]);
    const [costCenters, setCostCenters] = useState([]);
 
    useEffect(() => {
+      
       const fetchData = async () => {
          try {
             const bankAccountsResponse = await api.get('/bank-accounts');
@@ -73,6 +77,10 @@ export const RegisterTransaction = ({ getCashBook }: RegisterTransactionProps) =
       reset
    } = useForm<BankAccountFormData>({
       resolver: zodResolver(bankAccountSchema),
+      defaultValues:{
+         date: new Date(),
+         bankAccountId: bankAccountId || '',
+      }
    });
 
    const onSubmit = async (data: BankAccountFormData) => {
@@ -100,6 +108,7 @@ export const RegisterTransaction = ({ getCashBook }: RegisterTransactionProps) =
 
          toast.success('Lançamento registrado com sucesso!');
          getCashBook();
+          if (refreshTotals) refreshTotals();
          reset();
          closeModal();
       } catch (error: any) {
@@ -119,30 +128,13 @@ export const RegisterTransaction = ({ getCashBook }: RegisterTransactionProps) =
    return (
       <form className="flex w-[100%] flex-col items-center justify-center" onSubmit={handleSubmit(onSubmit)}>
          <div className="w-full space-y-5">
-            <Controller
-               control={control}
-               name="bankAccountId"
-               render={({ field: { value, onChange } }) => (
-                  <SelectField
-                     label="Conta Bancária"
-                     placeholder="Selecione a conta bancária"
-                     options={bankAccounts}
-                     onChange={(selected) => {
-                        onChange(selected);
-
-                     }}
-                     value={value || ''}
-                     error={errors.bankAccountId?.message}
-                  />
-               )}
-            />
-
-            {/* {selectedBank && (
-               <div className="flex flex-col items-end justify-center space-y-1">
-                  <span className="font-semibold">{selectedBank.bank}</span>
-                  <span className="text-sm">Ag. {selectedBank.agency} - CC {selectedBank.account}</span>
+        
+            {bankAccounts && bankAccounts.length > 0 && (
+               <div className="flex flex-col items-start justify-center space-y-1">
+                 <span className="font-bold">Conta bancária selecionada:</span>
+                 <span className="font-medium text-gray-700">{bankAccounts[0]?.label}</span>
                </div>
-            )} */}
+            )}
 
             <Controller
                control={control}

@@ -89,11 +89,6 @@ export const menuItems = [
       icon: <PiCurrencyCircleDollar />,
       dropdownItems: [
          {
-            name: 'Lançamentos à Vista',
-            href: '#',
-            //href: routes.financial.expenditure,
-         },
-         {
             name: 'Contas a Pagar',
             href: routes.accountsPayable,
          },

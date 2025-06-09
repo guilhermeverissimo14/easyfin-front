@@ -27,7 +27,7 @@ const settleAccountPayableSchema = z.object({
    paymentMethodId: z.string().nonempty('Método de pagamento não pode ser vazio'),
    paymentDate: z.date().optional().nullable(),
    value: z.string().nonempty('Valor não pode ser vazio'),
-   bankId: z.string().optional(),
+   bankAccountId: z.string().optional(),
 });
 
 type SettleAccountFormData = z.infer<typeof settleAccountPayableSchema>;
@@ -37,12 +37,14 @@ interface SettleAccountPayableProps {
    account: IAccountsPayable;
 }
 
+type PaymentMethod = { label: string; value: string; requiresBank?: boolean };
+
 export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPayableProps) => {
    const [loading, setLoading] = useState(false);
    const { closeModal } = useModal();
    const [showBankSelect, setShowBankSelect] = useState(false);
    const [costCenters, setCostCenters] = useState([]);
-   const [paymentMethods, setPaymentMethods] = useState([]);
+   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
    const [bankAccounts, setBankAccounts] = useState([]);
 
    const {
@@ -57,88 +59,86 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
 
    const onSubmit = async (data: SettleAccountFormData) => {
       setLoading(true);
-      
+
       try {
-       
-        const unmaskedFine = data.fine
-          ? parseFloat(data.fine.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
-          : 0;
-        
-        const unmaskedInterest = data.interest
-          ? parseFloat(data.interest.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
-          : 0;
-        
-        const unmaskedDiscount = data.discount
-          ? parseFloat(data.discount.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
-          : 0;
-    
-      
-        const payload = {
-          fine: unmaskedFine,
-          interest: unmaskedInterest,
-          discount: unmaskedDiscount,
-          observation: data.observation || '',
-          paymentMethodId: data.paymentMethodId,
-          paymentDate: adjustToBrazilTimezone(data.paymentDate ? data.paymentDate : new Date()),
-          costCenterId: data.costCenterId || ''
-        };
-    
-      
-        if (showBankSelect && data.bankId) {
-        }
-    
-       
-        await api.post(`/accounts-payable/${account.id}/settle`, payload);
-        
-        
-        toast.success('Pagamento registrado com sucesso!');
-        getAccounts(); 
-        closeModal();
+
+         const unmaskedFine = data.fine
+            ? parseFloat(data.fine.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
+            : 0;
+
+         const unmaskedInterest = data.interest
+            ? parseFloat(data.interest.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
+            : 0;
+
+         const unmaskedDiscount = data.discount
+            ? parseFloat(data.discount.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
+            : 0;
+
+
+         const payload = {
+            fine: unmaskedFine,
+            interest: unmaskedInterest,
+            discount: unmaskedDiscount,
+            observation: data.observation || '',
+            paymentMethodId: data.paymentMethodId,
+            paymentDate: adjustToBrazilTimezone(data.paymentDate ? data.paymentDate : new Date()),
+            costCenterId: data.costCenterId || '',
+            bankAccountId: data.bankAccountId || '',
+         };
+
+
+
+         await api.post(`/accounts-payable/${account.id}/settle`, payload);
+
+
+         toast.success('Pagamento registrado com sucesso!');
+         getAccounts();
+         closeModal();
       } catch (error: any) {
-        
-        console.error('Erro ao liquidar conta:', error);
-        const errorMessage = error.response?.data?.message || 'Não foi possível registrar o pagamento';
-        toast.error(errorMessage);
+
+         console.error('Erro ao liquidar conta:', error);
+         const errorMessage = error.response?.data?.message || 'Não foi possível registrar o pagamento';
+         toast.error(errorMessage);
       } finally {
-        setLoading(false);
+         setLoading(false);
       }
    };
 
    useEffect(() => {
       const fetchData = async () => {
-        try {
-          
-          const costCentersResponse = await api.get('/cost-centers');
-          setCostCenters(costCentersResponse.data.map((center: any) => ({
-            label: center.name,
-            value: center.id
-          })));
-    
-          
-          const paymentMethodsResponse = await api.get('/payment-methods');
-          setPaymentMethods(paymentMethodsResponse.data.map((method: any) => ({
-            label: method.name,
-            value: method.id,
-            requiresBank: method.requiresBank
-          })));
-    
-          
-          const bankAccountsResponse = await api.get('/bank-accounts');
-          setBankAccounts(bankAccountsResponse.data.map((bank: any) => ({
-            label: `${bank.bank} - Agência ${bank.agency} - CC ${bank.account}`,
-            value: bank.id
-          })));
-    
-        } catch (error) {
-          console.error("Erro ao carregar dados:", error);
-          toast.error("Erro ao carregar dados necessários");
-        }
-      };
-    
-      fetchData();
-    }, []);
+         try {
 
- useEffect(() => {
+            const costCentersResponse = await api.get('/cost-centers');
+            setCostCenters(costCentersResponse.data.map((center: any) => ({
+               label: center.name,
+               value: center.id
+            })));
+
+
+            const paymentMethodsResponse = await api.get('/payment-methods');
+            setPaymentMethods(paymentMethodsResponse.data.map((method: any) => ({
+               label: method.name,
+               value: method.id,
+               requiresBank: method.requiresBank
+            })));
+
+
+            const bankAccountsResponse = await api.get('/bank-accounts');
+            setBankAccounts(bankAccountsResponse.data.map((bank: any) => ({
+               label: `${bank.bank} - Agência ${bank.agency} - CC ${bank.account}`,
+               value: bank.id
+            })));
+
+         } catch (error) {
+            console.error("Erro ao carregar dados:", error);
+            toast.error("Erro ao carregar dados necessários");
+         }
+      };
+
+      fetchData();
+   }, []);
+
+   useEffect(() => {
 
 
 
@@ -154,7 +154,7 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
                throw new Error(`Error fetching account details: ${response}`);
             }
 
-           
+
             const data = await response.data;
 
             setValue('dueDate', data.dueDate ? new Date(data.dueDate) : null);
@@ -288,6 +288,9 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
                      options={paymentMethods.length > 0 ? paymentMethods : []}
                      onChange={(selected) => {
                         onChange(selected);
+                         const selectedMethod = paymentMethods.find((method) => method.value === selected);
+                        const isMoney = selectedMethod?.label === 'Dinheiro';
+                        setShowBankSelect(!isMoney);
                      }}
                      value={value || ''}
                      error={errors.paymentMethodId?.message}
@@ -312,39 +315,39 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
                )}
             />
          </div>
-         
+
          <div className="md:col-span-3">
-           <Controller
-             control={control}
-             name="paymentDate"
-             render={({ field: { onChange, value } }) => (
-               <DatePicker
-                 label="Data de Pagamento"
-                 selected={value || new Date()}
-                 onChange={onChange}
-                 dateFormat="dd/MM/yyyy"
-                 showMonthYearDropdown
-                 minDate={new Date('2000-02-01')}
-                 maxDate={new Date()}
-                 scrollableMonthYearDropdown
-                 placeholderText="Data de pagamento"
-                 popperPlacement="bottom-end"
-                 inputProps={{
-                   variant: 'outline',
-                   inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
-                 }}
-                 className="flex-grow [&>label>span]:font-medium"
-                 locale={ptBR}
-               />
-             )}
-           />
+            <Controller
+               control={control}
+               name="paymentDate"
+               render={({ field: { onChange, value } }) => (
+                  <DatePicker
+                     label="Data de Pagamento"
+                     selected={value || new Date()}
+                     onChange={onChange}
+                     dateFormat="dd/MM/yyyy"
+                     showMonthYearDropdown
+                     minDate={new Date('2000-02-01')}
+                     maxDate={new Date()}
+                     scrollableMonthYearDropdown
+                     placeholderText="Data de pagamento"
+                     popperPlacement="bottom-end"
+                     inputProps={{
+                        variant: 'outline',
+                        inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+                     }}
+                     className="flex-grow [&>label>span]:font-medium"
+                     locale={ptBR}
+                  />
+               )}
+            />
          </div>
 
          {showBankSelect && (
             <div className="md:col-span-3">
                <Controller
                   control={control}
-                  name="bankId"
+                  name="bankAccountId"
                   render={({ field: { value, onChange } }) => (
                      <SelectField
                         label="Banco"
@@ -354,7 +357,7 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
                            onChange(selected);
                         }}
                         value={value || ''}
-                        error={errors.bankId?.message}
+                        error={errors.bankAccountId?.message}
                      />
                   )}
                />

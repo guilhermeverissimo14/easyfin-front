@@ -46,7 +46,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
          header: 'Cliente',
          cell: ({ row }) => <span>{row.original.customerName}</span>,
       }),
-       columnHelper.accessor('status', {
+      columnHelper.accessor('status', {
          id: 'status',
          size: 60,
          header: 'Status',
@@ -120,48 +120,52 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
          }) => (
             <div className="flex items-center justify-end">
                <div className="flex items-center">
-                  <Tooltip size="sm" content="Receber" placement="top" color="invert">
-                     <Button
-                        onClick={() => {
-                           openModal({
-                              view: (
-                                 <ModalForm title="Receber">
-                                    <SettleAccountReceivable getAccounts={getList} account={row.original} />
-                                 </ModalForm>
-                              ),
-                              size: 'sm',
-                              customSize: 'max-w-2xl',
-                           });
-                        }}
-                        as="span"
-                        className="cursor-pointer bg-white px-2 hover:bg-transparent"
-                     >
-                        <ActionIcon as="span" size="sm" variant="outline" aria-label="Liquidar">
-                           <GiTakeMyMoney size={24} className="text-gray-500 hover:text-gray-700" />
-                        </ActionIcon>
-                     </Button>
-                  </Tooltip>
+                  {row.original.status !== "PAID" && (
+                     <Tooltip size="sm" content="Receber" placement="top" color="invert">
+                        <Button
+                           onClick={() => {
+                              openModal({
+                                 view: (
+                                    <ModalForm title="Receber">
+                                       <SettleAccountReceivable getAccounts={getList} account={row.original} />
+                                    </ModalForm>
+                                 ),
+                                 size: 'sm',
+                                 customSize: 'max-w-2xl',
+                              });
+                           }}
+                           as="span"
+                           className="cursor-pointer bg-white px-2 hover:bg-transparent"
+                        >
+                           <ActionIcon as="span" size="sm" variant="outline" aria-label="Liquidar">
+                              <GiTakeMyMoney size={24} className="text-gray-500 hover:text-gray-700" />
+                           </ActionIcon>
+                        </Button>
+                     </Tooltip>
+                  )}
 
-                  <Tooltip size="sm" content="Editar" placement="top" color="invert">
-                     <Button
-                        onClick={() => {
-                           openModal({
-                              view: (
-                                 <ModalForm title="Editar documento">
-                                    <EditAccountReceivable getAccounts={getList} account={row.original} />
-                                 </ModalForm>
-                              ),
-                              size: 'sm',
-                           });
-                        }}
-                        as="span"
-                        className="cursor-pointer bg-white px-2 hover:bg-transparent"
-                     >
-                        <ActionIcon as="span" size="sm" variant="outline" aria-label="Editar">
-                           <PencilIcon className="size-4 text-gray-500 hover:text-gray-700" />
-                        </ActionIcon>
-                     </Button>
-                  </Tooltip>
+                  {row.original.status !== "PAID" && (
+                     <Tooltip size="sm" content="Editar" placement="top" color="invert">
+                        <Button
+                           onClick={() => {
+                              openModal({
+                                 view: (
+                                    <ModalForm title="Editar documento">
+                                       <EditAccountReceivable getAccounts={getList} account={row.original} />
+                                    </ModalForm>
+                                 ),
+                                 size: 'sm',
+                              });
+                           }}
+                           as="span"
+                           className="cursor-pointer bg-white px-2 hover:bg-transparent"
+                        >
+                           <ActionIcon as="span" size="sm" variant="outline" aria-label="Editar">
+                              <PencilIcon className="size-4 text-gray-500 hover:text-gray-700" />
+                           </ActionIcon>
+                        </Button>
+                     </Tooltip>
+                  )}
 
                   <Tooltip size="sm" content="Visualizar" placement="top" color="invert">
                      <Button
@@ -186,7 +190,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
 
                   <Tooltip size="sm" content="Remover" placement="top" color="invert">
                      <TableRowActionGroup
-                        isVisibleDelete={true}
+                        isVisibleDelete={row.original.status !== "PAID"}
                         isVisibleEdit={false}
                         isVisible={false}
                         deletePopoverTitle="Excluir conta a receber?"

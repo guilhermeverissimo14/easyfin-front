@@ -60,7 +60,7 @@ export const ListBankAccountColumn = (getList: () => void) => {
                 <div className="flex items-center">
                    <UpdateStatusPopover
                       title="Atualizar Status"
-                      message={row.original.active ? 'Deseja bloquear o usuário?' : 'Deseja reativar este usuário?'}
+                      message={row.original.active ? 'Deseja bloquear essa conta bancaria?' : 'Deseja reativar está conta bancaria?'}
                       onConfirm={() => handleUpdateStatus(row.original.id, !row.original.active)}
                    >
                       {getStatusBadge(row.original.active ?? false, row.original.active ? 'Ativo' : 'Bloqueado')}

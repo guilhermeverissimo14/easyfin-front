@@ -1,14 +1,13 @@
 'use client';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { PiPlusBold } from 'react-icons/pi';
 
 import TableComponent from '@/components/tables/table';
 import ModalForm from '@/components/modal/modal-form';
 import { useModal } from '@/app/shared/modal-views/use-modal';
-import { apiCall } from '@/helpers/apiHelper';
 import { api } from '@/service/api';
 import { ListCashBookColumn } from '@/app/shared/cash-book/column';
-import { HeaderInfoDetails } from '@/app/shared/cash-book/header-info-details';
+import { HeaderInfoDetails, HeaderInfoDetailsRef } from '@/app/shared/cash-book/header-info-details';
 import TableLayout from '../tables/table-layout';
 import { ICashBook } from '@/types';
 import { RegisterTransaction } from '@/app/shared/cash-book/register-transaction';
@@ -18,11 +17,12 @@ export default function CashBook() {
    const [transactions, setTransactions] = useState<ICashBook[]>([]);
    const [loading, setLoading] = useState(true);
    const [settings, setSettings] = useState({
-      cashFlowDefault: 'BANK',
+      cashFlowDefault: '',
       bankAccountDefault: '',
    });
 
    const { openModal } = useModal();
+   const headerInfoRef = useRef<HeaderInfoDetailsRef>(null);
 
    const pageHeader = {
       title: 'Livro Caixa',
@@ -39,9 +39,10 @@ export default function CashBook() {
    const fetchSettings = async () => {
       try {
          const response = await api.get('/settings');
+         
          if (response?.data) {
             setSettings({
-               cashFlowDefault: response.data.cashFlowDefault || 'BANK',
+               cashFlowDefault: response.data.cashFlowDefault || '',
                bankAccountDefault: response.data.bankAccountDefault || '',
             });
             return response.data;
@@ -65,15 +66,10 @@ export default function CashBook() {
 
          if (cashFlowMode === 'CASH') {
             response = await api.get('/cash-flow/cash');
-         } else {
-            if (!defaultBankId) {
-               toast.warning('Nenhuma conta bancária padrão configurada. Configure nas configurações do sistema.');
-               setLoading(false);
-               setTransactions([]);
-               return;
-            }
-
+            console.log('Cash Transactions:', response.data);
+         } else if (cashFlowMode === 'BANK') {
             response = await api.get(`/cash-flow/account/${defaultBankId}`);
+            console.log('Bank Account Transactions:', response.data);
          }
 
          if (response?.data) {
@@ -92,6 +88,7 @@ export default function CashBook() {
          } else {
             setTransactions([]);
          }
+         headerInfoRef.current?.fetchTotals();
       } catch (error) {
          console.error('Erro ao carregar transações:', error);
          toast.error('Erro ao carregar dados do livro caixa');
@@ -112,7 +109,11 @@ export default function CashBook() {
                openModal({
                   view: (
                      <ModalForm title="Registro de Lançamento">
-                        <RegisterTransaction getCashBook={getTransactions} />
+                        <RegisterTransaction
+                           getCashBook={getTransactions}
+                           bankAccountId={settings.bankAccountDefault}
+                           refreshTotals={() => headerInfoRef.current?.fetchTotals()}
+                        />
                      </ModalForm>
                   ),
                   size: 'md',
@@ -128,6 +129,7 @@ export default function CashBook() {
             icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
          >
             <HeaderInfoDetails
+               ref={headerInfoRef}
                cashFlowMode={settings.cashFlowDefault}
                bankAccountId={settings.bankAccountDefault}
             />
@@ -138,7 +140,7 @@ export default function CashBook() {
                data={transactions}
                tableHeader={true}
                searchAble={true}
-               pagination={false}
+               pagination={true}
                loading={loading}
             />
          </TableLayout>

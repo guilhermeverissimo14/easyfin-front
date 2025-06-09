@@ -121,7 +121,8 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
          }) => (
             <div className="flex items-center justify-end">
                <div className="flex items-center">
-                  <Tooltip size="sm" content="Liquidar" placement="top" color="invert">
+                 {row.original.status !== 'PAID' && (
+                   <Tooltip size="sm" content="Liquidar" placement="top" color="invert">
                      <Button
                         onClick={() => {
                            openModal({
@@ -142,7 +143,9 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
                         </ActionIcon>
                      </Button>
                   </Tooltip>
+                 )}
 
+                 { row.original.status !== 'PAID' && (
                   <Tooltip size="sm" content="Editar" placement="top" color="invert">
                      <Button
                         onClick={() => {
@@ -163,6 +166,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
                         </ActionIcon>
                      </Button>
                   </Tooltip>
+                 )} 
 
                   <Tooltip size="sm" content="Visualizar" placement="top" color="invert">
                      <Button
@@ -187,7 +191,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
 
                   <Tooltip size="sm" content="Remover" placement="top" color="invert">
                      <TableRowActionGroup
-                        isVisibleDelete={true}
+                        isVisibleDelete={row.original.status !== 'PAID'}
                         isVisibleEdit={false}
                         isVisible={false}
                         deletePopoverTitle="Excluir conta a pagar?"
