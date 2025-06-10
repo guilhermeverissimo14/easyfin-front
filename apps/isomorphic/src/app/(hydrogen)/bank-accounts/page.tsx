@@ -87,7 +87,7 @@ export default function BankAccounts() {
                     data={bankAccounts}
                     tableHeader={true}
                     searchAble={true}
-                    pagination={true}
+                    pagination={false}
                     loading={loading}
                 />
             </TableLayout>
