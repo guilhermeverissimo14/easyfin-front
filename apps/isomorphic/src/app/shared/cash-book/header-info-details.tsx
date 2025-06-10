@@ -39,10 +39,7 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
    ({ cashFlowMode, bankAccountId, cashBoxId, onBankAccountChange }, ref) => {
       const [loading, setLoading] = useState(true);
       const [totals, setTotals] = useState<TotalData | null>(null);
-      const [bankAccounts, setBankAccounts] = useState([]);
       const { openModal, closeModal } = useModal();
-
-     
 
       const fetchTotals = async () => {
          try {
@@ -53,14 +50,13 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
             } else if (cashFlowMode === 'CASH') {
                paramns = { cashId: cashBoxId || '' };
             }
-
             const response = await api.get('/cash-flow/totals-per-day', {
                params: {
                   ...paramns,
                },
             });
 
-            if (response?.data) {
+            if (response?.data) { 
                setTotals({
                   bankName: response.data.bankName,
                   bankAccountInfo: response.data.bankAccountInfo,

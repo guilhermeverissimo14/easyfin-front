@@ -6,6 +6,7 @@ import { Button } from 'rizzui/button';
 
 type TableLayoutProps = {
    openModal?: () => void;
+   openModalImport?: () => void;
    navigation?: () => void;
    title: string;
    data: unknown[];
@@ -13,7 +14,9 @@ type TableLayoutProps = {
    columns: any;
    fileName: string;
    action?: string | null;
+   importLabel?: string | null;
    icon: React.ReactNode | null;
+   iconImport?: React.ReactNode | null;
    iconFilter?: React.ReactNode | null;
    payrollNavigation?: boolean;
    filter?: string | null;
@@ -22,6 +25,7 @@ type TableLayoutProps = {
 
 export default function TableLayout({
    openModal,
+   openModalImport,
    payrollNavigation = false,
    navigation,
    title,
@@ -32,7 +36,9 @@ export default function TableLayout({
    children,
    filter = null,
    action = null,
+   importLabel = null,
    icon = null,
+   iconImport = null,
    iconFilter = null,
    openModalFilter,
    ...props
@@ -42,6 +48,19 @@ export default function TableLayout({
          <PageHeader title={title} {...props}>
             <div className="mt-4 flex items-center gap-3 @lg:mt-0">
                <ExportButton columns={columns} data={data} fileName={fileName} />
+               
+               {importLabel && openModalImport && (
+                  <Button
+                     as="span"
+                     color="secondary"
+                     className="w-full cursor-pointer @lg:w-auto"
+                     onClick={openModalImport}
+                  >
+                     {iconImport && iconImport}
+                     {importLabel}
+                  </Button>
+               )}
+               
                {filter && (
                   <Button
                      as="span"
@@ -54,8 +73,13 @@ export default function TableLayout({
                      {filter}
                   </Button>
                )}
+               
                {action && (
-                  <Button as="span" className="w-full cursor-pointer @lg:w-auto" onClick={!payrollNavigation ? openModal : navigation}>
+                  <Button 
+                     as="span" 
+                     className="w-full cursor-pointer @lg:w-auto" 
+                     onClick={!payrollNavigation ? openModal : navigation}
+                  >
                      {icon && icon}
                      {action}
                   </Button>

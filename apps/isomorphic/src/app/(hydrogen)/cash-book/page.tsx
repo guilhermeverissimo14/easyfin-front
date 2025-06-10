@@ -1,6 +1,6 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
-import { PiPlusBold } from 'react-icons/pi';
+import { PiPlusBold, PiDownloadSimpleBold } from 'react-icons/pi';
 
 import TableComponent from '@/components/tables/table';
 import ModalForm from '@/components/modal/modal-form';
@@ -13,6 +13,7 @@ import { ICashBook } from '@/types';
 import { RegisterTransaction } from '@/app/shared/cash-book/register-transaction';
 import { toast } from 'react-toastify';
 import { apiCall } from '@/helpers/apiHelper';
+import ImportExtractModal from '@/components/import-button/import-button';
 
 export default function CashBook() {
    const [transactions, setTransactions] = useState<ICashBook[]>([]);
@@ -22,6 +23,11 @@ export default function CashBook() {
       bankAccountDefault: '',
    });
    const [cashBoxId, setCashBoxId] = useState<string | null>(null);
+   const [bankDetails, setBankDetails] = useState({
+      name: '',
+      agency: '',
+      account: '',
+   });
 
    const { openModal } = useModal();
    const headerInfoRef = useRef<HeaderInfoDetailsRef>(null);
@@ -60,6 +66,21 @@ export default function CashBook() {
       }
    };
 
+   const fetchBankDetails = async (bankId: string) => {
+      try {
+         const response = await apiCall(() => api.get(`/bank-accounts/${bankId}`));
+         if (response?.data) {
+            setBankDetails({
+               name: response.data.bank || 'Banco',
+               agency: response.data.agency || '',
+               account: response.data.account || '',
+            });
+         }
+      } catch (error) {
+         console.error('Erro ao buscar detalhes do banco:', error);
+      }
+   };
+
    const getTransactions = async () => {
       try {
          setLoading(true);
@@ -67,6 +88,10 @@ export default function CashBook() {
          const currentSettings = await fetchSettings();
          const cashFlowMode = currentSettings?.cashFlowDefault || settings.cashFlowDefault;
          const defaultBankId = currentSettings?.bankAccountDefault || settings.bankAccountDefault;
+
+         if (defaultBankId) {
+            fetchBankDetails(defaultBankId);
+         }
 
          let response;
 
@@ -103,6 +128,23 @@ export default function CashBook() {
       }
    };
 
+   const openImportModal = () => {
+      openModal({
+         view: (
+            <ModalForm title="Importar Extrato Bancário">
+               <ImportExtractModal
+                  bankAccountId={settings.bankAccountDefault}
+                  bankName={bankDetails.name}
+                  bankAgency={bankDetails.agency}
+                  bankAccount={bankDetails.account}
+                  onSuccess={getTransactions}
+               />
+            </ModalForm>
+         ),
+         size: 'md',
+      });
+   };
+
    useEffect(() => {
       getTransactions();
    }, []);
@@ -126,6 +168,7 @@ export default function CashBook() {
                   size: 'md',
                })
             }
+            openModalImport={openImportModal}
             breadcrumb={pageHeader.breadcrumb}
             title={pageHeader.title}
             data={transactions}
@@ -133,15 +176,24 @@ export default function CashBook() {
             fileName="livro-caixa"
             header=""
             action="Registrar Lançamento"
+            importLabel="Importar Extrato"
             icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
+            iconImport={<PiDownloadSimpleBold className="me-1.5 h-[17px] w-[17px]" />}
          >
 
+         {(settings.cashFlowDefault === 'BANK' && settings.bankAccountDefault) || 
+          (settings.cashFlowDefault === 'CASH' && cashBoxId) ? (
             <HeaderInfoDetails
                ref={headerInfoRef}
                cashFlowMode={settings.cashFlowDefault}
                bankAccountId={settings.bankAccountDefault}
                cashBoxId={cashBoxId ?? undefined}
             />
+         ) : (
+            <div className="flex justify-center p-6">
+               Carregando dados...
+            </div>
+         )}
 
             <TableComponent
                title=""
