@@ -133,10 +133,6 @@ export default function CashBook() {
          view: (
             <ModalForm title="Importar Extrato Bancário">
                <ImportExtractModal
-                  bankAccountId={settings.bankAccountDefault}
-                  bankName={bankDetails.name}
-                  bankAgency={bankDetails.agency}
-                  bankAccount={bankDetails.account}
                   onSuccess={getTransactions}
                />
             </ModalForm>

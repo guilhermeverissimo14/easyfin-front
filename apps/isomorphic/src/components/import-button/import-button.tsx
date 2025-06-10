@@ -1,30 +1,65 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button, Text } from 'rizzui';
 import { toast } from 'react-toastify';
 import { api } from '@/service/api';
 import { useModal } from '@/app/shared/modal-views/use-modal';
 import { PiFileCsv, PiFileXls } from 'react-icons/pi';
+import { SelectField } from '@/components/input/select-field';
+import { Controller, useForm } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const importFormSchema = z.object({
+  bankAccountId: z.string().nonempty('Selecione uma conta bancária')
+});
+
+type ImportFormData = z.infer<typeof importFormSchema>;
 
 type ImportExtractModalProps = {
-  bankAccountId: string;
-  bankName?: string;
-  bankAgency?: string;
-  bankAccount?: string;
   onSuccess: () => void;
 };
 
 export default function ImportExtractModal({
-  bankAccountId,
-  bankName = 'Carregando...',
-  bankAgency = '',
-  bankAccount = '',
   onSuccess
 }: ImportExtractModalProps) {
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [bankAccounts, setBankAccounts] = useState<{ label: string; value: string }[]>([]);
   const { closeModal } = useModal();
+  
+  const {
+    control,
+    handleSubmit,
+    formState: { errors }
+  } = useForm<ImportFormData>({
+    resolver: zodResolver(importFormSchema),
+    defaultValues: {
+      bankAccountId: ''
+    }
+  });
+
+  useEffect(() => {
+    const fetchBankAccounts = async () => {
+      try {
+        const response = await api.get('/bank-accounts');
+        
+        if (response?.data) {
+          const accounts = response.data.map((bank: any) => ({
+            label: `${bank.bank} - Agência ${bank.agency} - CC ${bank.account}`,
+            value: bank.id
+          }));
+          setBankAccounts(accounts);
+        }
+      } catch (error) {
+        console.error('Erro ao buscar contas bancárias:', error);
+        toast.error('Não foi possível carregar as contas bancárias');
+      }
+    };
+    
+    fetchBankAccounts();
+  }, []);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -33,7 +68,7 @@ export default function ImportExtractModal({
     }
   };
 
-  const handleImport = async () => {
+  const onSubmit = async (formData: ImportFormData) => {
     if (!selectedFile) {
       toast.error('Selecione um arquivo para importar');
       return;
@@ -41,12 +76,12 @@ export default function ImportExtractModal({
 
     setLoading(true);
 
-    const formData = new FormData();
-    formData.append('bankAccountId', bankAccountId);
-    formData.append('file', selectedFile);
+    const formDataToSend = new FormData();
+    formDataToSend.append('bankAccountId', formData.bankAccountId);
+    formDataToSend.append('file', selectedFile);
 
     try {
-      const response = await api.post('/cash-flow/import-bank-extract', formData, {
+      const response = await api.post('/cash-flow/import-bank-extract', formDataToSend, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -67,16 +102,22 @@ export default function ImportExtractModal({
   };
 
   return (
-    <div className="space-y-6 p-6">
-      <div className="rounded-lg border border-gray-200 bg-gray-50 p-4">
-        <h3 className="mb-3 font-medium text-gray-700">Conta Bancária Selecionada</h3>
-        
-        <div className="space-y-1">
-          <p className="text-base font-semibold">{bankName}</p>
-          <p className="text-sm text-gray-600">
-            {bankAgency && bankAccount ? `Agência: ${bankAgency} - Conta: ${bankAccount}` : ''}
-          </p>
-        </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6 p-6">
+      <div className="space-y-4">
+        <Controller
+          control={control}
+          name="bankAccountId"
+          render={({ field: { value, onChange } }) => (
+            <SelectField
+              label="Conta Bancária"
+              placeholder="Selecione a conta bancária"
+              options={bankAccounts}
+              onChange={onChange}
+              value={value}
+              error={errors.bankAccountId?.message}
+            />
+          )}
+        />
       </div>
 
       <div className="space-y-4">
@@ -165,14 +206,13 @@ export default function ImportExtractModal({
         </Button>
         
         <Button
-          type="button"
-          onClick={handleImport}
+          type="submit"
           disabled={!selectedFile || loading}
           className="px-6"
         >
-          {loading ? 'Importando...' : 'Confirmar Importação'}
+          {loading ? 'Importando...' : 'Confirmar'}
         </Button>
       </div>
-    </div>
+    </form>
   );
 }
