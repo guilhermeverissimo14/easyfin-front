@@ -137,7 +137,7 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
                   <div className="flex flex-row items-center space-x-2 text-gray-600">
                      <IoCalendarOutline size={26} />
                      <span className="text-xl font-semibold md:text-2xl">
-                        {totals?.date ? totals.date.toLocaleDateString('pt-BR') : ''}
+                        {(new Date()).toLocaleDateString('pt-BR')}
                      </span>
                   </div>
                   <div className="ml-1 flex items-center space-x-3 text-green-600">
