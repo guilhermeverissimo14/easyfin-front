@@ -96,10 +96,14 @@ export default function CashBook() {
          let response;
 
          if (cashFlowMode === 'CASH') {
-            response = await apiCall(() => api.get('/cash-flow/cash'));
-            setCashBoxId(response?.data[0].cashBoxId);
+            response = await api.get('/cash-flow/cash');
+
+            if (response?.data.length === 0) {
+               toast.info('Nenhum lançamento encontrado no livro caixa.');
+               return;
+            } else setCashBoxId(response?.data[0].cashBoxId);
          } else if (cashFlowMode === 'BANK') {
-            response = await apiCall(() => api.get(`/cash-flow/account/${defaultBankId}`));
+            response = await api.get(`/cash-flow/account/${defaultBankId}`);
          }
 
          if (response?.data) {
@@ -132,9 +136,7 @@ export default function CashBook() {
       openModal({
          view: (
             <ModalForm title="Importar Extrato Bancário">
-               <ImportExtractModal
-                  onSuccess={getTransactions}
-               />
+               <ImportExtractModal onSuccess={getTransactions} />
             </ModalForm>
          ),
          size: 'md',
@@ -176,20 +178,16 @@ export default function CashBook() {
             icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             iconImport={<PiDownloadSimpleBold className="me-1.5 h-[17px] w-[17px]" />}
          >
-
-         {(settings.cashFlowDefault === 'BANK' && settings.bankAccountDefault) || 
-          (settings.cashFlowDefault === 'CASH' && cashBoxId) ? (
-            <HeaderInfoDetails
-               ref={headerInfoRef}
-               cashFlowMode={settings.cashFlowDefault}
-               bankAccountId={settings.bankAccountDefault}
-               cashBoxId={cashBoxId ?? undefined}
-            />
-         ) : (
-            <div className="flex justify-center p-6">
-               Carregando dados...
-            </div>
-         )}
+            {(settings.cashFlowDefault === 'BANK' && settings.bankAccountDefault) || (settings.cashFlowDefault === 'CASH' && cashBoxId) ? (
+               <HeaderInfoDetails
+                  ref={headerInfoRef}
+                  cashFlowMode={settings.cashFlowDefault}
+                  bankAccountId={settings.bankAccountDefault}
+                  cashBoxId={cashBoxId ?? undefined}
+               />
+            ) : (
+               <div className="flex justify-center p-6">Carregando dados...</div>
+            )}
 
             <TableComponent
                title=""
