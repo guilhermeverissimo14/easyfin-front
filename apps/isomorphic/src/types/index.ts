@@ -1,117 +1,115 @@
 import { UserRole } from '@/config/enums';
 
-
-
 export interface AccountsReceivableResponse {
-  id: string;
-  customer: {
-    id: string;
-    name: string;
-  };
-  documentNumber: string;
-  documentDate: string;
-  launchDate: string;
-  dueDate: string;
-  paymentDate: string | null;
-  value: number;
-  paidValue: number;
-  discount: number;
-  fine: number;
-  interest: number;
-  installmentNumber: number;
-  totalInstallments: number;
-  user: {
-    id: string;
-    name: string;
-  };
-  costCenter: {
-    id: string | null;
-    name: string | null;
-  };
-  plannedPaymentMethod: {
-    id: string;
-    name: string;
-  };
-  paymentMethod: {
-    id: string | null;
-    name: string | null;
-  };
-  observation: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
+   id: string;
+   customer: {
+      id: string;
+      name: string;
+   };
+   documentNumber: string;
+   documentDate: string;
+   launchDate: string;
+   dueDate: string;
+   paymentDate: string | null;
+   value: number;
+   paidValue: number;
+   discount: number;
+   fine: number;
+   interest: number;
+   installmentNumber: number;
+   totalInstallments: number;
+   user: {
+      id: string;
+      name: string;
+   };
+   costCenter: {
+      id: string | null;
+      name: string | null;
+   };
+   plannedPaymentMethod: {
+      id: string;
+      name: string;
+   };
+   paymentMethod: {
+      id: string | null;
+      name: string | null;
+   };
+   observation: string;
+   status: string;
+   createdAt: string;
+   updatedAt: string;
 }
 
 export interface IAccountsReceivable {
-  id: string;
-  documentNumber: string;
-  customerId: string;
-  customerName: string;
-  status: string;
-  documentDate: string;
-  launchDate: string;
-  dueDate: string;
-  installmentNumber: number;
-  totalInstallments: number;
-  value: number;
-  plannedPaymentMethod?: string;
-  costCenterId?: string;
-  costCenterName: string;
-  observation?: string;
-  paymentDate: string;
+   id: string;
+   documentNumber: string;
+   customerId: string;
+   customerName: string;
+   status: string;
+   documentDate: string;
+   launchDate: string;
+   dueDate: string;
+   installmentNumber: number;
+   totalInstallments: number;
+   value: number;
+   plannedPaymentMethod?: string;
+   costCenterId?: string;
+   costCenterName: string;
+   observation?: string;
+   paymentDate: string;
 }
 
 export interface AccountsPayableResponse {
-  id: string;
-  supplier: {
-    id: string;
-    name: string;
-  };
-  documentNumber: string;
-  documentDate: string;
-  launchDate: string;
-  dueDate: string;
-  paymentDate: string | null;
-  value: number;
-  paidValue: number;
-  discount: number;
-  fine: number;
-  interest: number;
-  installmentNumber: number;
-  totalInstallments: number;
+   id: string;
+   supplier: {
+      id: string;
+      name: string;
+   };
+   documentNumber: string;
+   documentDate: string;
+   launchDate: string;
+   dueDate: string;
+   paymentDate: string | null;
+   value: number;
+   paidValue: number;
+   discount: number;
+   fine: number;
+   interest: number;
+   installmentNumber: number;
+   totalInstallments: number;
    user: {
-    id: string;
-    name: string;
-  };
-  costCenter: {
-    id: string | null;
-    name: string | null;
-  };
-  plannedPaymentMethod: {
-    id: string;
-    name: string;
-  };
-  paymentMethod: {
-    id: string | null;
-    name: string | null;
-  };
-  userId: string;
-  observation: string;
-  status: string;
-  createdAt: string;
-  updatedAt: string;
+      id: string;
+      name: string;
+   };
+   costCenter: {
+      id: string | null;
+      name: string | null;
+   };
+   plannedPaymentMethod: {
+      id: string;
+      name: string;
+   };
+   paymentMethod: {
+      id: string | null;
+      name: string | null;
+   };
+   userId: string;
+   observation: string;
+   status: string;
+   createdAt: string;
+   updatedAt: string;
 }
 
 export interface FilterParams {
    customerId?: string;
-  supplierId?: string;
-  costCenterId?: string;
-  status?: string;
-  paymentMethodId?: string;
-  documentDateStart?: string;
-  documentDateEnd?: string;
-  dueDateStart?: string;
-  dueDateEnd?: string;
+   supplierId?: string;
+   costCenterId?: string;
+   status?: string;
+   paymentMethodId?: string;
+   documentDateStart?: string;
+   documentDateEnd?: string;
+   dueDateStart?: string;
+   dueDateEnd?: string;
 }
 
 export interface PaymentMethod {
@@ -288,10 +286,10 @@ export interface ICashBook {
 }
 
 export enum PaymentStatus {
-  "PENDING",
-  "PAID" ,
-  "CANCELLED",
-  "OVERDUE",
+   'PENDING',
+   'PAID',
+   'CANCELLED',
+   'OVERDUE',
 }
 
 export interface IAccountsPayable {
@@ -344,4 +342,43 @@ export interface IAccountsReceivable {
    createdAt?: Date;
    updatedAt?: Date;
    cancelledAt?: Date | null;
+}
+
+export interface IInvoice {
+   id: string;
+   invoiceNumber: string;
+   customer: {
+      id: string;
+      name: string;
+   };
+   paymentCondition: {
+      id: string;
+      condition: string;
+      description: string;
+      installments: number;
+   };
+   issueDate: string;
+   month: number;
+   year: number;
+   dueDate: string;
+   serviceValue: number;
+   retainsIss: boolean;
+   issqnTaxRate: number;
+   effectiveTaxRate: number;
+   issqnValue: number;
+   netValue: number;
+   effectiveTax: number;
+   bankAccount?:
+      | {
+           id: string;
+           name: string;
+           agency: string;
+           account: string;
+        }
+      | {};
+   costCenter: {
+      id: string;
+      name: string;
+   };
+   notes: string;
 }

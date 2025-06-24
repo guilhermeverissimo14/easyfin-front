@@ -3,7 +3,6 @@
 import React, { useEffect, useState } from 'react';
 import { formatCurrency } from '@/utils/format';
 import { AccountsReceivableResponse } from '@/types';
-import Image from 'next/image';
 import { api } from '@/service/api';
 import { LoadingSpinner } from '@/components/loading-spinner';
 
@@ -12,48 +11,47 @@ interface AccountReceivableDetailsProps {
 }
 
 export const AccountReceivableDetails = ({ id }: AccountReceivableDetailsProps) => {
-
    const [loading, setLoading] = useState(true);
    const [account, setAccount] = useState<AccountsReceivableResponse | null>(null);
    const [error, setError] = useState<string | null>(null);
 
    useEffect(() => {
-     const fetchAccountDetails = async () => {
-       try {
-         setLoading(true);
-         const response = await api.get(`/accounts-receivable/${id}`);
-         
-         if (!response) {
-           throw new Error(`Error fetching account details: ${response}`);
+      const fetchAccountDetails = async () => {
+         try {
+            setLoading(true);
+            const response = await api.get(`/accounts-receivable/${id}`);
+
+            if (!response) {
+               throw new Error(`Error fetching account details: ${response}`);
+            }
+
+            const data = await response.data;
+            setAccount(data as AccountsReceivableResponse);
+         } catch (err) {
+            console.error('Error fetching account details:', err);
+            setError('Falha ao carregar os detalhes da conta');
+         } finally {
+            setLoading(false);
          }
-         
-         const data = await response.data;
-         setAccount(data as AccountsReceivableResponse);
-       } catch (err) {
-         console.error('Error fetching account details:', err);
-         setError('Falha ao carregar os detalhes da conta');
-       } finally {
-         setLoading(false);
-       }
-     };
-     
-     fetchAccountDetails();
+      };
+
+      fetchAccountDetails();
    }, [id]);
-   
+
    if (loading) {
-     return (
-       <div className="flex h-full w-full items-center justify-center p-10">
-         <LoadingSpinner />
-       </div>
-     );
+      return (
+         <div className="flex h-full w-full items-center justify-center p-10">
+            <LoadingSpinner />
+         </div>
+      );
    }
-   
+
    if (error && !account) {
-     return <div className="text-red-500 p-4">{error}</div>;
+      return <div className="p-4 text-red-500">{error}</div>;
    }
-   
+
    if (!account) {
-     return <div className="text-gray-500 p-4">Conta não encontrada</div>;
+      return <div className="p-4 text-gray-500">Conta não encontrada</div>;
    }
 
    const customerName = account.customer?.name;
@@ -131,7 +129,6 @@ export const AccountReceivableDetails = ({ id }: AccountReceivableDetailsProps) 
             <div className="flex items-center">
                <p className="text-lg font-semibold">Financeiro</p>
             </div>
-
          </div>
 
          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -165,12 +162,12 @@ export const AccountReceivableDetails = ({ id }: AccountReceivableDetailsProps) 
          </div>
 
          {account.observation && (
-           <div className="mt-4">
-             <p className="flex flex-col text-sm text-gray-500">
-               <span className="bg-gray-100 p-1 font-semibold">Observação</span>
-               <span className="p-1">{account.observation}</span>
-             </p>
-           </div>
+            <div className="mt-4">
+               <p className="flex flex-col text-sm text-gray-500">
+                  <span className="bg-gray-100 p-1 font-semibold">Observação</span>
+                  <span className="p-1">{account.observation}</span>
+               </p>
+            </div>
          )}
       </div>
    );

@@ -164,6 +164,7 @@ export const routes = {
    bankAccounts: '/bank-accounts',
    constCenters: '/cost-centers',
    paymentTerms: '/payment-terms',
+   invoicing: '/invoicing',
    cashBook: '/cash-book',
    accountsPayable: '/accounts-payable',
    accountsReceivable: '/accounts-receivable',

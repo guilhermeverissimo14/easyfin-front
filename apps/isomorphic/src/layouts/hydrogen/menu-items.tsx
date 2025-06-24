@@ -77,9 +77,8 @@ export const menuItems = [
       icon: <GiMoneyStack />,
       dropdownItems: [
          {
-            name: 'Emitir Nota Fiscal',
-            href: '#',
-            //href: routes.sales,
+            name: 'Notas Fiscais',
+            href: routes.invoicing,
          },
       ],
    },
