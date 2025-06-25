@@ -33,14 +33,4 @@ export const pageLinks = [
    {
       name: 'Financeiro',
    },
-
-   {
-      name: 'Despesas',
-      href: routes.financial.expenses,
-   },
-
-   {
-      name: 'Receitas',
-      href: routes.financial.revenues,
-   },
 ];

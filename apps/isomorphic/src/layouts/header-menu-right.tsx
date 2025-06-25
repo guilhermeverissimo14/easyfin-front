@@ -1,15 +1,10 @@
 'use client';
 
-import { Badge, ActionIcon } from 'rizzui';
 import ProfileMenu from '@/layouts/profile-menu';
-import RingBellSolidIcon from '@core/components/icons/ring-bell-solid';
-import NotificationDropdown from './notification-dropdown';
 import { useState } from 'react';
 import { userType } from '@/types';
 
 export default function HeaderMenuRight() {
-   const [hasNotification, setHasNotification] = useState(false);
-   const user = JSON.parse(localStorage.getItem('eas:user') || '{}') as userType;
 
    return (
       <div className="ms-auto grid shrink-0 grid-cols-2 items-center gap-2 text-gray-700 xs:gap-3 xl:gap-4">

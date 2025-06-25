@@ -381,3 +381,14 @@ export interface IInvoice {
    };
    notes: string;
 }
+
+export interface LocalUser {
+   id: string;
+   name: string;
+   email: string;
+   role: 'ADMIN' | 'USER' ;
+   phone: string;
+   cpfCnpj: string;
+   avatar: string;
+   lastLogin: Date;
+}

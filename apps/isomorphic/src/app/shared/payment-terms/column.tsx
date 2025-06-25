@@ -9,9 +9,28 @@ import { PaymentMethod, PaymentTermModel } from '@/types';
 import ModalForm from '@/components/modal/modal-form';
 import PaymentTermsDetails from './payment-terms-details';
 import { EditPaymentTerm } from './edit-payment-terms';
-import { CreatePaymentTerm } from './create-payment-terms';
 
 const columnHelper = createColumnHelper<PaymentTermModel>();
+
+const PaymentMethodCell = ({ paymentMethodId }: { paymentMethodId: string }) => {
+  const [paymentMethod, setPaymentMethod] = useState<string>('N/A');
+
+  useEffect(() => {
+    const fetchPaymentMethod = async () => {
+      try {
+        const response = await api.get<PaymentMethod[]>('/payment-methods');
+        const foundMethod = response.data.find(pm => pm.id === paymentMethodId);
+        setPaymentMethod(foundMethod ? foundMethod.name : 'N/A');
+      } catch (error) {
+        console.error('Erro ao buscar método de pagamento:', error);
+      }
+    };
+
+    fetchPaymentMethod();
+  }, [paymentMethodId]);
+
+  return <span>{paymentMethod}</span>;
+};
 
 export const ListPaymentTermColumn = (getList: () => void) => {
   const { openModal } = useModal();
@@ -44,26 +63,7 @@ export const ListPaymentTermColumn = (getList: () => void) => {
       id: 'paymentMethod',
       size: 180,
       header: 'Método de Pagamento',
-      cell: ({ row }) => {
-
-        const [paymentMethod, setPaymentMethod] = useState<string>('N/A');
-
-        useEffect(() => {
-          const fetchPaymentMethod = async () => {
-            try {
-              const response = await api.get<PaymentMethod[]>('/payment-methods');
-              const foundMethod = response.data.find(pm => pm.id === row.original.paymentMethodId);
-              setPaymentMethod(foundMethod ? foundMethod.name : 'N/A');
-            } catch (error) {
-              console.error('Erro ao buscar método de pagamento:', error);
-            }
-          };
-
-          fetchPaymentMethod();
-        }, [row.original.paymentMethodId]);
-
-        return <span>{paymentMethod}</span>;
-      },
+      cell: ({ row }) => <PaymentMethodCell paymentMethodId={row.original.paymentMethodId} />,
     }),
     
     columnHelper.display({
