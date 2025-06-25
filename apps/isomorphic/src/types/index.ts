@@ -374,8 +374,7 @@ export interface IInvoice {
            name: string;
            agency: string;
            account: string;
-        }
-      | {};
+        };
    costCenter: {
       id: string;
       name: string;

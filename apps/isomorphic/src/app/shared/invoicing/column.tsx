@@ -7,6 +7,7 @@ import TableRowActionGroup from '@core/components/table-utils/table-row-action-g
 import { useModal } from '../modal-views/use-modal';
 import ModalForm from '@/components/modal/modal-form';
 import { InvoiceDetails } from './invoice-details';
+import { EditInvoice } from './edit-invoicing';
 
 const columnHelper = createColumnHelper<IInvoice>();
 
@@ -23,7 +24,7 @@ export const ListInvoicingColumn = (getList: () => void) => {
       }),
       columnHelper.accessor('customer', {
          id: 'customer',
-         size: 180,
+         size: 140,
          header: 'Cliente',
          cell: ({ row }) => <span>{row.original.customer.name}</span>,
       }),
@@ -41,13 +42,13 @@ export const ListInvoicingColumn = (getList: () => void) => {
       }),
       columnHelper.accessor('paymentCondition', {
          id: 'paymentCondition.description',
-         size: 100,
+         size: 160,
          header: 'Cond. Pagamento',
          cell: ({ row }) => <span>{row.original.paymentCondition.description}</span>,
       }),
       columnHelper.accessor('paymentCondition', {
          id: 'paymentCondition.condition',
-         size: 80,
+         size: 120,
          header: 'Prazo (dias)',
          cell: ({ row }) => <span>{row.original.paymentCondition.condition}</span>,
       }),
@@ -59,7 +60,7 @@ export const ListInvoicingColumn = (getList: () => void) => {
       }),
       columnHelper.display({
          id: 'actions',
-         size: 160,
+         size: 140,
          cell: ({
             row,
             table: {
@@ -70,6 +71,19 @@ export const ListInvoicingColumn = (getList: () => void) => {
                isVisibleDelete={false}
                isVisible={true}
                isVisibleEdit={true}
+               openModalEdit={()=>{
+                  openModal({
+                     view: (
+                        <ModalForm title="Editar Nota Fiscal">
+                           <EditInvoice
+                              getInvoices={getList}
+                              invoice={row.original}
+                           />
+                        </ModalForm>
+                     ),
+                     size: 'lg',
+                  });
+               }}
                openModalList={() =>
                   openModal({
                      view: (
