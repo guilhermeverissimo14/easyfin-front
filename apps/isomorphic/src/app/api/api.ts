@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
-const BASE_URL = 'http://localhost:3333/api/';
+const BASE_URL = 'https://easyfin-api.onrender.com/api/';
 
 export const api: AxiosInstance = axios.create({
    baseURL: BASE_URL,
