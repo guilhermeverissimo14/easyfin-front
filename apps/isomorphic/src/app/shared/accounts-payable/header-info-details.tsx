@@ -9,6 +9,7 @@ interface AccountsPayableTotals {
   overdueThisMonth: number; 
   overdueThisWeek: number;
   overdueToday: number;
+  totalPayable: number;
 }
 
 export const HeaderInfoDetails = () => {
@@ -55,25 +56,25 @@ export const HeaderInfoDetails = () => {
       <div className="mx-auto mb-4 flex max-w-full items-start rounded-lg bg-[#CEBDA3] py-4 shadow-md">
          <div className="grid w-full grid-cols-1 gap-4 px-4 md:grid-cols-4">
             <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 p-3">
-               <span className="mb-2 text-sm text-gray-600">TOTAL VENCIDO</span>
+               <span className="mb-2 text-sm text-gray-600">TOTAL A PAGAR</span>
                <div className="text-3xl font-semibold text-[#17345F]">
                   {totals ? formatCurrency(totals.totalOverdue) : 'R$ 0,00'}
                </div>
             </div>
             <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 p-3">
-               <span className="mb-2 text-sm text-gray-600">VENCIDO ESTE MÊS</span>
+               <span className="mb-2 text-sm text-gray-600">A VENCER ESSE MÊS</span>
                <div className="text-3xl font-semibold text-[#17345F]">
                   {totals ? formatCurrency(totals.overdueThisMonth) : 'R$ 0,00'}
                </div>
             </div>
             <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 p-3">
-               <span className="mb-2 text-sm text-gray-600">VENCIDO ESTA SEMANA</span>
+               <span className="mb-2 text-sm text-gray-600">A VENCER ESSA SEMANA</span>
                <div className="text-3xl font-semibold text-[#17345F]">
                   {totals ? formatCurrency(totals.overdueThisWeek) : 'R$ 0,00'}
                </div>
             </div>
             <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 p-3">
-               <span className="mb-2 text-sm text-gray-600">VENCIDO HOJE</span>
+               <span className="mb-2 text-sm text-gray-600">VENCENDO HOJE</span>
                <div className="text-3xl font-semibold text-[#17345F]">
                   {totals ? formatCurrency(totals.overdueToday) : 'R$ 0,00'}
                </div>

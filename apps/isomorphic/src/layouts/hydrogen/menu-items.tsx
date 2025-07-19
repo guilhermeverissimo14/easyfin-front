@@ -61,11 +61,11 @@ export const menuItems = [
          },
       ],
    },
-   {
-      name: 'Caixa',
-      href: '#',
-      icon: <LuPiggyBank />,
-   },
+   // {
+   //    name: 'Caixa',
+   //    href: '#',
+   //    icon: <LuPiggyBank />,
+   // },
    {
       name: 'Contas Bancárias',
       href: routes.bankAccounts,

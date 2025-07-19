@@ -9,6 +9,7 @@ interface AccountsReceivableTotals {
   receivedThisMonth: number; 
   receivedThisWeek: number;
   receivedToday: number;
+  totalReceivable: number;
 }
 
 export const HeaderInfoDetails = () => {
@@ -54,25 +55,25 @@ export const HeaderInfoDetails = () => {
       <div className="mx-auto mb-4 flex max-w-full items-start rounded-lg bg-[#3D8E7A] py-4 shadow-md">
          <div className="grid w-full grid-cols-1 gap-4 px-4 md:grid-cols-4">
             <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 p-3">
-               <span className="mb-2 text-sm text-gray-600">TOTAL RECEBIDO</span>
+               <span className="mb-2 text-sm text-gray-600">TOTAL A RECEBER</span>
                <div className="text-3xl font-semibold text-[#17345F]">
-                  {totals ? formatCurrency(totals.totalReceived) : 'R$ 0,00'}
+                  {totals ? formatCurrency(totals.totalReceivable) : 'R$ 0,00'}
                </div>
             </div>
             <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 p-3">
-               <span className="mb-2 text-sm text-gray-600">RECEBIDO ESTE MÊS</span>
+               <span className="mb-2 text-sm text-gray-600">A RECEBER ESSE MÊS</span>
                <div className="text-3xl font-semibold text-[#17345F]">
                   {totals ? formatCurrency(totals.receivedThisMonth) : 'R$ 0,00'}
                </div>
             </div>
             <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 p-3">
-               <span className="mb-2 text-sm text-gray-600">RECEBIDO ESTA SEMANA</span>
+               <span className="mb-2 text-sm text-gray-600">A RECEBER ESSA SEMANA</span>
                <div className="text-3xl font-semibold text-[#17345F]">
                   {totals ? formatCurrency(totals.receivedThisWeek) : 'R$ 0,00'}
                </div>
             </div>
             <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 p-3">
-               <span className="mb-2 text-sm text-gray-600">RECEBIDO HOJE</span>
+               <span className="mb-2 text-sm text-gray-600">A RECEBER HOJE</span>
                <div className="text-3xl font-semibold text-[#17345F]">
                   {totals ? formatCurrency(totals.receivedToday) : 'R$ 0,00'}
                </div>
