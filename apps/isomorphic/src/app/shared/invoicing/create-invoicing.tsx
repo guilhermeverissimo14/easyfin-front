@@ -134,6 +134,7 @@ export const CreateInvoice = ({ getInvoices }: CreateInvoiceProps) => {
             bankAccountId: data.bankAccountId || undefined,
             costCenterId: data.costCenterId || undefined,
             notes: data.notes || undefined,
+            retainsIss: selectedCustomerRetIss,
          };
 
          await api.post('/invoices', payload);

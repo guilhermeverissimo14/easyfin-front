@@ -22,9 +22,9 @@ export default function Sidebar({ className }: { className?: string }) {
          <div className="custom-scrollbar h-[calc(100%-80px)] overflow-y-auto">
             <SidebarMenu />
 
-            <div className="absolute bottom-0 start-0 h-20 w-full bg-gradient-to-t from-white to-transparent dark:from-gray-100/50 dark:to-transparent">
+            {/* <div className="absolute bottom-0 start-0 h-20 w-full bg-gradient-to-t from-white to-transparent dark:from-gray-100/50 dark:to-transparent">
                <div className="flex h-full items-center justify-center">Versão 1.0.0</div>
-            </div>
+            </div> */}
          </div>
       </aside>
    );
