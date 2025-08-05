@@ -59,12 +59,13 @@ export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId,
             })
 
             setBankAccounts([{
-               label: `${filterAccountSelected[0].bank} - Agência ${filterAccountSelected[0].agency} - CC ${filterAccountSelected[0].account}`,
-               value: filterAccountSelected[0].id,
+               label: `${filterAccountSelected[0]?.bank} - Agência ${filterAccountSelected[0]?.agency} - CC ${filterAccountSelected[0]?.account}`,
+               value: filterAccountSelected[0]?.id,
                details: filterAccountSelected[0]
             }]);
 
             const costCentersResponse = await api.get('/cost-centers');
+            console.log('Cost Centers:', costCentersResponse.data);
             setCostCenters(costCentersResponse.data.map((center: any) => ({
                label: center.name,
                value: center.id
