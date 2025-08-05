@@ -65,7 +65,6 @@ export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId,
             }]);
 
             const costCentersResponse = await api.get('/cost-centers');
-            console.log('Cost Centers:', costCentersResponse.data);
             setCostCenters(costCentersResponse.data.map((center: any) => ({
                label: center.name,
                value: center.id
