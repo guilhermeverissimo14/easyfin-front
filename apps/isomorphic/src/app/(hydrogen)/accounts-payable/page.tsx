@@ -20,6 +20,7 @@ export default function AccountsPayable() {
   const [data, setData] = useState<IAccountsPayable[]>([]);
   const [loading, setLoading] = useState(true);
   const [filterParams, setFilterParams] = useState<FilterParams>({});
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   const { openModal } = useModal();
 
@@ -85,6 +86,7 @@ export default function AccountsPayable() {
       if (newFilters) {
         setFilterParams(newFilters);
       }
+       setRefreshTrigger(prev => prev + 1);
     } catch (error) {
       console.error('Erro ao buscar contas a pagar:', error);
       toast.error('Não foi possível carregar as contas a pagar');
@@ -132,7 +134,7 @@ export default function AccountsPayable() {
         icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
         iconFilter={<MdOutlineManageSearch className="me-1.5 h-[17px] w-[17px]" />}
       >
-        <HeaderInfoDetails />
+        <HeaderInfoDetails refreshTrigger={refreshTrigger} />
         <TableComponent
           title=""
           column={ListAccountsPayableColumn(getData)}

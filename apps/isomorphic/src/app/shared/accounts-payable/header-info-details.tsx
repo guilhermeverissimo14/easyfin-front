@@ -12,7 +12,12 @@ interface AccountsPayableTotals {
   totalPayable: number;
 }
 
-export const HeaderInfoDetails = () => {
+interface HeaderInfoDetailsProps {
+  refreshTrigger?: number; 
+}
+
+
+export const HeaderInfoDetails = ({ refreshTrigger }: HeaderInfoDetailsProps) => {
    const [totals, setTotals] = useState<AccountsPayableTotals | null>(null);
    const [loading, setLoading] = useState(true);
    const [error, setError] = useState<string | null>(null);
@@ -34,7 +39,7 @@ export const HeaderInfoDetails = () => {
       };
 
       fetchTotals();
-   }, []);
+   }, [refreshTrigger]);
 
    if (loading) {
       return (
