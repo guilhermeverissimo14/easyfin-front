@@ -60,7 +60,7 @@ export function CustomTooltip({
             />
             <Text>
               <Text as="span" className="capitalize">
-                Hectares trabalhadas:
+                {addSpacesToCamelCase(item.dataKey)}:
               </Text>{" "}
               <Text
                 as="span"
