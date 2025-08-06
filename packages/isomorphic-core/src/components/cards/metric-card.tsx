@@ -4,12 +4,12 @@ import { Text } from 'rizzui';
 import cn from '../../utils/class-names';
 
 const metricCardClasses = {
-  base: 'border border-muted bg-gray-0 p-5 dark:bg-gray-50 lg:p-6',
+  base: 'relative overflow-hidden border border-gray-200/60 bg-gradient-to-br from-white to-gray-50/30 p-5 shadow-sm transition-all duration-300 hover:shadow-lg hover:shadow-gray-200/40 hover:-translate-y-1 dark:from-gray-50 dark:to-gray-100/30 dark:border-gray-300/40 lg:p-6 backdrop-blur-sm',
   rounded: {
     sm: 'rounded-sm',
-    DEFAULT: 'rounded-lg',
-    lg: 'rounded-xl',
-    xl: 'rounded-2xl',
+    DEFAULT: 'rounded-xl',
+    lg: 'rounded-2xl',
+    xl: 'rounded-3xl',
   },
 };
 
@@ -51,12 +51,16 @@ export default function MetricCard({
         className
       )}
     >
-      <div className="flex items-center justify-between">
+      {/* Decorative background element */}
+      <div className="absolute -right-4 -top-4 h-24 w-24 rounded-full bg-gradient-to-br from-blue-100/20 to-purple-100/20 blur-2xl" />
+      <div className="absolute -bottom-6 -left-6 h-20 w-20 rounded-full bg-gradient-to-tr from-green-100/20 to-blue-100/20 blur-xl" />
+      
+      <div className="relative flex items-center justify-between">
         <div className="flex items-center">
           {icon ? (
             <div
               className={cn(
-                'flex h-11 w-11 items-center justify-center rounded-lg bg-gray-100 lg:h-12 lg:w-12',
+                'flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-white to-gray-50 shadow-sm border border-gray-200/50 transition-all duration-300 hover:shadow-md hover:scale-105 lg:h-12 lg:w-12',
                 iconClassName
               )}
             >
