@@ -62,19 +62,32 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
       setLoading(true);
 
       try {
-
          const unmaskedFine = data.fine
-            ? parseFloat(data.fine.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
+            ? parseFloat(
+                 data.fine
+                    .replace(/[^\d,.-]/g, '')
+                    .replace('.', '')
+                    .replace(',', '.')
+              )
             : 0;
 
          const unmaskedInterest = data.interest
-            ? parseFloat(data.interest.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
+            ? parseFloat(
+                 data.interest
+                    .replace(/[^\d,.-]/g, '')
+                    .replace('.', '')
+                    .replace(',', '.')
+              )
             : 0;
 
          const unmaskedDiscount = data.discount
-            ? parseFloat(data.discount.replace(/[^\d,.-]/g, '').replace('.', '').replace(',', '.'))
+            ? parseFloat(
+                 data.discount
+                    .replace(/[^\d,.-]/g, '')
+                    .replace('.', '')
+                    .replace(',', '.')
+              )
             : 0;
-
 
          const payload = {
             fine: unmaskedFine,
@@ -82,19 +95,17 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
             discount: unmaskedDiscount,
             observation: data.observation || '',
             paymentMethodId: data.paymentMethodId,
-            paymentDate: data.paymentDate ? data.paymentDate.toISOString() : new Date().toISOString(),
+            receiptDate: data.paymentDate ? data.paymentDate.toISOString() : new Date().toISOString(),
             costCenterId: data.costCenterId || '',
             bankAccountId: data.bankAccountId || '',
          };
 
          await api.post(`/accounts-receivable/${account.id}/receive`, payload);
 
-
          toast.success('Recebimento registrado com sucesso!');
          getAccounts();
          closeModal();
       } catch (error: any) {
-
          console.error('Erro ao receber conta:', error);
          const errorMessage = error.response?.data?.message || 'Não foi possível registrar o recebimento';
          toast.error(errorMessage);
@@ -108,29 +119,34 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
          try {
             // Fetch cost centers
             const costCentersResponse = await api.get('/cost-centers');
-            setCostCenters(costCentersResponse.data.map((center: any) => ({
-               label: center.name,
-               value: center.id
-            })));
+            setCostCenters(
+               costCentersResponse.data.map((center: any) => ({
+                  label: center.name,
+                  value: center.id,
+               }))
+            );
 
             // Fetch payment methods
             const paymentMethodsResponse = await api.get('/payment-methods');
-            setPaymentMethods(paymentMethodsResponse.data.map((method: any) => ({
-               label: method.name,
-               value: method.id,
-               requiresBank: method.requiresBank
-            })));
+            setPaymentMethods(
+               paymentMethodsResponse.data.map((method: any) => ({
+                  label: method.name,
+                  value: method.id,
+                  requiresBank: method.requiresBank,
+               }))
+            );
 
             // Fetch bank accounts
             const bankAccountsResponse = await api.get('/bank-accounts');
-            setBankAccounts(bankAccountsResponse.data.map((bank: any) => ({
-               label: `${bank.bank} - Agência ${bank.agency} - CC ${bank.account}`,
-               value: bank.id
-            })));
-
+            setBankAccounts(
+               bankAccountsResponse.data.map((bank: any) => ({
+                  label: `${bank.bank} - Agência ${bank.agency} - CC ${bank.account}`,
+                  value: bank.id,
+               }))
+            );
          } catch (error) {
-            console.error("Erro ao carregar dados:", error);
-            toast.error("Erro ao carregar dados necessários");
+            console.error('Erro ao carregar dados:', error);
+            toast.error('Erro ao carregar dados necessários');
          }
       };
 
@@ -358,7 +374,6 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
                />
             </div>
          )}
-
 
          <div className="md:col-span-3">
             <Button disabled={loading} className="w-full" type="submit" size="lg">
