@@ -12,7 +12,7 @@ import { api } from '@/service/api';
 import { useModal } from '../modal-views/use-modal';
 import { InputField } from '@/components/input/input-field';
 import { SelectField } from '@/components/input/select-field';
-import { adjustToBrazilTimezone, moneyMask } from '@/utils/format';
+import { adjustToBrazilTimezone, formatCurrency, moneyMask } from '@/utils/format';
 import { DatePicker } from '@core/ui/datepicker';
 import { OptionsSelect, IInvoice } from '@/types';
 
@@ -109,7 +109,7 @@ export const EditInvoice = ({ getInvoices, invoice }: EditInvoiceProps) => {
          customerId: invoice.customer.id || '',
          paymentConditionId: invoice.paymentCondition.id || '',
          issueDate: invoice.issueDate ? new Date(invoice.issueDate) : new Date(),
-         serviceValue: invoice.serviceValue ? moneyMask(invoice.serviceValue.toString()) : '',
+         serviceValue: invoice.serviceValue ? formatCurrency(invoice.serviceValue) : '',
          bankAccountId: invoice.bankAccount?.id || '',
          costCenterId: invoice.costCenter.id || '',
          notes: invoice.notes || '',
