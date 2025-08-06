@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Fragment } from 'react';
+import { Fragment, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { Title } from 'rizzui/typography';
 import { Collapse } from 'rizzui/collapse';
@@ -14,6 +14,7 @@ import { LocalUser } from '@/types';
 export function SidebarMenu() {
    const pathname = usePathname();
    const user = localStorage.getItem('eas:user');
+   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
 
    const parsedUser: LocalUser | null = user ? (JSON.parse(user) as LocalUser) : null;
 
@@ -26,12 +27,31 @@ export function SidebarMenu() {
       itemsToRender = menuItems;
    }
 
+   // Set initial open dropdown based on current pathname
+   useEffect(() => {
+      const activeDropdown = itemsToRender.find(item => 
+         item?.dropdownItems?.some(dropdownItem => dropdownItem.href === pathname)
+      );
+      if (activeDropdown) {
+         setOpenDropdown(activeDropdown.name);
+      }
+   }, [pathname, itemsToRender]);
+
+   const handleDropdownToggle = (itemName: string, currentOpen: boolean) => {
+      if (currentOpen) {
+         setOpenDropdown(null); // Close if already open
+      } else {
+         setOpenDropdown(itemName); // Open this one and close others
+      }
+   };
+
    return (
       <div className="mt-4 pb-3 3xl:mt-6">
          {itemsToRender.map((item, index) => {
             const isActive = pathname === (item?.href as string);
             const pathnameExistInDropdowns: any = item?.dropdownItems?.filter((dropdownItem) => dropdownItem.href === pathname);
             const isDropdownOpen = Boolean(pathnameExistInDropdowns?.length);
+            const isCurrentlyOpen = openDropdown === item.name;
 
             return (
                <Fragment key={item.name + '-' + index}>
@@ -39,13 +59,16 @@ export function SidebarMenu() {
                      <>
                         {item?.dropdownItems ? (
                            <Collapse
-                              defaultOpen={isDropdownOpen}
+                              key={`${item.name}-${isCurrentlyOpen}`}
+                              defaultOpen={isCurrentlyOpen}
                               header={({ open, toggle }) => (
                                  <div
-                                    onClick={toggle}
+                                    onClick={() => {
+                                       handleDropdownToggle(item.name, open || false);
+                                    }}
                                     className={cn(
                                        'group relative mx-3 flex cursor-pointer items-center justify-between rounded-md px-3 py-2 font-medium lg:my-1 2xl:mx-5 2xl:my-2',
-                                       isDropdownOpen
+                                       isDropdownOpen || isCurrentlyOpen
                                           ? 'before:top-2/5 text-primary before:absolute before:-start-3 before:block before:h-4/5 before:w-1 before:rounded-ee-md before:rounded-se-md before:bg-primary 2xl:before:-start-5'
                                           : 'text-gray-700 transition-colors duration-200 hover:bg-gray-100 dark:text-gray-700/90 dark:hover:text-gray-700'
                                     )}

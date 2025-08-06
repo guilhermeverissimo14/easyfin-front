@@ -81,13 +81,13 @@ export default function CashInBank({ className }: { className?: string }) {
       }
       className={cn('min-h-[28rem]', className)}
     >
-      <div className="mb-4 mt-1 flex items-center gap-2">
-        <Title as="h2" className="font-semibold">
+      <div className="mb-4 mt-1 flex items-center gap-3">
+        <Title as="h2" className="bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent font-bold text-2xl">
           $750.45k
         </Title>
-        <span className="flex items-center gap-1 text-green-dark">
-          <TrendingUpIcon className="h-auto w-5" />
-          <span className="font-medium leading-none"> +32.40%</span>
+        <span className="flex items-center gap-1.5 rounded-full bg-gradient-to-r from-green-50 to-emerald-50 px-3 py-1.5 border border-green-200/60 shadow-sm">
+          <TrendingUpIcon className="h-auto w-4 text-green-600" />
+          <span className="font-semibold text-green-700 text-sm"> +32.40%</span>
         </span>
       </div>
       <div className='custom-scrollbar overflow-x-auto scroll-smooth'>

@@ -6,7 +6,7 @@ import { CustomTooltip } from '@core/components/charts/custom-tooltip';
 import DropdownAction from '@core/components/charts/dropdown-action';
 import { useMedia } from '@core/hooks/use-media';
 import useApi from '@/hooks/useApi';
-import { Bar, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis, YAxis, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
+import { Bar, CartesianGrid, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
 import { formatCurrency } from '@/utils/format';
 
 interface ChartDataPoint {
@@ -37,26 +37,26 @@ interface DashboardChartsData {
 // Mock data matching API structure
 const mockData: DashboardChartsData = {
    accountsPayableChart: [
-      { label: 'ago. de 2025', value: 2000, date: '2025-08-05T11:41:58.000Z' },
-      { label: 'ago. de 2025', value: 1400, date: '2025-08-05T17:51:57.942Z' },
+      { label: 'ago. de 2025', value: 0, date: '2025-08-05T11:41:58.000Z' },
+      { label: 'ago. de 2025', value: 0, date: '2025-08-05T17:51:57.942Z' },
    ],
    accountsReceivableChart: [{ label: 'ago. de 2025', value: 500, date: '2025-08-05T18:25:52.000Z' }],
    cashFlowChart: [
-      { label: 'ago. de 2025 - Saída', value: 200, date: '2025-08-04T21:18:41.825Z' },
-      { label: 'ago. de 2025 - Saída', value: 2000, date: '2025-08-04T21:49:03.372Z' },
-      { label: 'ago. de 2025 - Entrada', value: 1500, date: '2025-08-05T00:48:39.161Z' },
+      { label: 'ago. de 2025 - Saída', value: 0, date: '2025-08-04T21:18:41.825Z' },
+      { label: 'ago. de 2025 - Saída', value: 0, date: '2025-08-04T21:49:03.372Z' },
+      { label: 'ago. de 2025 - Entrada', value: 0, date: '2025-08-05T00:48:39.161Z' },
    ],
    monthlyComparisonChart: {
       revenue: [
          { label: 'jul. de 2025', value: 0, date: '2025-07-05T06:00:00.000Z' },
-         { label: 'jul. de 2025', value: 333.33, date: '2025-07-22T00:55:14.940Z' },
-         { label: 'ago. de 2025', value: 1500, date: '2025-08-05T00:48:39.161Z' },
+         { label: 'jul. de 2025', value: 0, date: '2025-07-22T00:55:14.940Z' },
+         { label: 'ago. de 2025', value: 0, date: '2025-08-05T00:48:39.161Z' },
       ],
       expenses: [
-         { label: 'jul. de 2025', value: 300, date: '2025-07-21T21:56:24.742Z' },
-         { label: 'jul. de 2025', value: 500, date: '2025-07-27T22:06:15.000Z' },
-         { label: 'ago. de 2025', value: 200, date: '2025-08-04T21:18:41.825Z' },
-         { label: 'ago. de 2025', value: 2000, date: '2025-08-04T21:49:03.372Z' },
+         { label: 'jul. de 2025', value: 0, date: '2025-07-21T21:56:24.742Z' },
+         { label: 'jul. de 2025', value: 0, date: '2025-07-27T22:06:15.000Z' },
+         { label: 'ago. de 2025', value: 0, date: '2025-08-04T21:18:41.825Z' },
+         { label: 'ago. de 2025', value: 0, date: '2025-08-04T21:49:03.372Z' },
       ],
    },
    paymentStatusChart: {
@@ -71,6 +71,7 @@ const mockData: DashboardChartsData = {
 };
 
 const COLORS = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6'];
+const COLORS_PAYMENT_STATUS = ['#10B981', '#F59E0B', '#EF4444'];
 
 const viewOptions = [
    { value: 'monthly', label: 'Mensal' },
@@ -126,7 +127,7 @@ export default function DashboardCharts() {
          {/* Revenue vs Expenses Chart */}
          <WidgetCard
             title="Receita vs Despesas"
-            titleClassName="text-gray-700 font-normal sm:text-sm font-inter"
+            titleClassName="text-gray-700 font-bold font-inter"
             headerClassName="items-center"
             action={<DropdownAction className="rounded-md border" options={viewOptions} onChange={handleChange} dropdownClassName="!z-0" />}
             className="col-span-full lg:col-span-1"
@@ -158,7 +159,7 @@ export default function DashboardCharts() {
          {/* Cash Flow Chart */}
          <WidgetCard
             title="Fluxo de Caixa"
-            titleClassName="text-gray-700 font-normal sm:text-sm font-inter"
+            titleClassName="text-gray-700 font-bold font-inter"
             headerClassName="items-center"
             className="col-span-full lg:col-span-1"
          >
@@ -199,9 +200,9 @@ export default function DashboardCharts() {
          {/* Expenses by Category */}
          <WidgetCard
             title="Status de Pagamentos"
-            titleClassName="text-gray-700 font-normal sm:text-sm font-inter"
+            titleClassName="text-gray-700 font-bold font-inter"
             headerClassName="items-center"
-            className="col-span-full"
+            className="col-span"
          >
             <div className="mt-5 flex flex-col gap-6 lg:mt-7">
                <div className="flex flex-col gap-6 lg:flex-row">
@@ -210,7 +211,7 @@ export default function DashboardCharts() {
                         <PieChart>
                            <Pie data={paymentStatusData} cx="50%" cy="50%" innerRadius={60} outerRadius={120} paddingAngle={2} dataKey="value">
                               {paymentStatusData.map((entry, index) => (
-                                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                 <Cell key={`cell-${index}`} fill={COLORS_PAYMENT_STATUS[index % COLORS_PAYMENT_STATUS.length]} />
                               ))}
                            </Pie>
                            <Tooltip
@@ -235,7 +236,10 @@ export default function DashboardCharts() {
                      {paymentStatusData.map((item, index) => (
                         <div key={item.name} className="flex items-center justify-between">
                            <div className="flex items-center gap-3">
-                              <div className="h-3 w-3 rounded-full" style={{ backgroundColor: COLORS[index % COLORS.length] }} />
+                              <div
+                                 className="h-3 w-3 rounded-full"
+                                 style={{ backgroundColor: COLORS_PAYMENT_STATUS[index % COLORS_PAYMENT_STATUS.length] }}
+                              />
                               <span className="text-sm font-medium text-gray-700">{item.name}</span>
                            </div>
                            <div className="text-right">
@@ -251,9 +255,9 @@ export default function DashboardCharts() {
          {/* Top Cost Centers */}
          <WidgetCard
             title="Principais Centros de Custo"
-            titleClassName="text-gray-700 font-normal sm:text-sm font-inter"
+            titleClassName="text-gray-700 font-bold font-inter"
             headerClassName="items-center"
-            className="col-span-full"
+            className="col-span"
          >
             <div className="mt-5 aspect-[1060/400] w-full lg:mt-7">
                <ResponsiveContainer width="100%" height="100%">
