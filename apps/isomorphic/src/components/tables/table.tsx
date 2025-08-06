@@ -18,6 +18,7 @@ export default function TableComponent({
    column,
    title = '',
    loading = false,
+   customFilters,
 }: {
    searchAble: boolean;
    variant?: TableVariantProps;
@@ -27,6 +28,7 @@ export default function TableComponent({
    column: any;
    title: string;
    loading: boolean;
+   customFilters?: React.ReactNode;
 }) {
    const getList = async () => {
       setData(data);
@@ -53,23 +55,30 @@ export default function TableComponent({
    return (
       <>
          {tableHeader && (
-            <Flex direction="col" justify="between" className="mb-4 xs:flex-row xs:items-center">
-               <Title as="h3" className="text-lg font-semibold text-gray-800">
-                  {title}
-               </Title>
-               {searchAble && (
-                  <Input
-                     type="search"
-                     clearable={true}
-                     placeholder="Pesquisar..."
-                     onClear={() => table.setGlobalFilter('')}
-                     value={table.getState().globalFilter ?? ''}
-                     prefix={<PiMagnifyingGlassBold className="size-4" />}
-                     onChange={(e) => table.setGlobalFilter(e.target.value)}
-                     className="w-full xs:max-w-60"
-                  />
+            <div className="mb-4">
+               <Flex direction="col" justify="between" className="mb-4 xs:flex-row xs:items-center">
+                  <Title as="h3" className="text-lg font-semibold text-gray-800">
+                     {title}
+                  </Title>
+                  {searchAble && (
+                     <Input
+                        type="search"
+                        clearable={true}
+                        placeholder="Pesquisar..."
+                        onClear={() => table.setGlobalFilter('')}
+                        value={table.getState().globalFilter ?? ''}
+                        prefix={<PiMagnifyingGlassBold className="size-4" />}
+                        onChange={(e) => table.setGlobalFilter(e.target.value)}
+                        className="w-full xs:max-w-60"
+                     />
+                  )}
+               </Flex>
+               {customFilters && (
+                  <div className="border-t pt-4">
+                     {customFilters}
+                  </div>
                )}
-            </Flex>
+            </div>
          )}
          {loading ? (
             <SkeletonLoader />

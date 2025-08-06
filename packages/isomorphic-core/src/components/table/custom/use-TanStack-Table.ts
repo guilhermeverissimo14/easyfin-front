@@ -25,6 +25,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   useReactTable,
+  filterFns,
 } from "@tanstack/react-table";
 import React from "react";
 
@@ -85,6 +86,35 @@ export function useTanStackTable<T extends Record<string, any>>({
   // these are custom functions dependent on dnd kit and react-table to handle Drag and Drop events
   // =================================================================================================
 
+  // Custom global filter function that includes formatted date fields
+  const customGlobalFilterFn = React.useCallback((row: any, columnId: string, value: string) => {
+    const searchValue = value.toLowerCase();
+    
+    // Get all cell values from the row
+    const cellValues = Object.values(row.original).map((cellValue: any) => {
+      if (cellValue === null || cellValue === undefined) return '';
+      
+      // Handle date fields - check if it's a date string and format it
+      if (typeof cellValue === 'string' && /^\d{4}-\d{2}-\d{2}/.test(cellValue)) {
+        try {
+          const date = new Date(cellValue);
+          // Format as dd/MM/yyyy for Brazilian format
+          const formattedDate = date.toLocaleDateString('pt-BR');
+          return formattedDate;
+        } catch {
+          return String(cellValue);
+        }
+      }
+      
+      return String(cellValue);
+    });
+    
+    // Search in all formatted values
+    return cellValues.some(value => 
+      value.toLowerCase().includes(searchValue)
+    );
+  }, []);
+
   const table = useReactTable({
     data,
     columns,
@@ -104,6 +134,7 @@ export function useTanStackTable<T extends Record<string, any>>({
     onColumnOrderChange: setColumnOrder,
     onGlobalFilterChange: setGlobalFilter,
     onColumnFiltersChange: setColumnFilters,
+    globalFilterFn: customGlobalFilterFn,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),

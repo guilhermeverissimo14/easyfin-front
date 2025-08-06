@@ -14,9 +14,12 @@ import { RegisterTransaction } from '@/app/shared/cash-book/register-transaction
 import { toast } from 'react-toastify';
 import { apiCall } from '@/helpers/apiHelper';
 import ImportExtractModal from '@/components/import-button/import-button';
+import { FilterCashBook } from '@/app/shared/cash-book/filter-cash-book';
+import { format } from 'date-fns';
 
 export default function CashBook() {
    const [transactions, setTransactions] = useState<ICashBook[]>([]);
+   const [filteredTransactions, setFilteredTransactions] = useState<ICashBook[]>([]);
    const [loading, setLoading] = useState(true);
    const [settings, setSettings] = useState({
       cashFlowDefault: '',
@@ -28,6 +31,7 @@ export default function CashBook() {
       agency: '',
       account: '',
    });
+   const [dateFilter, setDateFilter] = useState<{ startDate?: Date; endDate?: Date }>({});
 
    const { openModal } = useModal();
    const headerInfoRef = useRef<HeaderInfoDetailsRef>(null);
@@ -119,17 +123,50 @@ export default function CashBook() {
             }));
 
             setTransactions(formattedData);
+            setFilteredTransactions(formattedData);
          } else {
             setTransactions([]);
+            setFilteredTransactions([]);
          }
          headerInfoRef.current?.fetchTotals();
       } catch (error) {
          console.error('Erro ao carregar transações:', error);
          toast.error('Erro ao carregar dados do livro caixa');
          setTransactions([]);
+         setFilteredTransactions([]);
       } finally {
          setLoading(false);
       }
+   };
+
+   const applyDateFilter = (startDate?: Date, endDate?: Date) => {
+      setDateFilter({ startDate, endDate });
+      
+      if (!startDate && !endDate) {
+         setFilteredTransactions(transactions);
+         return;
+      }
+
+      const filtered = transactions.filter((transaction) => {
+         const transactionDate = new Date(transaction.date);
+         
+         if (startDate && endDate) {
+            return transactionDate >= startDate && transactionDate <= endDate;
+         } else if (startDate) {
+            return transactionDate >= startDate;
+         } else if (endDate) {
+            return transactionDate <= endDate;
+         }
+         
+         return true;
+      });
+      
+      setFilteredTransactions(filtered);
+   };
+
+   const clearDateFilter = () => {
+      setDateFilter({});
+      setFilteredTransactions(transactions);
    };
 
    const openImportModal = () => {
@@ -169,7 +206,7 @@ export default function CashBook() {
             openModalImport={openImportModal}
             breadcrumb={pageHeader.breadcrumb}
             title={pageHeader.title}
-            data={transactions}
+            data={filteredTransactions}
             columns={ListCashBookColumn(getTransactions)}
             fileName="livro-caixa"
             header=""
@@ -193,11 +230,17 @@ export default function CashBook() {
                title=""
                column={ListCashBookColumn(getTransactions)}
                variant="classic"
-               data={transactions}
+               data={filteredTransactions}
                tableHeader={true}
                searchAble={true}
                pagination={true}
                loading={loading}
+               customFilters={
+                  <FilterCashBook
+                     onFilter={applyDateFilter}
+                     onClear={clearDateFilter}
+                  />
+               }
             />
          </TableLayout>
       </div>
