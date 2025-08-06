@@ -69,7 +69,7 @@ export const HeaderInfoDetails = ({ refreshTrigger }: HeaderInfoDetailsProps) =>
                <span className="mb-2 text-sm text-gray-600">TOTAL VENCIDO A RECEBER</span>
                <div className="text-3xl font-semibold text-[#17345F]">
                   {totals ? formatCurrency(totals.totalDueReceivable || 0) : 'R$ 0,00'}
-               </div>
+               </div> 
             </div>
             <div className="flex flex-col items-center justify-center rounded-lg bg-gray-50 p-3">
                <span className="mb-2 text-sm text-gray-600">A RECEBER ESSE MÊS</span>
