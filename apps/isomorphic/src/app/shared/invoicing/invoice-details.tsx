@@ -124,7 +124,7 @@ export const InvoiceDetails = ({ id }: InvoiceDetailsProps) => {
             <div>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Taxa Efetiva</span>
-                  <span className="p-1">{formatCurrency(invoice.effectiveTaxRate)}</span>
+                  <span className="p-1">{invoice?.effectiveTaxRate?.toFixed(2) || 0}%</span>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Imposto Efetivo</span>
