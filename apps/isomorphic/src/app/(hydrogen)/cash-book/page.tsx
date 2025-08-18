@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef, useState } from 'react';
 import { PiPlusBold, PiDownloadSimpleBold } from 'react-icons/pi';
+import { MdOutlineManageSearch } from 'react-icons/md';
 
 import TableComponent from '@/components/tables/table';
 import ModalForm from '@/components/modal/modal-form';
@@ -14,16 +15,43 @@ import { RegisterTransaction } from '@/app/shared/cash-book/register-transaction
 import { toast } from 'react-toastify';
 import { apiCall } from '@/helpers/apiHelper';
 import ImportExtractModal from '@/components/import-button/import-button';
-import { FilterCashBook } from '@/app/shared/cash-book/filter-cash-book';
-import { format } from 'date-fns';
+import { TablePagination } from '@/components/tables/table-pagination';
+import { FilterCashBookAdvanced } from '@/app/shared/cash-book/filter-cash-book-advanced';
+
+
+
+export interface CashBookFilterParams {
+   page?: number;
+   limit?: number;
+   type?: string;
+   description?: string;
+   history?: string;
+   costCenterId?: string;
+   dateStart?: string;
+   dateEnd?: string;
+   valueMin?: string;
+   valueMax?: string;
+   cashId?: string;
+   bankAccountId?: string;
+}
+
+interface PaginationInfo {
+   page: number;
+   limit: number;
+   totalCount: number;
+   totalPages: number;
+   hasNextPage: boolean;
+   hasPreviousPage: boolean;
+}
+
 
 export default function CashBook() {
    const [transactions, setTransactions] = useState<ICashBook[]>([]);
-   const [filteredTransactions, setFilteredTransactions] = useState<ICashBook[]>([]);
    const [loading, setLoading] = useState(true);
    const [settings, setSettings] = useState({
       cashFlowDefault: '',
       bankAccountDefault: '',
+      cashBoxDefault: '',
    });
    const [cashBoxId, setCashBoxId] = useState<string | null>(null);
    const [bankDetails, setBankDetails] = useState({
@@ -31,7 +59,18 @@ export default function CashBook() {
       agency: '',
       account: '',
    });
-   const [dateFilter, setDateFilter] = useState<{ startDate?: Date; endDate?: Date }>({});
+   const [pagination, setPagination] = useState<PaginationInfo>({
+      page: 1,
+      limit: 10,
+      totalCount: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+   });
+   const [filterParams, setFilterParams] = useState<CashBookFilterParams>({
+      page: 1,
+      limit: 10,
+   });
 
    const { openModal } = useModal();
    const headerInfoRef = useRef<HeaderInfoDetailsRef>(null);
@@ -48,6 +87,19 @@ export default function CashBook() {
       ],
    };
 
+   // Função para construir query params
+   const buildQueryParams = (params: CashBookFilterParams): string => {
+      const queryParams = new URLSearchParams();
+      
+      Object.entries(params).forEach(([key, value]) => {
+         if (value !== undefined && value !== null && value !== '') {
+            queryParams.append(key, value.toString());
+         }
+      });
+      
+      return queryParams.toString();
+   };
+
    const fetchSettings = async () => {
       try {
          const response = await apiCall(() => api.get('/settings'));
@@ -60,6 +112,7 @@ export default function CashBook() {
             setSettings({
                cashFlowDefault: response.data.cashFlowDefault || '',
                bankAccountDefault: response.data.bankAccountDefault || '',
+               cashBoxDefault: response.data.cashBoxDefault || '',
             });
             return response.data;
          }
@@ -85,88 +138,143 @@ export default function CashBook() {
       }
    };
 
-   const getTransactions = async () => {
+   const getTransactions = async (newFilters?: CashBookFilterParams) => {
       try {
          setLoading(true);
 
          const currentSettings = await fetchSettings();
          const cashFlowMode = currentSettings?.cashFlowDefault || settings.cashFlowDefault;
          const defaultBankId = currentSettings?.bankAccountDefault || settings.bankAccountDefault;
+         const defaultCashBoxId = currentSettings?.cashBoxDefault || settings.cashBoxDefault;
 
-         if (defaultBankId) {
+         if (defaultBankId && cashFlowMode === 'BANK') {
             fetchBankDetails(defaultBankId);
          }
 
-         let response;
+         const filters = newFilters || filterParams;
+         let response: any = null;
 
          if (cashFlowMode === 'CASH') {
-            response = await api.get('/cash-flow/cash');
-
-            if (response?.data.length === 0) {
-               toast.info('Nenhum lançamento encontrado no livro caixa.');
-               return;
-            } else setCashBoxId(response?.data[0].cashBoxId);
+            const queryParams = buildQueryParams({ 
+               ...filters, 
+               cashId: filters.cashId || cashBoxId || defaultCashBoxId || undefined 
+            });
+            const endpoint = `/cash-flow/cash${queryParams ? `?${queryParams}` : ''}`;
+            response = await apiCall(() => api.get(endpoint));
          } else if (cashFlowMode === 'BANK') {
-            response = await api.get(`/cash-flow/account/${defaultBankId}`);
+            const queryParams = buildQueryParams({ 
+               ...filters, 
+               bankAccountId: filters.bankAccountId || defaultBankId 
+            });
+            const endpoint = `/cash-flow/account/${defaultBankId}${queryParams ? `?${queryParams}` : ''}`;
+            response = await apiCall(() => api.get(endpoint));
          }
 
          if (response?.data) {
-            const formattedData = response.data.map((item: any) => ({
+
+            let dataArray: any[] = [];
+            let paginationInfo: PaginationInfo = {
+               page: 1,
+               limit: 10,
+               totalCount: 0,
+               totalPages: 0,
+               hasNextPage: false,
+               hasPreviousPage: false,
+            };
+
+            if (response.data.data && response.data.pagination) {
+               dataArray = response.data.data;
+               paginationInfo = response.data.pagination;
+            } else if (Array.isArray(response.data)) {
+               dataArray = response.data;
+            }
+
+            if (cashFlowMode === 'CASH') {
+               setCashBoxId(dataArray[0].cashBoxId);
+            }
+
+            if (dataArray.length === 0 && !newFilters) {
+               toast.info('Nenhum lançamento encontrado no livro caixa.');
+            }
+
+            const formattedData = dataArray.map((item: any) => ({
                id: item.id,
                date: item.date,
-               historic: item.historic,
-               value: parseFloat(item.value),
+               history: item.history || "Sem histórico",
+               value: item.value,
                type: item.type === 'CREDIT' ? 'C' : 'D',
                description: item.description || '',
                costCenter: item.costCenter?.name || '',
-               balance: item.balance ? parseFloat(item.balance) : 0,
+               balance: item.balance,
             }));
 
             setTransactions(formattedData);
-            setFilteredTransactions(formattedData);
+            setPagination(paginationInfo);
          } else {
             setTransactions([]);
-            setFilteredTransactions([]);
+            setPagination({
+               page: 1,
+               limit: 10,
+               totalCount: 0,
+               totalPages: 0,
+               hasNextPage: false,
+               hasPreviousPage: false,
+            });
          }
+
+         if (newFilters) {
+            setFilterParams(newFilters);
+         }
+         
          headerInfoRef.current?.fetchTotals();
       } catch (error) {
          console.error('Erro ao carregar transações:', error);
          toast.error('Erro ao carregar dados do livro caixa');
          setTransactions([]);
-         setFilteredTransactions([]);
+         setPagination({
+            page: 1,
+            limit: 10,
+            totalCount: 0,
+            totalPages: 0,
+            hasNextPage: false,
+            hasPreviousPage: false,
+         });
       } finally {
          setLoading(false);
       }
    };
 
-   const applyDateFilter = (startDate?: Date, endDate?: Date) => {
-      setDateFilter({ startDate, endDate });
-      
-      if (!startDate && !endDate) {
-         setFilteredTransactions(transactions);
-         return;
-      }
-
-      const filtered = transactions.filter((transaction) => {
-         const transactionDate = new Date(transaction.date);
-         
-         if (startDate && endDate) {
-            return transactionDate >= startDate && transactionDate <= endDate;
-         } else if (startDate) {
-            return transactionDate >= startDate;
-         } else if (endDate) {
-            return transactionDate <= endDate;
-         }
-         
-         return true;
-      });
-      
-      setFilteredTransactions(filtered);
+   // Função para mudança de página
+   const handlePageChange = (page: number) => {
+      const newFilters = { ...filterParams, page };
+      getTransactions(newFilters);
    };
 
-   const clearDateFilter = () => {
-      setDateFilter({});
-      setFilteredTransactions(transactions);
+   // Função para mudança de limite por página
+   const handleLimitChange = (limit: number) => {
+      const newFilters = { ...filterParams, limit, page: 1 };
+      getTransactions(newFilters);
+   };
+
+   // Função para aplicar filtros
+   const handleFilter = async (filters: CashBookFilterParams) => {
+      const newFilters = { ...filters, page: 1 };
+      await getTransactions(newFilters);
+   };
+
+   const openAdvancedFilterModal = () => {
+      openModal({
+         view: (
+            <ModalForm title="Filtro Avançado - Livro Caixa">
+               <FilterCashBookAdvanced
+                  onFilter={handleFilter}
+                  // cashFlowMode={settings.cashFlowDefault}
+                  currentFilters={filterParams}
+               />
+            </ModalForm>
+         ),
+         size: 'lg',
+      });
    };
 
    const openImportModal = () => {
@@ -182,7 +290,9 @@ export default function CashBook() {
 
    useEffect(() => {
       getTransactions();
-   }, []);
+      fetchSettings();
+      console.log("cashBoxId", cashBoxId);
+   }, [cashBoxId]);
 
    return (
       <div className="mt-8">
@@ -192,10 +302,10 @@ export default function CashBook() {
                   view: (
                      <ModalForm title="Registro de Lançamento">
                         <RegisterTransaction
-                           getCashBook={getTransactions}
+                           getCashBook={() => getTransactions()}
                            bankAccountId={settings.bankAccountDefault}
                            refreshTotals={() => headerInfoRef.current?.fetchTotals()}
-                           cashBookId={cashBoxId ?? undefined}
+                           cashBookId={cashBoxId || settings.cashBoxDefault || undefined}
                            cashFlowMode={settings.cashFlowDefault}
                         />
                      </ModalForm>
@@ -204,18 +314,21 @@ export default function CashBook() {
                })
             }
             openModalImport={openImportModal}
+            openModalFilter={openAdvancedFilterModal}
             breadcrumb={pageHeader.breadcrumb}
             title={pageHeader.title}
-            data={filteredTransactions}
-            columns={ListCashBookColumn(getTransactions)}
+            data={transactions}
+            columns={ListCashBookColumn(() => getTransactions())}
             fileName="livro-caixa"
             header=""
             action="Registrar Lançamento"
             importLabel="Importar Extrato"
+            filter="Filtro Avançado"
             icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             iconImport={<PiDownloadSimpleBold className="me-1.5 h-[17px] w-[17px]" />}
+            iconFilter={<MdOutlineManageSearch className="me-1.5 h-[17px] w-[17px]" />}
          >
-            {(settings.cashFlowDefault === 'BANK' && settings.bankAccountDefault) || (settings.cashFlowDefault === 'CASH' && cashBoxId) ? (
+            {(settings.cashFlowDefault === 'BANK' && settings.bankAccountDefault) || (settings.cashFlowDefault === 'CASH') ? (
                <HeaderInfoDetails
                   ref={headerInfoRef}
                   cashFlowMode={settings.cashFlowDefault}
@@ -228,19 +341,19 @@ export default function CashBook() {
 
             <TableComponent
                title=""
-               column={ListCashBookColumn(getTransactions)}
+               column={ListCashBookColumn(() => getTransactions())}
                variant="classic"
-               data={filteredTransactions}
+               data={transactions}
                tableHeader={true}
                searchAble={true}
-               pagination={true}
+               pagination={false} 
                loading={loading}
-               customFilters={
-                  <FilterCashBook
-                     onFilter={applyDateFilter}
-                     onClear={clearDateFilter}
-                  />
-               }
+            />
+
+            <TablePagination
+               pagination={pagination}
+               onPageChange={handlePageChange}
+               onLimitChange={handleLimitChange}
             />
          </TableLayout>
       </div>

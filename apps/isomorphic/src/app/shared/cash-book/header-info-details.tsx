@@ -3,6 +3,7 @@ import { useEffect, useState, forwardRef, useImperativeHandle } from 'react';
 import Image from 'next/image';
 import { IoCalendarOutline } from 'react-icons/io5';
 import { FaDotCircle } from 'react-icons/fa';
+import { format } from 'date-fns';
 import { CustomTooltip } from '@/components/custom-tooltip';
 import { toast } from 'react-toastify';
 import { api } from '@/service/api';
@@ -44,16 +45,39 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
       const fetchTotals = async () => {
          try {
             setLoading(true);
-            let paramns;
+            const currentDate = format(new Date(), 'yyyy-MM-dd');
+            let params: any = { date: currentDate };
+            
             if (cashFlowMode === 'BANK') {
-               paramns = { bankAccountId: bankAccountId || '' };
+               if (!bankAccountId) {
+                  console.warn('Bank account ID is required for BANK mode');
+                  setTotals(null);
+                  return;
+               }
+               params.bankAccountId = bankAccountId;
             } else if (cashFlowMode === 'CASH') {
-               paramns = { cashId: cashBoxId || '' };
+               // Para modo CASH, tentar usar o cashBoxId se disponível
+               if (cashBoxId) {
+                  params.cashId = cashBoxId;
+               } else {
+                  // Se não tem cashBoxId, tentar buscar das configurações
+                  try {
+                     const settingsResponse = await api.get('/settings');
+                     if (settingsResponse?.data?.cashBoxDefault) {
+                        params.cashId = settingsResponse.data.cashBoxDefault;
+                     }
+                  } catch (error) {
+                     console.warn('Erro ao buscar configurações para cashId:', error);
+                  }
+               }
+            } else {
+               console.warn('Cash flow mode not defined');
+               setTotals(null);
+               return;
             }
+            
             const response = await api.get('/cash-flow/totals-per-day', {
-               params: {
-                  ...paramns,
-               },
+               params,
             });
 
             if (response?.data) { 
@@ -67,6 +91,7 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
                });
             }
          } catch (error) {
+            console.error('Erro ao buscar totais:', error);
             setTotals(null);
          } finally {
             setLoading(false);
@@ -120,8 +145,10 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
       }));
 
       useEffect(() => {
-         fetchTotals();
-      }, [cashFlowMode, bankAccountId]);
+         if (cashFlowMode) {
+            fetchTotals();
+         }
+      }, [cashFlowMode, bankAccountId, cashBoxId]);
 
       return (
          <div className="flex flex-col items-center gap-4 bg-white px-4 py-2 md:flex-row md:justify-between md:gap-0">

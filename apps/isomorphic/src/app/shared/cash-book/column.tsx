@@ -26,17 +26,17 @@ export const ListCashBookColumn = (getList: () => void) => {
          cell: ({ row }) => <span className="font-medium">{formatDate(row.original.date)}</span>,
          dataType: 'date',
       }),
-      columnHelper.accessor('historic', {
-         id: 'historic',
+      columnHelper.accessor('history', {
+         id: 'history',
          size: 180,
          header: 'Histórico',
-         cell: ({ row }) => <span>{row.original.historic}</span>,
+         cell: ({ row }) => <span>{row.original.history}</span>,
       }),
       columnHelper.accessor('value', {
          id: 'value',
          size: 100,
          header: 'Valor',
-         cell: ({ row }) => <span>{formatCurrency(row.original.value)}</span>,
+         cell: ({ row }) => <span>{row.original.value}</span>,
          dataType: 'currency', 
       }),
       columnHelper.accessor('type', {
@@ -61,7 +61,7 @@ export const ListCashBookColumn = (getList: () => void) => {
          id: 'balance',
          size: 120,
          header: 'Saldo',
-         cell: ({ row }) => <span>{formatCurrency(row.original.balance)}</span>,
+         cell: ({ row }) => <span>{row.original.balance}</span>,
          dataType: 'currency',
       }),
    ];

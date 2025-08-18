@@ -48,21 +48,22 @@ export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId,
    useEffect(() => {
       const fetchData = async () => {
          try {
-            const bankAccountsResponse = await api.get('/bank-accounts');
+            // Só buscar contas bancárias se estiver no modo BANK
+            if (cashFlowMode === 'BANK') {
+               const bankAccountsResponse = await api.get('/bank-accounts');
 
-            const filterAccountSelected = bankAccountsResponse.data.filter((account:any) => {
-               if (bankAccountId) {
+               const filterAccountSelected = bankAccountsResponse.data.filter((account:any) => {
                   return account.id === bankAccountId;
-               } else if (cashBookId) {
-                  return account.id === cashBookId;
-               }
-            })
+               });
 
-            setBankAccounts([{
-               label: `${filterAccountSelected[0]?.bank} - Agência ${filterAccountSelected[0]?.agency} - CC ${filterAccountSelected[0]?.account}`,
-               value: filterAccountSelected[0]?.id,
-               details: filterAccountSelected[0]
-            }]);
+               if (filterAccountSelected.length > 0) {
+                  setBankAccounts([{
+                     label: `${filterAccountSelected[0]?.bank} - Agência ${filterAccountSelected[0]?.agency} - CC ${filterAccountSelected[0]?.account}`,
+                     value: filterAccountSelected[0]?.id,
+                     details: filterAccountSelected[0]
+                  }]);
+               }
+            }
 
             const costCentersResponse = await api.get('/cost-centers');
             setCostCenters(costCentersResponse.data.map((center: any) => ({
@@ -76,7 +77,7 @@ export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId,
       };
 
       fetchData();
-   }, []);
+   }, [cashFlowMode, bankAccountId, cashBookId]);
 
    const {
       register,
@@ -153,17 +154,17 @@ export const RegisterTransaction = ({ getCashBook, refreshTotals, bankAccountId,
       <form className="flex w-[100%] flex-col items-center justify-center" onSubmit={handleSubmit(onSubmit)}>
          <div className="w-full space-y-5">
 
-            {bankAccounts && bankAccounts.length > 0 && !cashBookId && (
+            {cashFlowMode === 'BANK' && bankAccounts && bankAccounts.length > 0 && (
                <div className="flex flex-col items-start justify-center space-y-1">
                   <span className="font-bold">Conta bancária selecionada:</span>
                   <span className="font-medium text-gray-700">{bankAccounts[0]?.label}</span>
                </div>
             )}
 
-            {cashBookId && (
+            {cashFlowMode === 'CASH' && (
                <div className="flex flex-col items-start justify-center space-y-1">
-                  <span className="font-bold">Caixa geral</span>
-                  <span className="font-medium text-gray-700">apenas dinheiro</span>
+                  <span className="font-bold">Caixa Geral</span>
+                  <span className="font-medium text-gray-700">Lançamentos em dinheiro</span>
                </div>
             )}
 

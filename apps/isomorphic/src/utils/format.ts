@@ -62,11 +62,28 @@ export const moneyMask = (value: string) => {
    return formattedValue;
 };
 
-export const formatCurrency = (value: number): string => {
+export const formatCurrency = (value: number | string | null | undefined): string => {
+   // Converter string para número se necessário
+   let numValue: number;
+   
+   if (typeof value === 'string') {
+      numValue = parseFloat(value);
+   } else {
+      numValue = value as number;
+   }
+   
+   // Verificar se o valor é um número válido
+   if (isNaN(numValue) || numValue === null || numValue === undefined || !isFinite(numValue)) {
+      return new Intl.NumberFormat('pt-BR', {
+         style: 'currency',
+         currency: 'BRL'
+      }).format(0);
+   }
+   
    return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL'
-   }).format(value);
+   }).format(numValue);
 };
 
 

@@ -275,12 +275,12 @@ export interface Notifications {
 export interface ICashBook {
    id: string;
    date: string;
-   historic: string;
-   value: number;
+   history: string;
+   value: string;
    type: string; // 'C' para crédito, 'D' para débito
    description: string;
    costCenter: string | null;
-   balance: number;
+   balance: string;
    createdAt?: Date;
    updatedAt?: Date;
 }
