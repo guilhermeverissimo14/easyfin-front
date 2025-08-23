@@ -15,6 +15,7 @@ import { SelectField } from '@/components/input/select-field';
 import { adjustToBrazilTimezone, formatCurrency, moneyMask } from '@/utils/format';
 import { DatePicker } from '@core/ui/datepicker';
 import { OptionsSelect, IInvoice } from '@/types';
+import { LoadingSpinner } from '@/components/loading-spinner';
 
 const invoiceSchema = z.object({
    invoiceNumber: z.string().nonempty('Número da fatura não pode ser vazio'),
@@ -34,7 +35,7 @@ type InvoiceFormData = z.infer<typeof invoiceSchema>;
 
 interface EditInvoiceProps {
    getInvoices: () => void;
-   invoice: IInvoice;
+   invoiceId: string;
 }
 
 interface Customer {
@@ -43,24 +44,24 @@ interface Customer {
    retIss: boolean;
 }
 
-export const EditInvoice = ({ getInvoices, invoice }: EditInvoiceProps) => {
+export const EditInvoice = ({ getInvoices, invoiceId }: EditInvoiceProps) => {
    const [loading, setLoading] = useState(false);
+   const [fetchingInvoice, setFetchingInvoice] = useState(true);
    const { closeModal } = useModal();
    const [customers, setCustomers] = useState<OptionsSelect[]>([]);
    const [customersData, setCustomersData] = useState<Customer[]>([]);
    const [paymentConditions, setPaymentConditions] = useState<OptionsSelect[]>([]);
    const [bankAccounts, setBankAccounts] = useState<OptionsSelect[]>([]);
    const [costCenters, setCostCenters] = useState<OptionsSelect[]>([]);
-   const [selectedCustomerRetIss, setSelectedCustomerRetIss] = useState<boolean>(invoice.retainsIss || false);
+   const [selectedCustomerRetIss, setSelectedCustomerRetIss] = useState<boolean>(false);
    const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+   const [invoiceData, setInvoiceData] = useState<IInvoice | null>(null);
 
    useEffect(() => {
       const fetchData = async () => {
          try {
             const customersResponse = await api.get('/customers');
-            
             setCustomersData(customersResponse.data);
-            
             setCustomers(customersResponse.data.map((customer: Customer) => ({
                label: customer.name,
                value: customer.id
@@ -94,6 +95,26 @@ export const EditInvoice = ({ getInvoices, invoice }: EditInvoiceProps) => {
       fetchData();
    }, []);
 
+   useEffect(() => {
+      const fetchInvoice = async () => {
+         try {
+            setFetchingInvoice(true);
+            const response = await api.get(`/invoices/${invoiceId}`);
+            const data = await response.data;
+            setInvoiceData(data as IInvoice);
+         } catch (error) {
+            console.error('Erro ao buscar fatura:', error);
+            toast.error('Erro ao carregar dados da fatura');
+         } finally {
+            setFetchingInvoice(false);
+         }
+      };
+
+      if (invoiceId) {
+         fetchInvoice();
+      }
+   }, [invoiceId]);
+
    const {
       register,
       handleSubmit,
@@ -105,16 +126,35 @@ export const EditInvoice = ({ getInvoices, invoice }: EditInvoiceProps) => {
    } = useForm<InvoiceFormData>({
       resolver: zodResolver(invoiceSchema),
       defaultValues: {
-         invoiceNumber: invoice.invoiceNumber || '',
-         customerId: invoice.customer.id || '',
-         paymentConditionId: invoice.paymentCondition.id || '',
-         issueDate: invoice.issueDate ? new Date(invoice.issueDate) : new Date(),
-         serviceValue: invoice.serviceValue ? formatCurrency(invoice.serviceValue) : '',
-         bankAccountId: invoice.bankAccount?.id || '',
-         costCenterId: invoice.costCenter.id || '',
-         notes: invoice.notes || '',
+         invoiceNumber: '',
+         customerId: '',
+         paymentConditionId: '',
+         issueDate: new Date(),
+         serviceValue: '',
+         bankAccountId: '',
+         costCenterId: '',
+         notes: '',
       }
    });
+
+   // Reset form when invoiceData is loaded
+   useEffect(() => {
+      if (invoiceData) {
+         reset({
+            invoiceNumber: invoiceData.invoiceNumber || '',
+            customerId: invoiceData.customer?.id || '',
+            paymentConditionId: invoiceData.paymentCondition?.id || '',
+            issueDate: invoiceData.issueDate ? new Date(invoiceData.issueDate) : new Date(),
+            serviceValue: invoiceData.serviceValue ? formatCurrency(invoiceData.serviceValue) : '',
+            bankAccountId: invoiceData.bankAccount?.id || '',
+            costCenterId: invoiceData.costCenter?.id || '',
+            notes: invoiceData.notes || '',
+         });
+
+         // set initial retain ISS flag based on fetched invoice
+         setSelectedCustomerRetIss(invoiceData.retainsIss || false);
+      }
+   }, [invoiceData, reset]);
 
    const selectedCustomerId = watch('customerId');
 
@@ -122,23 +162,25 @@ export const EditInvoice = ({ getInvoices, invoice }: EditInvoiceProps) => {
       if (selectedCustomerId && customersData.length > 0 && initialDataLoaded) {
          const selectedCustomer = customersData.find(customer => customer.id === selectedCustomerId);
          if (selectedCustomer) {
-            if (selectedCustomerId !== invoice.customer.id) {
+            if (invoiceData?.customer?.id !== selectedCustomerId) {
                setSelectedCustomerRetIss(selectedCustomer.retIss);
             }
          }
       }
-   }, [selectedCustomerId, customersData, initialDataLoaded, invoice.customer.id]);
+   }, [selectedCustomerId, customersData, initialDataLoaded, invoiceData]);
 
    useEffect(() => {
-      if (invoice.customer.id && customersData.length > 0 && !initialDataLoaded) {
-         const originalCustomer = customersData.find(customer => customer.id === invoice.customer.id);
+      if (invoiceData?.customer?.id && customersData.length > 0 && !initialDataLoaded) {
+         const originalCustomer = customersData.find(customer => customer.id === invoiceData.customer.id);
          if (originalCustomer) {
             setSelectedCustomerRetIss(originalCustomer.retIss);
          }
       }
-   }, [invoice.customer.id, customersData, initialDataLoaded]);
+   }, [invoiceData?.customer?.id, customersData, initialDataLoaded]);
 
    const onSubmit = async (data: InvoiceFormData) => {
+      if (!invoiceData) return;
+
       setLoading(true);
 
       try {
@@ -153,13 +195,13 @@ export const EditInvoice = ({ getInvoices, invoice }: EditInvoiceProps) => {
             paymentConditionId: data.paymentConditionId,
             issueDate: adjustToBrazilTimezone(data.issueDate),
             serviceValue: Number(unmaskedServiceValue),
-            retainsIss: selectedCustomerRetIss, 
+            retainsIss: selectedCustomerRetIss,
             bankAccountId: data.bankAccountId || undefined,
             costCenterId: data.costCenterId || undefined,
             notes: data.notes || undefined,
          };
 
-         await api.put(`/invoices/${invoice.id}`, payload);
+         await api.put(`/invoices/${invoiceData.id}`, payload);
 
          toast.success('Fatura atualizada com sucesso!');
          getInvoices();
@@ -172,6 +214,18 @@ export const EditInvoice = ({ getInvoices, invoice }: EditInvoiceProps) => {
          setLoading(false);
       }
    };
+
+   if (fetchingInvoice) {
+      return (
+         <div className="flex h-full w-full items-center justify-center p-10">
+            <LoadingSpinner />
+         </div>
+      );
+   }
+
+   if (!invoiceData) {
+      return <div className="p-4 text-gray-500">Nota fiscal não encontrada</div>;
+   }
 
    return (
       <form className="flex w-[100%] flex-col items-center justify-center" onSubmit={handleSubmit(onSubmit)}>
