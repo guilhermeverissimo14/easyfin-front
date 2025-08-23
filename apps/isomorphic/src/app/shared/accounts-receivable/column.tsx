@@ -5,6 +5,7 @@ import { api } from '@/service/api';
 import { IAccountsReceivable } from '@/types';
 import { formatCurrency, formatDate, moneyMask } from '@/utils/format';
 import { GiTakeMyMoney } from 'react-icons/gi';
+import { FiRotateCcw } from 'react-icons/fi';
 import { Tooltip } from 'rizzui/tooltip';
 import { Button } from 'rizzui/button';
 import { ActionIcon } from 'rizzui/action-icon';
@@ -16,6 +17,10 @@ import { SettleAccountReceivable } from './settle-account-receivable';
 import { AccountReceivableDetails } from './account-receivable-details';
 import { EditAccountReceivable } from './edit-account-receivable';
 import TableRowActionGroup from '@core/components/table-utils/table-row-action-group';
+import { useState } from 'react';
+import { toast } from 'react-toastify';
+import { useForm } from 'react-hook-form';
+import { InputField } from '@/components/input/input-field';
 
 type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
    dataType?: 'date' | 'currency' | string
@@ -32,6 +37,55 @@ const columnHelper = createColumnHelper<IAccountsReceivable>() as {
 export const ListAccountsReceivableColumn = (getList: () => void) => {
    const { openModal } = useModal();
    const isMobile = window.innerWidth < 768;
+
+   const ConfirmReversePayment = ({ id }: { id: string }) => {
+      const { closeModal } = useModal();
+      const [loading, setLoading] = useState(false);
+
+      const { register, handleSubmit, formState: { errors } } = useForm<{ reason: string }>(
+         { defaultValues: { reason: '' } }
+      );
+
+      const handleConfirm = async (values: { reason: string }) => {
+         const { reason } = values;
+         if (!reason || reason.trim() === '') return;
+
+         setLoading(true);
+         try {
+            await api.put(`/accounts-receivable/${id}/reverse`, { reason });
+            toast.success('Pagamento estornado com sucesso!');
+            getList();
+            closeModal();
+         } catch (err) {
+            console.error('Erro ao estornar pagamento:', err);
+            toast.error('Erro ao estornar pagamento');
+         } finally {
+            setLoading(false);
+         }
+      };
+
+      return (
+         <form onSubmit={handleSubmit(handleConfirm)} className="p-4">
+            <p className="mb-3">Informe o motivo do estorno (campo obrigatório)</p>
+            <InputField
+               label="Motivo do estorno"
+               placeholder="Descreva o motivo do estorno"
+               type="text"
+               register={register('reason', { required: 'Motivo é obrigatório' }) as any}
+               error={errors.reason?.message}
+            />
+
+            <div className="flex gap-3 mt-4">
+               <Button variant="outline" onClick={() => closeModal()} disabled={loading} type="button">
+                  Cancelar
+               </Button>
+               <Button type="submit" disabled={loading}>
+                  {loading ? 'Processando...' : 'Confirmar estorno'}
+               </Button>
+            </div>
+         </form>
+      );
+   };
 
    const columns = [
       columnHelper.accessor('documentNumber', {
@@ -162,6 +216,29 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
                         >
                            <ActionIcon as="span" size="sm" variant="outline" aria-label="Editar">
                               <PencilIcon className="size-4 text-gray-500 hover:text-gray-700" />
+                           </ActionIcon>
+                        </Button>
+                     </Tooltip>
+                  )}
+
+                  {row.original.status === "PAID" && (
+                     <Tooltip size="sm" content="Estornar pagamento" placement="top" color="invert">
+                        <Button
+                           onClick={() => {
+                              openModal({
+                                 view: (
+                                    <ModalForm title="Estornar pagamento">
+                                       <ConfirmReversePayment id={row.original.id as string} />
+                                    </ModalForm>
+                                 ),
+                                 size: 'sm',
+                              });
+                           }}
+                           as="span"
+                           className="cursor-pointer bg-white px-2 hover:bg-transparent"
+                        >
+                           <ActionIcon as="span" size="sm" variant="outline" aria-label="Estornar">
+                              <FiRotateCcw size={20} className="text-gray-500 hover:text-gray-700" />
                            </ActionIcon>
                         </Button>
                      </Tooltip>
