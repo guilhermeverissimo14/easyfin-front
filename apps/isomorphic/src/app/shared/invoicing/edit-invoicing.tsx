@@ -36,6 +36,7 @@ type InvoiceFormData = z.infer<typeof invoiceSchema>;
 interface EditInvoiceProps {
    getInvoices: () => void;
    invoiceId: string;
+   customerId: string;
 }
 
 interface Customer {
@@ -44,7 +45,7 @@ interface Customer {
    retIss: boolean;
 }
 
-export const EditInvoice = ({ getInvoices, invoiceId }: EditInvoiceProps) => {
+export const EditInvoice = ({ getInvoices, invoiceId, customerId }: EditInvoiceProps) => {
    const [loading, setLoading] = useState(false);
    const [fetchingInvoice, setFetchingInvoice] = useState(true);
    const { closeModal } = useModal();
@@ -137,12 +138,12 @@ export const EditInvoice = ({ getInvoices, invoiceId }: EditInvoiceProps) => {
       }
    });
 
-   // Reset form when invoiceData is loaded
+
    useEffect(() => {
       if (invoiceData) {
          reset({
             invoiceNumber: invoiceData.invoiceNumber || '',
-            customerId: invoiceData.customer?.id || '',
+            customerId: customerId || '', 
             paymentConditionId: invoiceData.paymentCondition?.id || '',
             issueDate: invoiceData.issueDate ? new Date(invoiceData.issueDate) : new Date(),
             serviceValue: invoiceData.serviceValue ? formatCurrency(invoiceData.serviceValue) : '',
@@ -151,7 +152,6 @@ export const EditInvoice = ({ getInvoices, invoiceId }: EditInvoiceProps) => {
             notes: invoiceData.notes || '',
          });
 
-         // set initial retain ISS flag based on fetched invoice
          setSelectedCustomerRetIss(invoiceData.retainsIss || false);
       }
    }, [invoiceData, reset]);

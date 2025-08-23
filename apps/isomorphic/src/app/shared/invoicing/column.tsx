@@ -78,6 +78,7 @@ export const ListInvoicingColumn = (getList: () => void) => {
                            <EditInvoice
                               getInvoices={getList}
                               invoiceId={row.original.id}
+                              customerId={row.original.customer.id}
                            />
                         </ModalForm>
                      ),
