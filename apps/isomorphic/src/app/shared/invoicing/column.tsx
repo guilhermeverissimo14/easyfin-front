@@ -1,6 +1,7 @@
 'use client';
 
 import { createColumnHelper } from '@tanstack/react-table';
+import { api } from '@/service/api';
 import { IInvoice } from '@/types';
 import { formatCurrency, formatDate } from '@/utils/format';
 import TableRowActionGroup from '@core/components/table-utils/table-row-action-group';
@@ -68,7 +69,7 @@ export const ListInvoicingColumn = (getList: () => void) => {
             },
          }) => (
             <TableRowActionGroup
-               isVisibleDelete={false}
+               isVisibleDelete={true}
                isVisible={true}
                isVisibleEdit={true}
                openModalEdit={()=>{
@@ -95,6 +96,12 @@ export const ListInvoicingColumn = (getList: () => void) => {
                      size: 'lg',
                   })
                }
+               deletePopoverTitle="Excluir Nota Fiscal?"
+               deletePopoverDescription={`Tem certeza que deseja excluir a Nota Fiscal ${row.original.invoiceNumber}?`}
+               onDelete={async () => {
+                  await api.delete(`/invoices/${row.original.id}`);
+                  getList();
+               }}
             />
          ),
       }),
