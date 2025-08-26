@@ -18,8 +18,6 @@ import ImportExtractModal from '@/components/import-button/import-button';
 import { TablePagination } from '@/components/tables/table-pagination';
 import { FilterCashBookAdvanced } from '@/app/shared/cash-book/filter-cash-book-advanced';
 
-
-
 export interface CashBookFilterParams {
    page?: number;
    limit?: number;
@@ -43,7 +41,6 @@ interface PaginationInfo {
    hasNextPage: boolean;
    hasPreviousPage: boolean;
 }
-
 
 export default function CashBook() {
    const [transactions, setTransactions] = useState<ICashBook[]>([]);
@@ -90,13 +87,13 @@ export default function CashBook() {
    // Função para construir query params
    const buildQueryParams = (params: CashBookFilterParams): string => {
       const queryParams = new URLSearchParams();
-      
+
       Object.entries(params).forEach(([key, value]) => {
          if (value !== undefined && value !== null && value !== '') {
             queryParams.append(key, value.toString());
          }
       });
-      
+
       return queryParams.toString();
    };
 
@@ -155,23 +152,22 @@ export default function CashBook() {
          let response: any = null;
 
          if (cashFlowMode === 'CASH') {
-            const queryParams = buildQueryParams({ 
-               ...filters, 
-               cashId: filters.cashId || cashBoxId || defaultCashBoxId || undefined 
+            const queryParams = buildQueryParams({
+               ...filters,
+               cashId: filters.cashId || cashBoxId || defaultCashBoxId || undefined,
             });
             const endpoint = `/cash-flow/cash${queryParams ? `?${queryParams}` : ''}`;
             response = await apiCall(() => api.get(endpoint));
          } else if (cashFlowMode === 'BANK') {
-            const queryParams = buildQueryParams({ 
-               ...filters, 
-               bankAccountId: filters.bankAccountId || defaultBankId 
+            const queryParams = buildQueryParams({
+               ...filters,
+               bankAccountId: filters.bankAccountId || defaultBankId,
             });
             const endpoint = `/cash-flow/account/${defaultBankId}${queryParams ? `?${queryParams}` : ''}`;
             response = await apiCall(() => api.get(endpoint));
          }
 
          if (response?.data) {
-
             let dataArray: any[] = [];
             let paginationInfo: PaginationInfo = {
                page: 1,
@@ -200,7 +196,7 @@ export default function CashBook() {
             const formattedData = dataArray.map((item: any) => ({
                id: item.id,
                date: item.date,
-               history: item.history || "Sem histórico",
+               history: item.history || 'Sem histórico',
                value: item.value,
                type: item.type === 'CREDIT' ? 'C' : 'D',
                description: item.description || '',
@@ -225,7 +221,7 @@ export default function CashBook() {
          if (newFilters) {
             setFilterParams(newFilters);
          }
-         
+
          headerInfoRef.current?.fetchTotals();
       } catch (error) {
          console.error('Erro ao carregar transações:', error);
@@ -266,11 +262,7 @@ export default function CashBook() {
       openModal({
          view: (
             <ModalForm title="Filtro Avançado - Livro Caixa">
-               <FilterCashBookAdvanced
-                  onFilter={handleFilter}
-                  // cashFlowMode={settings.cashFlowDefault}
-                  currentFilters={filterParams}
-               />
+               <FilterCashBookAdvanced onFilter={handleFilter} currentFilters={filterParams} />
             </ModalForm>
          ),
          size: 'lg',
@@ -291,7 +283,6 @@ export default function CashBook() {
    useEffect(() => {
       getTransactions();
       fetchSettings();
-      console.log("cashBoxId", cashBoxId);
    }, [cashBoxId]);
 
    return (
@@ -328,7 +319,7 @@ export default function CashBook() {
             iconImport={<PiDownloadSimpleBold className="me-1.5 h-[17px] w-[17px]" />}
             iconFilter={<MdOutlineManageSearch className="me-1.5 h-[17px] w-[17px]" />}
          >
-            {(settings.cashFlowDefault === 'BANK' && settings.bankAccountDefault) || (settings.cashFlowDefault === 'CASH') ? (
+            {(settings.cashFlowDefault === 'BANK' && settings.bankAccountDefault) || settings.cashFlowDefault === 'CASH' ? (
                <HeaderInfoDetails
                   ref={headerInfoRef}
                   cashFlowMode={settings.cashFlowDefault}
@@ -346,15 +337,11 @@ export default function CashBook() {
                data={transactions}
                tableHeader={true}
                searchAble={true}
-               pagination={false} 
+               pagination={false}
                loading={loading}
             />
 
-            <TablePagination
-               pagination={pagination}
-               onPageChange={handlePageChange}
-               onLimitChange={handleLimitChange}
-            />
+            <TablePagination pagination={pagination} onPageChange={handlePageChange} onLimitChange={handleLimitChange} />
          </TableLayout>
       </div>
    );
