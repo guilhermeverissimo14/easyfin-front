@@ -1,5 +1,5 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { PiPlusBold, PiDownloadSimpleBold } from 'react-icons/pi';
 import { MdOutlineManageSearch } from 'react-icons/md';
 
@@ -185,12 +185,16 @@ export default function CashBook() {
                dataArray = response.data;
             }
 
-            if (cashFlowMode === 'CASH') {
-               setCashBoxId(dataArray[0].cashBoxId);
+            if (cashFlowMode === 'CASH' && dataArray.length > 0) {
+               const newCashBoxId = dataArray[0]?.cashBoxId;
+               if (newCashBoxId && newCashBoxId !== cashBoxId) {
+                  setCashBoxId(newCashBoxId);
+               }
             }
 
             if (dataArray.length === 0 && !newFilters) {
                toast.info('Nenhum lançamento encontrado no livro caixa.');
+               return;
             }
 
             const formattedData = dataArray.map((item: any) => ({
@@ -280,9 +284,8 @@ export default function CashBook() {
       });
    };
 
-   useEffect(() => {
+   useLayoutEffect(() => {
       getTransactions();
-      fetchSettings();
    }, [cashBoxId]);
 
    return (

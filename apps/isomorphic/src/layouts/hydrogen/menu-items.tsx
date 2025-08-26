@@ -30,6 +30,26 @@ export const menuItems = [
       icon: <PiNotebook />,
       dropdownItems: [
          {
+            name: 'Aliquotas',
+            href: routes.taxRates,
+            icon: <PiPercentDuotone />,
+         },
+          {
+            name: 'Centro de Custo',
+            href: routes.constCenters,
+            icon: <PiGridFourDuotone />,
+         },
+         {
+            name: 'Condições de Pagamento',
+            href: routes.paymentTerms,
+            icon: <PiFileCDuotone />,
+         },
+          {
+      name: 'Contas Bancárias',
+      href: routes.bankAccounts,
+      icon: <PiBankDuotone />,
+   },
+         {
             name: 'Clientes',
             href: routes.customers,
             icon: <PiHandshakeDuotone />,
@@ -44,21 +64,6 @@ export const menuItems = [
             href: routes.users,
             icon: <PiUserGearDuotone />,
          },
-         {
-            name: 'Aliquotas',
-            href: routes.taxRates,
-            icon: <PiPercentDuotone />,
-         },
-         {
-            name: 'Centro de Custo',
-            href: routes.constCenters,
-            icon: <PiGridFourDuotone />,
-         },
-         {
-            name: 'Condições de Pagamento',
-            href: routes.paymentTerms,
-            icon: <PiFileCDuotone />,
-         },
       ],
    },
    // {
@@ -66,11 +71,6 @@ export const menuItems = [
    //    href: '#',
    //    icon: <LuPiggyBank />,
    // },
-   {
-      name: 'Contas Bancárias',
-      href: routes.bankAccounts,
-      icon: <PiBankDuotone />,
-   },
    {
       name: 'Faturamento',
       href: '#',
