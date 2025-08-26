@@ -142,7 +142,7 @@ function IntroBannerBlock() {
             <Image
                fill
                priority
-               src={'https://isomorphic-furyroad.s3.amazonaws.com/public/auth/sign-in-bg2.webp'}
+               src={'https://easyapp-api.mgioqc.easypanel.host/public/signin.png'}
                alt="Sign Up Thumbnail"
                sizes="(max-width: 768px) 100vw"
                className="bg-primary object-cover"
