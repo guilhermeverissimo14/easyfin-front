@@ -19,21 +19,17 @@ export const siteConfig = {
    // TODO: favicon
 };
 
-export const metaObject = (
-   title?: string,
-   openGraph?: OpenGraph,
-   description: string = siteConfig.description
-): Metadata => {
+export const metaObject = (title?: string, openGraph?: OpenGraph, description: string = siteConfig.description): Metadata => {
    return {
       title: title ? `${title} - Easyfin` : siteConfig.title,
       description,
       openGraph: openGraph ?? {
          title: title ? `${title}` : title,
          description,
-         url: 'https://isomorphic-furyroad.vercel.app',
-         siteName: 'Esyfin Gestão', // https://developers.google.com/search/docs/appearance/site-names
+         url: 'https://easyfin-front-isomorphic.vercel.app/',
+         siteName: 'Esyfin Gestão',
          images: {
-            url: 'https://s3.amazonaws.com/redqteam.com/isomorphic-furyroad/itemdep/isobanner.png',
+            url: 'https://easyapp-api.mgioqc.easypanel.host/public/signin.png',
             width: 1200,
             height: 630,
          },
