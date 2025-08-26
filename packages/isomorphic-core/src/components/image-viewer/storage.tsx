@@ -13,7 +13,7 @@ type ImageType = {
 };
 
 const imageAtom = atom<ImageType>({
-  url: "https://s3.amazonaws.com/redqteam.com/isomorphic-furyroad/public/image-viewer.png",
+  url: "https://easyapp-api.mgioqc.easypanel.host/public/signin.png",
 });
 
 const commentAtom = atom<CommentsDataType[]>([
@@ -43,8 +43,7 @@ const commentAtom = atom<CommentsDataType[]>([
     name: "Jane Doe",
     avatar: "https://randomuser.me/api/portraits/women/76.jpg",
     commentTime: "Yesterday",
-    comment:
-      "Guys the design is done and ready for review. Please check and let me know if there is any changes.",
+    comment: "Guys the design is done and ready for review. Please check and let me know if there is any changes.",
   },
 ]);
 
