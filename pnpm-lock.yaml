@@ -644,9 +644,6 @@ importers:
       tailwind-merge:
         specifier: ^2.6.0
         version: 2.6.0
-      turbo:
-        specifier: 2.3.3
-        version: 2.3.3
       typescript:
         specifier: 5.7.2
         version: 5.7.2
