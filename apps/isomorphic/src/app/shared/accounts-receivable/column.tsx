@@ -23,16 +23,19 @@ import { useForm } from 'react-hook-form';
 import { InputField } from '@/components/input/input-field';
 
 type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
-   dataType?: 'date' | 'currency' | string
-}
+   dataType?: 'date' | 'currency' | string;
+};
 
 const columnHelper = createColumnHelper<IAccountsReceivable>() as {
    accessor<TValue extends keyof IAccountsReceivable | null>(
       accessor: TValue,
-      config: CustomColumnDef<IAccountsReceivable, TValue extends null ? unknown : IAccountsReceivable[TValue extends keyof IAccountsReceivable ? TValue : never]>
+      config: CustomColumnDef<
+         IAccountsReceivable,
+         TValue extends null ? unknown : IAccountsReceivable[TValue extends keyof IAccountsReceivable ? TValue : never]
+      >
    ): CustomColumnDef<IAccountsReceivable, any>;
    display(config: CustomColumnDef<IAccountsReceivable, any>): CustomColumnDef<IAccountsReceivable, any>;
-}
+};
 
 export const ListAccountsReceivableColumn = (getList: () => void) => {
    const { openModal } = useModal();
@@ -42,9 +45,11 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
       const { closeModal } = useModal();
       const [loading, setLoading] = useState(false);
 
-      const { register, handleSubmit, formState: { errors } } = useForm<{ reason: string }>(
-         { defaultValues: { reason: '' } }
-      );
+      const {
+         register,
+         handleSubmit,
+         formState: { errors },
+      } = useForm<{ reason: string }>({ defaultValues: { reason: '' } });
 
       const handleConfirm = async (values: { reason: string }) => {
          const { reason } = values;
@@ -75,7 +80,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
                error={errors.reason?.message}
             />
 
-            <div className="flex gap-3 mt-4">
+            <div className="mt-4 flex gap-3">
                <Button variant="outline" onClick={() => closeModal()} disabled={loading} type="button">
                   Cancelar
                </Button>
@@ -107,7 +112,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
          cell: ({ row }) => {
             const status = row.original.status;
 
-            if (status === "PENDING") {
+            if (status === 'PENDING') {
                return (
                   <div className="w-22">
                      <div className="border-1 cursor-pointer rounded-md border border-[#ABD2EF] bg-[#ABD2EF] px-2 py-1 text-center text-white">
@@ -115,7 +120,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
                      </div>
                   </div>
                );
-            } else if (status === "OVERDUE") {
+            } else if (status === 'OVERDUE') {
                return (
                   <div className="w-20">
                      <div className="border-1 cursor-pointer rounded-md border border-red-400 bg-red-400 px-2 py-1 text-center text-white">
@@ -123,7 +128,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
                      </div>
                   </div>
                );
-            } else if (status === "PAID") {
+            } else if (status === 'PAID') {
                return (
                   <div className="w-22">
                      <div className="border-1 cursor-pointer rounded-md border border-green-400 bg-green-400 px-2 py-1 text-center text-white">
@@ -131,7 +136,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
                      </div>
                   </div>
                );
-            } else if (status === "CANCELED") {
+            } else if (status === 'CANCELED') {
                return (
                   <div className="w-22">
                      <div className="border-1 cursor-pointer rounded-md border border-gray-400 bg-gray-400 px-2 py-1 text-center text-white">
@@ -174,7 +179,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
          }) => (
             <div className="flex items-center justify-end">
                <div className="flex items-center">
-                  {row.original.status !== "PAID" && (
+                  {row.original.status !== 'PAID' && (
                      <Tooltip size="sm" content="Receber" placement="top" color="invert">
                         <Button
                            onClick={() => {
@@ -198,7 +203,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
                      </Tooltip>
                   )}
 
-                  {row.original.status !== "PAID" && (
+                  {row.original.status !== 'PAID' && (
                      <Tooltip size="sm" content="Editar" placement="top" color="invert">
                         <Button
                            onClick={() => {
@@ -221,7 +226,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
                      </Tooltip>
                   )}
 
-                  {row.original.status === "PAID" && (
+                  {row.original.status === 'PAID' && (
                      <Tooltip size="sm" content="Estornar pagamento" placement="top" color="invert">
                         <Button
                            onClick={() => {
@@ -267,7 +272,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
 
                   <Tooltip size="sm" content="Remover" placement="top" color="invert">
                      <TableRowActionGroup
-                        isVisibleDelete={row.original.status !== "PAID"}
+                        isVisibleDelete={row.original.status !== 'PAID' && row.original.hasInvoiceLink === false}
                         isVisibleEdit={false}
                         isVisible={false}
                         deletePopoverTitle="Excluir conta a receber?"

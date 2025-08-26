@@ -35,6 +35,7 @@ export interface AccountsReceivableResponse {
       name: string | null;
    };
    observation: string;
+   hasInvoiceLink: boolean;
    status: string;
    createdAt: string;
    updatedAt: string;
@@ -57,6 +58,7 @@ export interface IAccountsReceivable {
    costCenterName: string;
    observation?: string;
    paymentDate: string;
+   hasInvoiceLink: boolean;
 }
 
 export interface AccountsPayableResponse {
@@ -368,13 +370,12 @@ export interface IInvoice {
    issqnValue: number;
    netValue: number;
    effectiveTax: number;
-   bankAccount?:
-      | {
-           id: string;
-           name: string;
-           agency: string;
-           account: string;
-        };
+   bankAccount?: {
+      id: string;
+      name: string;
+      agency: string;
+      account: string;
+   };
    costCenter: {
       id: string;
       name: string;
@@ -386,7 +387,7 @@ export interface LocalUser {
    id: string;
    name: string;
    email: string;
-   role: 'ADMIN' | 'USER' ;
+   role: 'ADMIN' | 'USER';
    phone: string;
    cpfCnpj: string;
    avatar: string;
