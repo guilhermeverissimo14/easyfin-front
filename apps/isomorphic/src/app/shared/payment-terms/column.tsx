@@ -36,6 +36,8 @@ export const ListPaymentTermColumn = (getList: () => void) => {
   const { openModal } = useModal();
   const isMobile = window.innerWidth < 768;
 
+  const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
   const formatCondition = (condition: string) => {
     return condition.split(',').join(', ') + ' dias';
   };
@@ -76,9 +78,9 @@ export const ListPaymentTermColumn = (getList: () => void) => {
         },
       }) => (
         <TableRowActionGroup
-          isVisibleDelete={true}
-          isVisible={true}
-          isVisibleEdit={true}
+          isVisibleDelete={!(userRole === 'USER')}
+          isVisible={!(userRole === 'USER')}
+          isVisibleEdit={!(userRole === 'USER')}
           openModalList={() =>
             openModal({
               view: (

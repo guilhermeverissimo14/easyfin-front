@@ -38,6 +38,7 @@ const columnHelper = createColumnHelper<IAccountsPayable>() as {
 export const ListAccountsPayableColumn = (getList: () => void) => {
    const { openModal } = useModal();
    const isMobile = window.innerWidth < 768;
+   const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
 
    const ConfirmReversePayment = ({ id }: { id: string }) => {
       const { closeModal } = useModal();
@@ -49,7 +50,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
 
       const handleConfirm = async (values: { reason: string }) => {
          const { reason } = values;
-         if (!reason || reason.trim() === '') return; 
+         if (!reason || reason.trim() === '') return;
 
          setLoading(true);
          try {
@@ -175,110 +176,114 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
          }) => (
             <div className="flex items-center justify-end">
                <div className="flex items-center">
-                 {row.original.status !== 'PAID' && (
-                   <Tooltip size="sm" content="Liquidar" placement="top" color="invert">
-                     <Button
-                        onClick={() => {
-                           openModal({
-                              view: (
-                                 <ModalForm title="Pagamento">
-                                    <SettleAccountPayable getAccounts={getList} account={row.original} />
-                                 </ModalForm>
-                              ),
-                              size: 'sm',
-                              customSize: 'max-w-2xl',
-                           });
-                        }}
-                        as="span"
-                        className="cursor-pointer bg-white px-2 hover:bg-transparent"
-                     >
-                        <ActionIcon as="span" size="sm" variant="outline" aria-label="Liquidar">
-                           <PiCashRegister size={24} className="text-gray-500 hover:text-gray-700" />
-                        </ActionIcon>
-                     </Button>
-                  </Tooltip>
-                 )}
+                  {row.original.status !== 'PAID' || !(userRole === 'USER') && (
+                     <Tooltip size="sm" content="Liquidar" placement="top" color="invert">
+                        <Button
+                           onClick={() => {
+                              openModal({
+                                 view: (
+                                    <ModalForm title="Pagamento">
+                                       <SettleAccountPayable getAccounts={getList} account={row.original} />
+                                    </ModalForm>
+                                 ),
+                                 size: 'sm',
+                                 customSize: 'max-w-2xl',
+                              });
+                           }}
+                           as="span"
+                           className="cursor-pointer bg-white px-2 hover:bg-transparent"
+                        >
+                           <ActionIcon as="span" size="sm" variant="outline" aria-label="Liquidar">
+                              <PiCashRegister size={24} className="text-gray-500 hover:text-gray-700" />
+                           </ActionIcon>
+                        </Button>
+                     </Tooltip>
+                  )}
 
-                 { row.original.status !== 'PAID' && (
-                  <Tooltip size="sm" content="Editar" placement="top" color="invert">
-                     <Button
-                        onClick={() => {
-                           openModal({
-                              view: (
-                                 <ModalForm title="Editar documento">
-                                    <EditAccountPayable getAccounts={getList} account={row.original} />
-                                 </ModalForm>
-                              ),
-                              size: 'sm',
-                           });
-                        }}
-                        as="span"
-                        className="cursor-pointer bg-white px-2 hover:bg-transparent"
-                     >
-                        <ActionIcon as="span" size="sm" variant="outline" aria-label="Editar">
-                           <PencilIcon className="size-4 text-gray-500 hover:text-gray-700" />
-                        </ActionIcon>
-                     </Button>
-                  </Tooltip>
-                 )} 
+                  {row.original.status !== 'PAID' || !(userRole === 'USER') && (
+                     <Tooltip size="sm" content="Editar" placement="top" color="invert">
+                        <Button
+                           onClick={() => {
+                              openModal({
+                                 view: (
+                                    <ModalForm title="Editar documento">
+                                       <EditAccountPayable getAccounts={getList} account={row.original} />
+                                    </ModalForm>
+                                 ),
+                                 size: 'sm',
+                              });
+                           }}
+                           as="span"
+                           className="cursor-pointer bg-white px-2 hover:bg-transparent"
+                        >
+                           <ActionIcon as="span" size="sm" variant="outline" aria-label="Editar">
+                              <PencilIcon className="size-4 text-gray-500 hover:text-gray-700" />
+                           </ActionIcon>
+                        </Button>
+                     </Tooltip>
+                  )}
 
-                {row.original.status === 'PAID' && (
-                  <Tooltip size="sm" content="Estornar pagamento" placement="top" color="invert">
-                     <Button
-                        onClick={() => {
-                           openModal({
-                              view: (
-                                 <ModalForm title="Estornar pagamento">
-                                    <ConfirmReversePayment id={row.original.id as string} />
-                                 </ModalForm>
-                              ),
-                              size: 'sm',
-                           });
-                        }}
-                        as="span"
-                        className="cursor-pointer bg-white px-2 hover:bg-transparent"
-                     >
-                        <ActionIcon as="span" size="sm" variant="outline" aria-label="Estornar">
-                           <FiRotateCcw size={20} className="text-gray-500 hover:text-gray-700" />
-                        </ActionIcon>
-                     </Button>
-                  </Tooltip>
-                )}
+                  {row.original.status === 'PAID' || !(userRole === 'USER') && (
+                     <Tooltip size="sm" content="Estornar pagamento" placement="top" color="invert">
+                        <Button
+                           onClick={() => {
+                              openModal({
+                                 view: (
+                                    <ModalForm title="Estornar pagamento">
+                                       <ConfirmReversePayment id={row.original.id as string} />
+                                    </ModalForm>
+                                 ),
+                                 size: 'sm',
+                              });
+                           }}
+                           as="span"
+                           className="cursor-pointer bg-white px-2 hover:bg-transparent"
+                        >
+                           <ActionIcon as="span" size="sm" variant="outline" aria-label="Estornar">
+                              <FiRotateCcw size={20} className="text-gray-500 hover:text-gray-700" />
+                           </ActionIcon>
+                        </Button>
+                     </Tooltip>
+                  )}
 
-                  <Tooltip size="sm" content="Visualizar" placement="top" color="invert">
-                     <Button
-                        onClick={() => {
-                           openModal({
-                              view: (
-                                 <ModalForm title="Informações do documento">
-                                    <AccountPayableDetails id={row.original.id as any} />
-                                 </ModalForm>
-                              ),
-                              size: 'sm',
-                           });
-                        }}
-                        as="span"
-                        className="cursor-pointer bg-white px-2 hover:bg-transparent"
-                     >
-                        <ActionIcon as="span" size="sm" variant="outline" aria-label="Visualizar">
-                           <EyeIcon className="size-4 text-gray-500 hover:text-gray-700" />
-                        </ActionIcon>
-                     </Button>
-                  </Tooltip>
+                  {!(userRole === 'USER') && (
+                     <Tooltip size="sm" content="Visualizar" placement="top" color="invert">
+                        <Button
+                           onClick={() => {
+                              openModal({
+                                 view: (
+                                    <ModalForm title="Informações do documento">
+                                       <AccountPayableDetails id={row.original.id as any} />
+                                    </ModalForm>
+                                 ),
+                                 size: 'sm',
+                              });
+                           }}
+                           as="span"
+                           className="cursor-pointer bg-white px-2 hover:bg-transparent"
+                        >
+                           <ActionIcon as="span" size="sm" variant="outline" aria-label="Visualizar">
+                              <EyeIcon className="size-4 text-gray-500 hover:text-gray-700" />
+                           </ActionIcon>
+                        </Button>
+                     </Tooltip>
+                  )}
 
-                  <Tooltip size="sm" content="Remover" placement="top" color="invert">
-                     <TableRowActionGroup
-                        isVisibleDelete={row.original.status !== 'PAID'}
-                        isVisibleEdit={false}
-                        isVisible={false}
-                        deletePopoverTitle="Excluir conta a pagar?"
-                        deletePopoverDescription={`Tem certeza que deseja excluir o Documento ${row.original.documentNumber}?`}
-                        onDelete={async () => {
-                           await api.delete(`/accounts-payable/${row.original.id}`);
-                           getList();
-                        }}
-                     />
-                  </Tooltip>
+                  {!(userRole === 'USER') && (
+                     <Tooltip size="sm" content="Remover" placement="top" color="invert">
+                        <TableRowActionGroup
+                           isVisibleDelete={row.original.status !== 'PAID' || !(userRole === 'USER')}
+                           isVisibleEdit={false}
+                           isVisible={false}
+                           deletePopoverTitle="Excluir conta a pagar?"
+                           deletePopoverDescription={`Tem certeza que deseja excluir o Documento ${row.original.documentNumber}?`}
+                           onDelete={async () => {
+                              await api.delete(`/accounts-payable/${row.original.id}`);
+                              getList();
+                           }}
+                        />
+                     </Tooltip>
+                  )}
                </div>
             </div>
          ),

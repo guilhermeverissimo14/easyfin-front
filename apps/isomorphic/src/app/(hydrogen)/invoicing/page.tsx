@@ -16,7 +16,6 @@ import { CreateInvoice } from '@/app/shared/invoicing/create-invoicing';
 
 export default function Invoicing() {
    const { openModal } = useModal();
-   const headerInfoRef = useRef<HeaderInfoDetailsRef>(null);
 
    const [loading, setLoading] = useState(true);
    const [invoices, setInvoices] = useState<IInvoice[]>([]);
@@ -35,6 +34,8 @@ export default function Invoicing() {
          },
       ],
    };
+
+    const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
 
    const getInvoices = async () => {
       setLoading(true);
@@ -73,7 +74,7 @@ export default function Invoicing() {
             columns={ListInvoicingColumn(getInvoices)}
             fileName="nota-fiscal"
             header=""
-            action="Digitar Nota"
+            action={userRole === 'ADMIN' ? "Digitar Nota" : ""}
             icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             iconImport={<PiDownloadSimpleBold className="me-1.5 h-[17px] w-[17px]" />}
          >

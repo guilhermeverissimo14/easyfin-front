@@ -16,6 +16,8 @@ import { CreateCustomer } from "@/app/shared/customers/create-customer";
 export default function Customers() {
     const [dataUser, setDataUser] = useState<CustomerType[]>([]);
       const [loading, setLoading] = useState(false);
+
+       const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
    
       const { openModal } = useModal();
    
@@ -80,7 +82,7 @@ export default function Customers() {
                data={dataUser}
                fileName="clientes"
                header=""
-               action="Cadastar cliente"
+               action={userRole === 'ADMIN' ? "Cadastrar cliente" : ""}
                icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             >
                <TableComponent

@@ -22,6 +22,8 @@ export default function AccountsPayable() {
   const [filterParams, setFilterParams] = useState<FilterParams>({});
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
+  const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
   const { openModal } = useModal();
 
   const pageHeader = {
@@ -129,7 +131,7 @@ export default function AccountsPayable() {
         data={data}
         fileName="contas-a-pagar"
         header=""
-        action="Lançar Conta"
+        action={userRole === 'ADMIN' ? "Lançar Conta" : ""}
         filter="Pesquisa avançada"
         icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
         iconFilter={<MdOutlineManageSearch className="me-1.5 h-[17px] w-[17px]" />}

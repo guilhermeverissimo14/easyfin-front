@@ -19,6 +19,8 @@ export default function CostCenters() {
 
     const { openModal } = useModal();
 
+     const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
     const getCostCenters = async () => {
         setLoading(true);
         try {
@@ -77,7 +79,7 @@ export default function CostCenters() {
                 columns={ListCostCenterColumn(getCostCenters)}
                 fileName="centros-de-custo"
                 header=""
-                action="Cadastrar centro de custo"
+                action={userRole === 'ADMIN' ? "Cadastrar centro de custo" : ""}
                 icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             >
                 <TableComponent

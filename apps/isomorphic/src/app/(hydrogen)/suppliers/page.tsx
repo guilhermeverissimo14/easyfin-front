@@ -17,6 +17,8 @@ export default function Suppliers() {
     const [dataUser, setDataUser] = useState<SupplierType[]>([]);
     const [loading, setLoading] = useState(false);
 
+     const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
     const { openModal } = useModal();
 
     const getSuppliers = async () => {
@@ -80,7 +82,7 @@ export default function Suppliers() {
                 columns={ListSupplierColumn(getSuppliers)}
                 fileName="fornecedores"
                 header=""
-                action="Cadastar fornecedor"
+                action={userRole === 'ADMIN' ? "Cadastrar fornecedor" : ""}
                 icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             >
                 <TableComponent

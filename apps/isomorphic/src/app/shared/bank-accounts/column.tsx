@@ -16,6 +16,7 @@ const columnHelper = createColumnHelper<BankAccount>();
 export const ListBankAccountColumn = (getList: () => void) => {
   const { openModal } = useModal();
   const isMobile = window.innerWidth < 768;
+  const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
 
   const handleUpdateStatus = async (accountId: string, newStatus: boolean) => {
     await api.put(`/bank-accounts/${accountId}`, { active: newStatus });
@@ -52,22 +53,36 @@ export const ListBankAccountColumn = (getList: () => void) => {
       ),
     }),
 
-     columnHelper.display({
-             id: 'active',
-             size: 80,
-             header: 'Status',
-             cell: ({ row }) => (
-                <div className="flex items-center">
-                   <UpdateStatusPopover
-                      title="Atualizar Status"
-                      message={row.original.active ? 'Deseja bloquear essa conta bancaria?' : 'Deseja reativar está conta bancaria?'}
-                      onConfirm={() => handleUpdateStatus(row.original.id, !row.original.active)}
-                   >
-                      {getStatusBadge(row.original.active ?? false, row.original.active ? 'Ativo' : 'Bloqueado')}
-                   </UpdateStatusPopover>
-                </div>
-             ),
-          }),
+    ...(userRole !== 'USER'
+      ? [
+        columnHelper.display({
+          id: 'active',
+          size: 80,
+          header: 'Status',
+          cell: ({ row }) => (
+            <div className="flex items-center">
+              <UpdateStatusPopover
+                title="Atualizar Status"
+                message={
+                  row.original.active
+                    ? 'Deseja bloquear essa conta bancaria?'
+                    : 'Deseja reativar está conta bancaria?'
+                }
+                onConfirm={() =>
+                  handleUpdateStatus(row.original.id, !row.original.active)
+                }
+              >
+                {getStatusBadge(
+                  row.original.active ?? false,
+                  row.original.active ? 'Ativo' : 'Bloqueado'
+                )}
+              </UpdateStatusPopover>
+            </div>
+          ),
+        }),
+      ]
+      : []),
+
     columnHelper.display({
       id: 'actions',
       size: 120,
@@ -78,9 +93,9 @@ export const ListBankAccountColumn = (getList: () => void) => {
         },
       }) => (
         <TableRowActionGroup
-          isVisibleDelete={true}
-          isVisible={true}
-          isVisibleEdit={true}
+          isVisibleDelete={!(userRole === 'USER')}
+          isVisible={!(userRole === 'USER')}
+          isVisibleEdit={!(userRole === 'USER')}
           openModalList={() =>
             openModal({
               view: (
