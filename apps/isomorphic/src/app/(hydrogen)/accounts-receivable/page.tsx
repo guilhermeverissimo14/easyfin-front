@@ -52,7 +52,7 @@ export default function AccountsReceivable() {
          costCenterId: item.costCenter?.id || '',
          costCenterName: item.costCenter?.name || '',
          observation: item.observation,
-         paymentDate: item.paymentDate || '',
+         paymentDate: item.receiptDate || '',
          hasInvoiceLink: item.hasInvoiceLink,
       }));
    };
