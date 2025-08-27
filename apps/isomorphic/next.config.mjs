@@ -48,6 +48,11 @@ const nextConfig = {
         protocol: 'https',
         hostname: 'isomorphic-furyroad.vercel.app',
       },
+      {
+        protocol: 'https',
+        hostname: 'easyapp-api.mgioqc.easypanel.host',
+        pathname: '/public/**',
+      },
     ],
   },
   reactStrictMode: true,
