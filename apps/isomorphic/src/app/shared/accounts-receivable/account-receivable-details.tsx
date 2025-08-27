@@ -5,6 +5,7 @@ import { formatCurrency } from '@/utils/format';
 import { AccountsReceivableResponse } from '@/types';
 import { api } from '@/service/api';
 import { LoadingSpinner } from '@/components/loading-spinner';
+import Image from 'next/image';
 
 interface AccountReceivableDetailsProps {
    id: number;
@@ -59,6 +60,9 @@ export const AccountReceivableDetails = ({ id }: AccountReceivableDetailsProps) 
    const costCenterName = account.costCenter?.name;
    const plannedPaymentMethodName = account.plannedPaymentMethod?.name;
 
+   // Calcular o valor recebido: valor - desconto + juros + multa
+   const receivedValue = account.value - (account.discount || 0) + (account.interest || 0) + (account.fine || 0);
+
    return (
       <div>
          <div className="flex flex-row items-center justify-between pb-4 md:col-span-3">
@@ -107,6 +111,12 @@ export const AccountReceivableDetails = ({ id }: AccountReceivableDetailsProps) 
                   <span className="bg-gray-100 p-1 font-semibold">Data Vencimento</span>{' '}
                   <span className="p-1">{new Date(account.dueDate).toLocaleDateString('pt-BR')}</span>
                </p>
+               {account.status === 'PAID' && account.receiptDate && (
+                  <p className="flex flex-col text-sm text-gray-500">
+                     <span className="bg-gray-100 p-1 font-semibold">Data Pagamento</span>
+                     <span className="p-1 text-green-800 font-semibold">{new Date(account.receiptDate).toLocaleDateString('pt-BR')}</span>
+                  </p>
+               )}
             </div>
 
             <div>
@@ -129,6 +139,8 @@ export const AccountReceivableDetails = ({ id }: AccountReceivableDetailsProps) 
             <div className="flex items-center">
                <p className="text-lg font-semibold">Financeiro</p>
             </div>
+
+            <Image src={'/images/contasapagar.png'} alt="Contas a Pagar" width={40} height={10} />
          </div>
 
          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -144,6 +156,12 @@ export const AccountReceivableDetails = ({ id }: AccountReceivableDetailsProps) 
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Multa</span> <span className="p-1">{formatCurrency(account.fine || 0)}</span>
                </p>
+               {account.status === 'PAID' && (
+                  <p className="flex flex-col text-sm text-gray-500">
+                     <span className="bg-green-100 p-1 font-semibold text-green-800">Valor Recebido</span>
+                     <span className="p-1 text-lg font-bold text-green-600">{formatCurrency(receivedValue)}</span>
+                  </p>
+               )}
             </div>
 
             <div>
@@ -158,6 +176,12 @@ export const AccountReceivableDetails = ({ id }: AccountReceivableDetailsProps) 
                   <span className="bg-gray-100 p-1 font-semibold">Método de Pagamento Previsto</span>
                   <span className="p-1">{plannedPaymentMethodName || 'Não especificado'}</span>
                </p>
+               {account.status === 'PAID' && (
+                  <p className="flex flex-col text-sm text-gray-500">
+                     <span className="bg-green-100 p-1 font-semibold text-green-800">Método de Pagamento Realizado</span>
+                     <span className="p-1 text-lg font-bold text-green-600">{account.plannedPaymentMethod?.name || 'Não especificado'}</span>
+                  </p>
+               )}
             </div>
          </div>
 

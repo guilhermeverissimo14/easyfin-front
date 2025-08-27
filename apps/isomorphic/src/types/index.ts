@@ -10,7 +10,7 @@ export interface AccountsReceivableResponse {
    documentDate: string;
    launchDate: string;
    dueDate: string;
-   paymentDate: string | null;
+   receiptDate: string | null;
    value: number;
    paidValue: number;
    discount: number;

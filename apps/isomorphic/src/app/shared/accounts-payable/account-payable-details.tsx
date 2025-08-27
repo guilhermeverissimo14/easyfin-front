@@ -65,6 +65,9 @@ export const AccountPayableDetails = ({ id: id }: AccountPayableDetailsProps) =>
    const costCenterName = account.costCenter?.name;
    const plannedPaymentMethodName = account.plannedPaymentMethod?.name;
 
+   // Calcular o valor pago: valor - desconto + juros + multa
+   const paidValue = account.value - (account.discount || 0) + (account.interest || 0) + (account.fine || 0);
+
    return (
       <div>
          <div className="flex flex-row items-center justify-between pb-4 md:col-span-3">
@@ -84,15 +87,15 @@ export const AccountPayableDetails = ({ id: id }: AccountPayableDetailsProps) =>
                    Vencido
                  </div>
                </div>
-            ) : account.status === "CANCELLED" ? (
+            ) : account.status === "PAID" ? (
                <div className="w-22">
-                 <div className="border-1 cursor-pointer rounded-md border border-green-400 bg-green-400 px-2 text-center text-xs text-white">
+                 <div className="border-1 cursor-pointer rounded-md border border-green-500 bg-green-500 px-2 text-center text-xs text-white">
                    Pago
                  </div>
                </div>
-            ) : account.status === "PAID" ? (
+            ) : account.status === "CANCELLED" ? (
                <div className="w-22">
-                 <div className="border-1 cursor-pointer rounded-md border border-gray-400 bg-gray-400 px-2 text-center text-xs text-white">
+                 <div className="border-1 cursor-pointer rounded-md border border-gray-500 bg-gray-500 px-2 text-center text-xs text-white">
                    Cancelado
                  </div>
                </div>
@@ -113,6 +116,12 @@ export const AccountPayableDetails = ({ id: id }: AccountPayableDetailsProps) =>
                   <span className="bg-gray-100 p-1 font-semibold">Data Vencimento</span>{' '}
                   <span className="p-1">{new Date(account.dueDate).toLocaleDateString('pt-BR')}</span>
                </p>
+               {account.status === 'PAID' && account.paymentDate && (
+                  <p className="flex flex-col text-sm text-gray-500">
+                     <span className="bg-gray-100 p-1 font-semibold">Data Pagamento</span>
+                     <span className="p-1 text-green-800 font-semibold">{new Date(account.paymentDate).toLocaleDateString('pt-BR')}</span>
+                  </p>
+               )}
             </div>
 
             <div>
@@ -149,27 +158,39 @@ export const AccountPayableDetails = ({ id: id }: AccountPayableDetailsProps) =>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Juros</span>
-                  <span className="p-1">{formatCurrency(account.interest)}</span>
+                  <span className="p-1">{formatCurrency(account.interest || 0)}</span>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Multa</span> 
-                  <span className="p-1">{formatCurrency(account.fine)}</span>
+                  <span className="p-1">{formatCurrency(account.fine || 0)}</span>
                </p>
+               {account.status === 'PAID' && (
+                  <p className="flex flex-col text-sm text-gray-500">
+                     <span className="bg-green-100 p-1 font-semibold text-green-800">Valor Pago</span>
+                     <span className="p-1 text-lg font-bold text-green-600">{formatCurrency(paidValue)}</span>
+                  </p>
+               )}
             </div>
 
             <div>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Desconto</span> 
-                  <span className="p-1">{formatCurrency(account.discount)}</span>
+                  <span className="p-1">{formatCurrency(account.discount || 0)}</span>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Centro de Custo</span>
-                  <span className="p-1">{costCenterName}</span>
+                  <span className="p-1">{costCenterName || 'Não especificado'}</span>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Método de Pagamento Previsto</span>
-                  <span className="p-1">{plannedPaymentMethodName}</span>
+                  <span className="p-1">{plannedPaymentMethodName || 'Não especificado'}</span>
                </p>
+               {account.status === 'PAID' && (
+                  <p className="flex flex-col text-sm text-gray-500">
+                     <span className="bg-green-100 p-1 font-semibold text-green-800">Método de Pagamento Realizado</span>
+                     <span className="p-1 text-lg font-bold text-green-600">{account.plannedPaymentMethod?.name || 'Não especificado'}</span>
+                  </p>
+               )}
             </div>
          </div>
          
