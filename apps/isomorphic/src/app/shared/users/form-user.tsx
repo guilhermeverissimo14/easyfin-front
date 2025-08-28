@@ -11,7 +11,7 @@ import { useModal } from '../modal-views/use-modal';
 import { CustomErrorLogin} from '@/types';
 import { InputField } from '@/components/input/input-field';
 import { SelectField } from '@/components/input/select-field';
-import { cpfCnpjMask, moneyMask, phoneNumberMask } from '@/utils/format';
+import { cpfCnpjMask, phoneNumberMask } from '@/utils/format';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
 import { format } from 'date-fns';

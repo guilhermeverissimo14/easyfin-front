@@ -176,7 +176,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
          }) => (
             <div className="flex items-center justify-end">
                <div className="flex items-center">
-                  {row.original.status !== 'PAID' || !(userRole === 'USER') && (
+                  {row.original.status !== 'PAID' && !(userRole === 'USER') && (
                      <Tooltip size="sm" content="Liquidar" placement="top" color="invert">
                         <Button
                            onClick={() => {
@@ -200,7 +200,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
                      </Tooltip>
                   )}
 
-                  {row.original.status !== 'PAID' || !(userRole === 'USER') && (
+                  {row.original.status !== 'PAID' && !(userRole === 'USER') && (
                      <Tooltip size="sm" content="Editar" placement="top" color="invert">
                         <Button
                            onClick={() => {
@@ -223,7 +223,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
                      </Tooltip>
                   )}
 
-                  {row.original.status === 'PAID' || !(userRole === 'USER') && (
+                  {row.original.status === 'PAID' && !(userRole === 'USER') && (
                      <Tooltip size="sm" content="Estornar pagamento" placement="top" color="invert">
                         <Button
                            onClick={() => {
