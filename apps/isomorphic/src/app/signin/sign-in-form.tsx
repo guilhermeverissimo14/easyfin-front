@@ -17,7 +17,7 @@ import { loginUser } from "@/service/auth/authService";
 import { CustomErrorLogin, User } from "@/types";
 import { redirect } from "next/navigation";
 import { toast } from "react-toastify";
-import axios from "axios";
+
 const year = new Date().getFullYear();
 
 const initialValues: LoginSchema = {
@@ -39,15 +39,9 @@ export default function SignInForm() {
 		).role;
 
 		if (isAuthenticated) {
-			if (userRole === "FINANCIAL") {
-				redirect("/user-financial");
-			} else if (userRole === "ADMIN" || userRole === "MANAGER") {
-				redirect("/dashboard-admin");
-			} else if (userRole === "PILOT") {
-				redirect("/dashboard-pilot");
-			} else if (userRole === "LOCAL_MANAGER") {
-				redirect("/dashboard-local-manager");
-			}
+			if (userRole === "USER" || userRole === "ADMIN") {
+				redirect("/dashboard");
+			} 
 		}
 	}, [onSubmited]);
 
@@ -82,18 +76,6 @@ export default function SignInForm() {
 			setLoading(false);
 		}
 	};
-
-	async function getHealthCheck() {
-		try {
-			await axios.get("https://minas-drones-api.onrender.com/healthcheck");
-		} catch (error) {
-			console.log(error);
-		}
-	}
-
-	useEffect(() => {
-		getHealthCheck();
-	}, []);
 
 	return (
 		<Form<LoginSchema>

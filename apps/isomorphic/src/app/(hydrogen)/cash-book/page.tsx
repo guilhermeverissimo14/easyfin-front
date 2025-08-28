@@ -72,6 +72,8 @@ export default function CashBook() {
    const { openModal } = useModal();
    const headerInfoRef = useRef<HeaderInfoDetailsRef>(null);
 
+   const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
    const pageHeader = {
       title: 'Livro Caixa',
       breadcrumb: [
@@ -315,8 +317,8 @@ export default function CashBook() {
             columns={ListCashBookColumn(() => getTransactions())}
             fileName="livro-caixa"
             header=""
-            action="Registrar Lançamento"
-            importLabel="Importar Extrato"
+            action={userRole === 'ADMIN' ? "Registrar Lançamento" : ""}
+            importLabel={userRole === 'ADMIN' ? "Importar Extrato" : ""}
             filter="Filtro Avançado"
             icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             iconImport={<PiDownloadSimpleBold className="me-1.5 h-[17px] w-[17px]" />}

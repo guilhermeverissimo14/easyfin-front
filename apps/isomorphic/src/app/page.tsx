@@ -12,14 +12,8 @@ const Home = () => {
       const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
       if (!isAuthenticated) {
          redirect('/signin');
-      } else if (userRole === 'FINANCIAL') {
-         redirect('/user-financial');
-      } else if (userRole === 'ADMIN' || userRole === 'MANAGER') {
+      }else if (userRole === 'ADMIN' || userRole === 'USER') {
          redirect('/dashboard-admin');
-      } else if (userRole === 'PILOT') {
-         redirect('/dashboard-pilot');
-      }else if (userRole === 'LOCAL_MANAGER') {
-         redirect('/dashboard-local-manager');
       }
    }, [isMounted]);
 

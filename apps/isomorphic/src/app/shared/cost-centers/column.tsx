@@ -15,6 +15,8 @@ export const ListCostCenterColumn = (getList: () => void) => {
   const { openModal } = useModal();
   const isMobile = window.innerWidth < 768;
 
+  const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
   const columns = [
     columnHelper.accessor('name', {
       id: 'name',
@@ -22,7 +24,7 @@ export const ListCostCenterColumn = (getList: () => void) => {
       header: 'Nome',
       cell: ({ row }) => <span className="font-medium">{row.original.name}</span>,
     }),
-   
+
     columnHelper.display({
       id: 'actions',
       size: 120,
@@ -33,9 +35,9 @@ export const ListCostCenterColumn = (getList: () => void) => {
         },
       }) => (
         <TableRowActionGroup
-          isVisibleDelete={true}
-          isVisible={true}
-          isVisibleEdit={true}
+          isVisibleDelete={!(userRole === 'USER')}
+          isVisible={!(userRole === 'USER')}
+          isVisibleEdit={!(userRole === 'USER')}
           openModalList={() =>
             openModal({
               view: (

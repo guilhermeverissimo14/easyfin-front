@@ -17,6 +17,8 @@ export default function PaymentTerms() {
     const [paymentTerms, setPaymentTerms] = useState<PaymentTermModel[]>([]);
     const [loading, setLoading] = useState(false);
 
+    const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
     const { openModal } = useModal();
 
     const getPaymentTerms = async () => {
@@ -77,7 +79,7 @@ export default function PaymentTerms() {
                 columns={ListPaymentTermColumn(getPaymentTerms)}
                 fileName="condicoes-de-pagamento"
                 header=""
-                action="Cadastrar condição"
+                action={userRole === 'ADMIN' ? "Cadastrar condição" : ""}
                 icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             >
                 <TableComponent

@@ -19,6 +19,8 @@ export default function TaxRates() {
 
     const { openModal } = useModal();
 
+     const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
     const getTaxRates = async () => {
         setLoading(true);
         try {
@@ -77,7 +79,7 @@ export default function TaxRates() {
                 columns={ListTaxRateColumn(getTaxRates)}
                 fileName="aliquotas"
                 header=""
-                action="Cadastrar alíquota"
+                action={userRole === 'ADMIN' ? "Cadastrar alíquota" : ""}
                 icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             >
                 <TableComponent

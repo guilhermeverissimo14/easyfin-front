@@ -17,6 +17,8 @@ export default function BankAccounts() {
     const [bankAccounts, setBankAccounts] = useState<BankAccount[]>([]);
     const [loading, setLoading] = useState(false);
 
+    const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
     const { openModal } = useModal();
 
     const getBankAccounts = async () => {
@@ -77,7 +79,7 @@ export default function BankAccounts() {
                 columns={ListBankAccountColumn(getBankAccounts)}
                 fileName="contas-bancarias"
                 header=""
-                action="Cadastrar conta bancária"
+                action={userRole === 'ADMIN' ? "Cadastrar conta bancária" : ""}
                 icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             >
                 <TableComponent

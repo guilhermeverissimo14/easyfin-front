@@ -1,5 +1,4 @@
 import { routes } from '@/config/routes';
-import { LuPiggyBank } from 'react-icons/lu';
 import { GiMoneyStack } from 'react-icons/gi';
 
 import {
@@ -66,11 +65,6 @@ export const menuItems = [
          },
       ],
    },
-   // {
-   //    name: 'Caixa',
-   //    href: '#',
-   //    icon: <LuPiggyBank />,
-   // },
    {
       name: 'Faturamento',
       href: '#',
