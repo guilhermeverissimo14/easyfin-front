@@ -113,17 +113,17 @@ export const InvoiceDetails = ({ id }: InvoiceDetailsProps) => {
                </p>
                <p className="flex flex-col text-sm text-gray-500">
                   <span className="bg-gray-100 p-1 font-semibold">Valor ISSQN</span>
-                  <span className="p-1">{formatCurrency(invoice.issqnTaxRate)}</span>
+                  <span className="p-1">{formatCurrency(invoice.issqnValue * 100) || 0}</span>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
-                  <span className="bg-gray-100 p-1 font-semibold">Taxa ISSQN</span>
-                  <span className="p-1">{invoice.issqnValue.toFixed(2) || 0}%</span>
+                  <span className="bg-gray-100 p-1 font-semibold">Alíquota ISSQN</span>
+                  <span className="p-1">{invoice.issqnTaxRate}%</span>
                </p>
             </div>
 
             <div>
                <p className="flex flex-col text-sm text-gray-500">
-                  <span className="bg-gray-100 p-1 font-semibold">Taxa Efetiva</span>
+                  <span className="bg-gray-100 p-1 font-semibold">Alíquota Efetiva</span>
                   <span className="p-1">{invoice?.effectiveTaxRate?.toFixed(2) || 0}%</span>
                </p>
                <p className="flex flex-col text-sm text-gray-500">
