@@ -17,7 +17,7 @@ const useApi = <T>(endpoint: string, options?: UseApiOptions<T>) => {
    useEffect(() => {
 
       const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
-      
+
       const fetchData = async () => {
          setLoading(true);
          try {
@@ -47,21 +47,15 @@ const useApi = <T>(endpoint: string, options?: UseApiOptions<T>) => {
             console.error('Erro ao fazer a chamada à API:', error);
             setError(
                (error as any).response?.data?.message ||
-                  'Erro ao fazer a chamada à API'
+               'Erro ao fazer a chamada à API'
             );
             if ((error as any)?.response?.status === 401) {
                localStorage.clear();
                redirect('/signin');
             }
             if ((error as any)?.response?.status === 403) {
-               if (userRole === 'FINANCIAL') {
-                  redirect('/user-financial');
-               } else if (userRole === 'ADMIN' || userRole === 'MANAGER') {
+               if (userRole === 'ADMIN' || userRole === 'USER') {
                   redirect('/dashboard-admin');
-               } else if (userRole === 'PILOT') {
-                  redirect('/dashboard-pilot');
-               } else if (userRole === 'LOCAL_MANAGER') {
-                  redirect('/dashboard-local-manager');
                }
             }
          } finally {

@@ -144,7 +144,7 @@ export const routes = {
     otp4: "/auth/otp-4",
     otp5: "/auth/otp-5",
   },
-  dashboard: "/dashboard",
+  dashboard: "/dashboard-admin",
   signIn: "/signin",
   forgotPassword: "/forgot-password",
   resetPassword: "/reset-password",

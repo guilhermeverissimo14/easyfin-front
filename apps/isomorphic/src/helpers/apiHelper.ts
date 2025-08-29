@@ -16,14 +16,8 @@ export const apiCall = async <T>(request: () => Promise<T>): Promise<T | null> =
       }
       if ((error as any)?.response?.status == 403) {
 
-          if (userRole === 'FINANCIAL') {
-            window.location.href = '/user-financial';
-          } else if (userRole === 'ADMIN' || userRole === 'MANAGER') {
+          if (userRole === 'ADMIN' || userRole === 'USER') {
             window.location.href = '/dashboard-admin';
-          } else if (userRole === 'PILOT') {
-            window.location.href = '/dashboard-pilot';
-          } else if (userRole === 'LOCAL_MANAGER') {
-            window.location.href = '/dashboard-local-manager';
           }
       }
 

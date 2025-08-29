@@ -135,7 +135,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
                return (
                   <div className="w-22">
                      <div className="border-1 cursor-pointer rounded-md border border-green-400 bg-green-400 px-2 py-1 text-center text-white">
-                        Pago
+                        Recebido
                      </div>
                   </div>
                );

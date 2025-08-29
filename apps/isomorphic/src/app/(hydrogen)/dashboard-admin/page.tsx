@@ -1,6 +1,5 @@
 'use client';
 
-import { metaObject } from '@/config/site.config';
 import DashboardOverview from '../../shared/dashboard/dashboard-overview';
 import DashboardCharts from '../../shared/dashboard/dashboard-charts';
 import TopCustomers from '../../shared/dashboard/top-customers';

@@ -120,14 +120,8 @@ export default function ProfileDetails() {
 
       const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
       
-      if (userRole === 'FINANCIAL') {
-         router.push('/user-financial');
-      } else if (userRole === 'ADMIN' || userRole === 'MANAGER') {
+      if (userRole === 'ADMIN' || userRole === 'USER') {
          router.push('/dashboard-admin');
-      } else if (userRole === 'PILOT') {
-         router.push('/dashboard-pilot');
-      } else if (userRole === 'LOCAL_MANAGER') {
-         router.push('/dashboard-local-manager');
       }
 
    }

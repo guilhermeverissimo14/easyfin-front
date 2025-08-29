@@ -7,10 +7,8 @@ import {
 	PiArrowRightBold,
 	PiEnvelopeSimple,
 	PiLockKey,
-	PiEye,
-	PiEyeSlash,
 } from "react-icons/pi";
-import { Checkbox, Password, Button, Input } from "rizzui";
+import { Password, Button, Input } from "rizzui";
 import { Form } from "@core/ui/form";
 import { loginSchema, LoginSchema } from "@/validators/login.schema";
 import { loginUser } from "@/service/auth/authService";
@@ -30,7 +28,6 @@ export default function SignInForm() {
 	const [reset, setReset] = useState({});
 	const [loading, setLoading] = useState(false);
 	const [onSubmited, setOnSubmited] = useState(false);
-	const [showPassword, setShowPassword] = useState(false);
 
 	useEffect(() => {
 		const isAuthenticated = localStorage.getItem("eas:isAuthenticated");
@@ -40,7 +37,7 @@ export default function SignInForm() {
 
 		if (isAuthenticated) {
 			if (userRole === "USER" || userRole === "ADMIN") {
-				redirect("/dashboard");
+				redirect("/dashboard-admin");
 			} 
 		}
 	}, [onSubmited]);
