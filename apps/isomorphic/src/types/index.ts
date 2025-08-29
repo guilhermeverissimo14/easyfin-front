@@ -311,6 +311,7 @@ export interface IAccountsPayable {
    fine?: number;
    discount?: number;
    costCenterId?: string;
+   costCenterName?: string;
    paymentMethodId?: string;
    plannedPaymentMethod?: string;
    observation?: string;

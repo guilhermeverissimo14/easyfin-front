@@ -106,6 +106,12 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
          header: 'Cliente',
          cell: ({ row }) => <span>{row.original.customerName}</span>,
       }),
+      columnHelper.accessor('costCenterName', {
+         id: 'costCenterName',
+         size: 280,
+         header: 'Centro de Custo',
+         cell: ({ row }) => <span>{row.original.costCenterName}</span>,
+      }),
       columnHelper.accessor('status', {
          id: 'status',
          size: 60,

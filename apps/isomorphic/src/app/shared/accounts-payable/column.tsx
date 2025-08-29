@@ -102,6 +102,12 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
          header: 'Fornecedor',
          cell: ({ row }) => <span>{row.original.supplierName}</span>,
       }),
+      columnHelper.accessor('costCenterName', {
+         id: 'costCenterName',
+         size: 280,
+         header: 'Centro de Custo',
+         cell: ({ row }) => <span>{row.original.costCenterName}</span>,
+      }),
       columnHelper.accessor('status', {
          id: 'status',
          size: 60,
