@@ -170,7 +170,7 @@ export default function CashBook() {
          }
 
          if (response?.data) {
-            let dataArray: any[] = [];
+            let dataArray = [];
             let paginationInfo: PaginationInfo = {
                page: 1,
                limit: 10,

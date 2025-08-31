@@ -36,18 +36,26 @@ interface TotalData {
    date?: Date;
 }
 
+interface BankAccount {
+   id: string;
+   bank: string;
+   agency: string;
+   account: string;
+}
+
 export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDetailsProps>(
    ({ cashFlowMode, bankAccountId, cashBoxId, onBankAccountChange }, ref) => {
       const [loading, setLoading] = useState(true);
       const [totals, setTotals] = useState<TotalData | null>(null);
+      const [selectedBankAccount, setSelectedBankAccount] = useState<BankAccount | null>(null);
       const { openModal, closeModal } = useModal();
 
       const fetchTotals = async () => {
          try {
             setLoading(true);
             const currentDate = format(new Date(), 'yyyy-MM-dd');
-            let params: any = { date: currentDate };
-            
+            let params: Record<string, any> = { date: currentDate };
+
             if (cashFlowMode === 'BANK') {
                if (!bankAccountId) {
                   console.warn('Bank account ID is required for BANK mode');
@@ -79,7 +87,7 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
             const response = await api.get('/cash-flow/totals-per-day', {
                params,
             });
-
+            
             if (response?.data) { 
                setTotals({
                   bankName: response.data.bankName,
@@ -95,6 +103,22 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
             setTotals(null);
          } finally {
             setLoading(false);
+         }
+      };
+
+      const fetchSelectedBankAccount = async () => {
+         if (cashFlowMode !== 'BANK' || !bankAccountId) return;
+         
+         try {
+            const response = await api.get('/bank-accounts');
+            if (response?.data) {
+               const account = response.data.find((acc: BankAccount) => acc.id === bankAccountId);
+               if (account) {
+                  setSelectedBankAccount(account);
+               }
+            }
+         } catch (error) {
+            console.error('Erro ao buscar conta bancária:', error);
          }
       };
 
@@ -147,6 +171,7 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
       useEffect(() => {
          if (cashFlowMode) {
             fetchTotals();
+            fetchSelectedBankAccount();
          }
       }, [cashFlowMode, bankAccountId, cashBoxId]);
 
@@ -192,8 +217,10 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
                         className="flex cursor-pointer flex-col items-center justify-center space-y-1 md:items-end"
                         onClick={openBankSelectionModal}
                      >
-                        <span className="text-sm text-gray-500 md:text-base">{totals?.bankName || ""}</span>
-                        <div className="text-base font-semibold md:text-lg">{totals?.bankAccountInfo}</div>
+                        <span className="text-sm text-gray-500 md:text-base">{selectedBankAccount?.bank || ""}</span>
+                        <div className="text-base font-semibold md:text-lg">
+                           {selectedBankAccount ? `Agência ${selectedBankAccount.agency} - CC ${selectedBankAccount.account}` : ""}
+                        </div>
                      </div>
                   </CustomTooltip>
                )}

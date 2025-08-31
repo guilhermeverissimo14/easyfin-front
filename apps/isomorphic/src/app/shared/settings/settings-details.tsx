@@ -30,7 +30,6 @@ const SettingsDetails = () => {
    const {
       handleSubmit,
       reset,
-      setValue,
       control,
       watch,
       formState: { errors },
@@ -53,7 +52,7 @@ const SettingsDetails = () => {
          }
       
          if (response?.data) {
-            setBankAccounts(response.data.map((account: any) => ({
+            setBankAccounts(response.data.map((account: { bank: string; agency: string; account: string; id: string }) => ({
                label: `${account.bank} - Agência ${account.agency} - CC ${account.account}`,
                value: account.id
             })));
@@ -70,7 +69,6 @@ const SettingsDetails = () => {
          const response = await api.get('/settings');
   
          const data = response.data;
-         
          const formattedData = {
             cashFlowDefault: data.cashFlowDefault || 'BANK',
             bankAccountDefault: data.bankAccountDefault || '',
