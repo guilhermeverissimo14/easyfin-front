@@ -25,7 +25,6 @@ const supplierSchema = z.object({
         .nonempty('CNPJ não pode ser vazio'),
     email: z
         .string()
-        .email('Formato de e-mail inválido')
         .nullable()
         .optional(),
     retIss: z
