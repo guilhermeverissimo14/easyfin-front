@@ -54,7 +54,7 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
          try {
             setLoading(true);
             const currentDate = format(new Date(), 'yyyy-MM-dd');
-            let params: Record<string, any> = { date: currentDate, cashId: "cfe97761-0b1c-4f82-9054-8f51b258071d" };
+            let params: Record<string, any> = { date: currentDate};
 
             if (cashFlowMode === 'BANK') {
                if (!bankAccountId) {
