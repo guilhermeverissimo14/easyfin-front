@@ -151,7 +151,7 @@ export default function CashBook() {
          }
 
          const filters = newFilters || filterParams;
-         let response: any = null;
+         let response = null;
 
          if (cashFlowMode === 'CASH') {
             const queryParams = buildQueryParams({
