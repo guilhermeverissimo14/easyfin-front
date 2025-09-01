@@ -63,21 +63,15 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
                   return;
                }
                params.bankAccountId = bankAccountId;
-            } else if (cashFlowMode === 'CASH') {
+               
+            }else if (cashFlowMode === 'CASH') {
                // Para modo CASH, tentar usar o cashBoxId se disponível
-               if (cashBoxId) {
-                  params.cashId = cashBoxId;
-               } else {
-                  // Se não tem cashBoxId, tentar buscar das configurações
-                  try {
-                     const settingsResponse = await api.get('/settings');
-                     if (settingsResponse?.data?.cashBoxDefault) {
-                        params.cashId = settingsResponse.data.cashBoxDefault;
-                     }
-                  } catch (error) {
-                     console.warn('Erro ao buscar configurações para cashId:', error);
-                  }
-               }
+               if (!cashBoxId) {
+                  console.warn('Cash box ID is required for CASH mode');
+                  setTotals(null);
+                  return;
+               } 
+               params.cashId = cashBoxId;
             } else {
                console.warn('Cash flow mode not defined');
                setTotals(null);
