@@ -318,7 +318,7 @@ export default function CashBook() {
             fileName="livro-caixa"
             header=""
             action={userRole === 'ADMIN' ? "Registrar Lançamento" : ""}
-            importLabel={userRole === 'ADMIN' ? "Importar Extrato" : ""}
+            importLabel={userRole === 'ADMIN' && settings.cashFlowDefault === 'BANK' ? "Importar Extrato" : ""}
             filter="Filtro Avançado"
             icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             iconImport={<PiDownloadSimpleBold className="me-1.5 h-[17px] w-[17px]" />}
