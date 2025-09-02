@@ -8,6 +8,10 @@ import { useMedia } from '@core/hooks/use-media';
 import useApi from '@/hooks/useApi';
 import { Bar, CartesianGrid, ComposedChart, ResponsiveContainer, Tooltip, XAxis, YAxis, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
 import { formatCurrency } from '@/utils/format';
+import { DatePicker } from '@core/ui/datepicker';
+import { ptBR } from 'date-fns/locale';
+import { format } from 'date-fns';
+import { PiCalendarBlank } from 'react-icons/pi';
 
 interface ChartDataPoint {
    label: string;
@@ -15,10 +19,15 @@ interface ChartDataPoint {
    date: string;
 }
 
+interface ChartCashFlow { 
+   entries: number;
+   exits: number;
+}
+
 interface DashboardChartsData {
    accountsPayableChart: ChartDataPoint[];
    accountsReceivableChart: ChartDataPoint[];
-   cashFlowChart: ChartDataPoint[];
+   cashFlowChart: ChartCashFlow;
    monthlyComparisonChart: {
       revenue: ChartDataPoint[];
       expenses: ChartDataPoint[];
@@ -41,11 +50,10 @@ const mockData: DashboardChartsData = {
       { label: 'ago. de 2025', value: 0, date: '2025-08-05T17:51:57.942Z' },
    ],
    accountsReceivableChart: [{ label: 'ago. de 2025', value: 500, date: '2025-08-05T18:25:52.000Z' }],
-   cashFlowChart: [
-      { label: 'ago. de 2025 - Saída', value: 0, date: '2025-08-04T21:18:41.825Z' },
-      { label: 'ago. de 2025 - Saída', value: 0, date: '2025-08-04T21:49:03.372Z' },
-      { label: 'ago. de 2025 - Entrada', value: 0, date: '2025-08-05T00:48:39.161Z' },
-   ],
+   cashFlowChart: {
+      entries: 101411,
+      exits: 20000
+   },
    monthlyComparisonChart: {
       revenue: [
          { label: 'jul. de 2025', value: 0, date: '2025-07-05T06:00:00.000Z' },
@@ -82,28 +90,39 @@ const viewOptions = [
 export default function DashboardCharts() {
    const isTablet = useMedia('(max-width: 800px)', false);
    const [viewType, setViewType] = useState('monthly');
+   const [cashFlowStartDate, setCashFlowStartDate] = useState<Date | null>(null);
+   const [cashFlowEndDate, setCashFlowEndDate] = useState<Date | null>(null);
 
-   const { data: apiData, loading, error } = useApi<DashboardChartsData>('/dashboard/charts');
+   // Build API URL with date parameters for cash flow
+   const buildCashFlowApiUrl = () => {
+      let url = '/dashboard/charts';
+      const params = new URLSearchParams();
+      
+      if (cashFlowStartDate) {
+         params.append('startDate', format(cashFlowStartDate, 'yyyy-MM-dd'));
+      }
+      if (cashFlowEndDate) {
+         params.append('endDate', format(cashFlowEndDate, 'yyyy-MM-dd'));
+      }
+      
+      return params.toString() ? `${url}?${params.toString()}` : url;
+   };
+
+   const { data: apiData, loading, error } = useApi<DashboardChartsData>(buildCashFlowApiUrl());
    const displayData = apiData || mockData;
 
    function handleChange(selectedViewType: string) {
       setViewType(selectedViewType);
    }
 
-   // Process cash flow data to separate entrada and saida
-   const processedCashFlowData = displayData.cashFlowChart.reduce((acc: any[], item) => {
-      const month = item.label.split(' - ')[0];
-      const type = item.label.includes('Entrada') ? 'entrada' : 'saida';
+   // Process cash flow data for pie chart
+   const cashFlowData = [
+      { name: 'Entradas', value: displayData.cashFlowChart.entries },
+      { name: 'Saídas', value: displayData.cashFlowChart.exits },
+   ];
 
-      let existingMonth = acc.find((m) => m.month === month);
-      if (!existingMonth) {
-         existingMonth = { month, entrada: 0, saida: 0 };
-         acc.push(existingMonth);
-      }
-
-      existingMonth[type] += item.value;
-      return acc;
-   }, []);
+   // Check if cash flow has no data
+   const hasCashFlowData = displayData.cashFlowChart.entries > 0 || displayData.cashFlowChart.exits > 0;
 
    // Process monthly comparison data
    const processedMonthlyData = displayData.monthlyComparisonChart.revenue.map((revenueItem, index) => {
@@ -126,10 +145,10 @@ export default function DashboardCharts() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
          {/* Revenue vs Expenses Chart */}
          <WidgetCard
-            title="Receita vs Despesas"
+            title="Receitas x Despesas"
             titleClassName="text-gray-700 font-bold font-inter"
             headerClassName="items-center"
-            action={<DropdownAction className="rounded-md border" options={viewOptions} onChange={handleChange} dropdownClassName="!z-0" />}
+            //action={<DropdownAction className="rounded-md border" options={viewOptions} onChange={handleChange} dropdownClassName="!z-0" />}
             className="col-span-full lg:col-span-1"
          >
             <div className="mt-5 aspect-[1060/640] w-full lg:mt-7">
@@ -156,45 +175,123 @@ export default function DashboardCharts() {
             </div>
          </WidgetCard>
 
-         {/* Cash Flow Chart */}
+         {/* Cash Flow Chart - Now as Pie Chart */}
          <WidgetCard
             title="Fluxo de Caixa"
             titleClassName="text-gray-700 font-bold font-inter"
             headerClassName="items-center"
             className="col-span-full lg:col-span-1"
-         >
-            <div className="mt-5 aspect-[1060/640] w-full lg:mt-7">
-               <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                     data={processedCashFlowData}
-                     margin={{
-                        left: -5,
+            action={
+               <div className="flex items-center gap-2 md:flex-row flex-col">
+                  <DatePicker
+                     selected={cashFlowStartDate}
+                     onChange={(date) => setCashFlowStartDate(date)}
+                     dateFormat="dd/MM/yyyy"
+                     placeholderText="Data inicial"
+                     inputProps={{
+                        variant: 'outline',
+                        inputClassName: 'h-9 px-2 text-sm [&_input]:text-ellipsis',
+                        className: 'w-48'
                      }}
-                     className="[&_.recharts-tooltip-cursor]:fill-opacity-20 dark:[&_.recharts-tooltip-cursor]:fill-opacity-10 [&_.recharts-cartesian-axis-tick-value]:fill-gray-500"
-                  >
-                     <defs>
-                        <linearGradient id="entrada" x1="0" y1="0" x2="0" y2="1">
-                           <stop offset="5%" stopColor="#10B981" stopOpacity={0.8} />
-                           <stop offset="95%" stopColor="#10B981" stopOpacity={0.1} />
-                        </linearGradient>
-                        <linearGradient id="saida" x1="0" y1="0" x2="0" y2="1">
-                           <stop offset="5%" stopColor="#EF4444" stopOpacity={0.8} />
-                           <stop offset="95%" stopColor="#EF4444" stopOpacity={0.1} />
-                        </linearGradient>
-                     </defs>
-                     <CartesianGrid vertical={false} strokeOpacity={0.435} strokeDasharray="8 10" />
-                     <XAxis dataKey="month" axisLine={false} tickLine={false} />
-                     <YAxis
-                        axisLine={false}
-                        tickLine={false}
-                        tickFormatter={(value) => formatCurrency(value).replace('R$', 'R$').slice(0, -3) + 'k'}
-                     />
-                     <Tooltip content={<CustomTooltip />} />
-                     <Area type="monotone" dataKey="entrada" stroke="#10B981" fillOpacity={1} fill="url(#entrada)" strokeWidth={2} name="Entrada" />
-                     <Area type="monotone" dataKey="saida" stroke="#EF4444" fillOpacity={1} fill="url(#saida)" strokeWidth={2} name="Saída" />
-                  </AreaChart>
-               </ResponsiveContainer>
-            </div>
+                     locale={ptBR}
+                     maxDate={cashFlowEndDate || new Date()}
+                  />
+                  <span className="text-gray-400">até</span>
+                  <DatePicker
+                     selected={cashFlowEndDate}
+                     onChange={(date) => setCashFlowEndDate(date)}
+                     dateFormat="dd/MM/yyyy"
+                     placeholderText="Data final"
+                     inputProps={{
+                        variant: 'outline',
+                        inputClassName: 'h-9 px-2 text-sm [&_input]:text-ellipsis',
+                        className: 'w-48'
+                     }}
+                     locale={ptBR}
+                     minDate={cashFlowStartDate || undefined}
+                     maxDate={new Date()}
+                  />
+                  {(cashFlowStartDate || cashFlowEndDate) && (
+                     <button
+                        onClick={() => {
+                           setCashFlowStartDate(null);
+                           setCashFlowEndDate(null);
+                        }}
+                        className="text-xs text-gray-500 hover:text-gray-700 underline"
+                     >
+                        Limpar
+                     </button>
+                  )}
+               </div>
+            }
+         >
+            {!hasCashFlowData ? (
+               <div className="mt-5 flex flex-col items-center justify-center h-[500px] text-center">
+                  <PiCalendarBlank className="w-16 h-16 text-gray-300 mb-4" />
+                  <h3 className="text-lg font-medium text-gray-600 mb-2">
+                     Nenhum lançamento encontrado
+                  </h3>
+                  <p className="text-sm text-gray-500 max-w-sm">
+                     Não foram encontrados lançamentos financeiros no período selecionado. 
+                     Tente ajustar o filtro de datas ou verifique se há movimentações cadastradas.
+                  </p>
+               </div>
+            ) : (
+               <div className="mt-5 flex flex-col gap-6 lg:mt-7">
+                  <div className="flex flex-col gap-2 lg:flex-row">
+                     <div className="relative h-[500px] w-full lg:w-[500px]">
+                        <ResponsiveContainer width="100%" height="100%">
+                           <PieChart>
+                              <Pie 
+                                 data={cashFlowData} 
+                                 cx="50%" 
+                                 cy="50%" 
+                                 innerRadius={60} 
+                                 outerRadius={120} 
+                                 paddingAngle={2} 
+                                 dataKey="value"
+                              >
+                                 {cashFlowData.map((entry, index) => (
+                                    <Cell key={`cell-${index}`} fill={index === 0 ? '#10B981' : '#EF4444'} />
+                                 ))}
+                              </Pie>
+                              <Tooltip
+                                 content={({ active, payload }) => {
+                                    if (active && payload && payload.length) {
+                                       const data = payload[0].payload;
+                                       return (
+                                          <div className="rounded-lg border bg-white p-3 shadow-lg">
+                                             <p className="font-medium">{data.name}</p>
+                                             <p className="text-sm text-gray-600">{formatCurrency(data.value)}</p>
+                                          </div>
+                                       );
+                                    }
+                                    return null;
+                                 }}
+                              />
+                           </PieChart>
+                        </ResponsiveContainer>
+                     </div>
+
+                     <div className="flex flex-1 flex-col justify-center gap-4">
+                        {cashFlowData.map((item, index) => (
+                           <div key={item.name} className="flex items-center justify-between">
+                              <div className="flex items-center gap-3">
+                                 <div
+                                    className="h-3 w-3 rounded-full"
+                                    style={{ backgroundColor: index === 0 ? '#10B981' : '#EF4444' }}
+                                 />
+                                 <span className="text-sm font-medium text-gray-700">{item.name}</span>
+                              </div>
+                              <div className="text-right">
+                                 <p className="text-sm font-semibold text-gray-900">{formatCurrency(item.value)}</p>
+                              </div>
+                           </div>
+                        ))}
+                     </div>
+                  </div>
+               </div>
+            )}
          </WidgetCard>
 
          {/* Expenses by Category */}
