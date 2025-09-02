@@ -10,8 +10,6 @@ import { api } from '@/service/api';
 import { formatCurrency } from '@/utils/format';
 import { useModal } from '@/app/shared/modal-views/use-modal';
 import { Controller, useForm } from 'react-hook-form';
-import { z } from 'zod';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from 'rizzui';
 import { SelectField } from '@/components/input/select-field';
 import ModalForm from '@/components/modal/modal-form';
@@ -116,46 +114,55 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
          }
       };
 
-      const handleBankAccountChange = async (bankId: string) => {
-         try {
-            setLoading(true);
-            
-            await api.put('/settings', {
-               cashFlowDefault: 'BANK',
-               bankAccountDefault: bankId
-            });
-            
-            if (onBankAccountChange) {
-               onBankAccountChange(bankId);
-            }
-            
-            fetchTotals();
-            window.location.reload();
-            
-            toast.success('Conta bancária alterada com sucesso!');
-         } catch (error) {
-            console.error('Erro ao alterar conta bancária:', error);
-            toast.error('Não foi possível alterar a conta bancária');
-         } finally {
-            setLoading(false);
-         }
-      };
 
-      const openBankSelectionModal = () => {
-         if (cashFlowMode !== 'BANK') return;
-         
+      const openModeSelectionModal = () => {
          openModal({
             view: (
-               <ModalForm title="Selecionar Conta Bancária">
-                  <BankAccountSelectionForm 
+               <ModalForm title="Selecionar Modo do Fluxo de Caixa">
+                  <ModeSelectionForm 
+                     currentMode={cashFlowMode}
                      currentBankAccountId={bankAccountId}
-                     onSubmit={handleBankAccountChange}
+                     onSubmit={handleModeChange}
                      onCancel={closeModal}
                   />
                </ModalForm>
             ),
             size: 'sm',
          });
+      };
+
+      const handleModeChange = async (mode: string, bankId?: string) => {
+         try {
+            setLoading(true);
+            
+            const payload: any = {
+               cashFlowDefault: mode,
+            };
+
+            if (mode === 'BANK' && bankId) {
+               payload.bankAccountDefault = bankId;
+            }
+
+            await api.put('/settings', payload);
+            
+            if (onBankAccountChange) {
+               if (mode === 'BANK' && bankId) {
+                  onBankAccountChange(bankId);
+               } else {
+                  // Se mudou para CASH, recarregar a página para aplicar as mudanças
+                  window.location.reload();
+               }
+            } else {
+               window.location.reload();
+            }
+            
+            toast.success('Modo do fluxo de caixa alterado com sucesso!');
+         } catch (error) {
+            console.error('Erro ao alterar modo:', error);
+            toast.error('Não foi possível alterar o modo do fluxo de caixa');
+         } finally {
+            setLoading(false);
+         }
       };
 
       useImperativeHandle(ref, () => ({
@@ -199,17 +206,22 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
 
             <div className="flex w-full items-center justify-center md:w-1/4">
                {cashFlowMode === 'CASH' && (
-                  <div className="flex flex-col items-center justify-center space-y-1 md:items-end">
-                     <span className="text-sm text-gray-500 md:text-base">Modo Dinheiro</span>
-                     <div className="text-base font-semibold md:text-lg">Fluxo de Caixa</div>
-                  </div>
+                  <CustomTooltip text="Clique aqui para alterar o modo do fluxo de caixa">
+                     <div 
+                        className="flex cursor-pointer flex-col items-center justify-center space-y-1 md:items-end"
+                        onClick={openModeSelectionModal}
+                     >
+                        <span className="text-sm text-gray-500 md:text-base">Modo Dinheiro</span>
+                        <div className="text-base font-semibold md:text-lg">Fluxo de Caixa</div>
+                     </div>
+                  </CustomTooltip>
                )}
 
                {cashFlowMode === 'BANK' && (
-                  <CustomTooltip text="Clique aqui para selecionar outra conta">
+                  <CustomTooltip text="Clique aqui para alterar o modo do fluxo de caixa">
                      <div 
                         className="flex cursor-pointer flex-col items-center justify-center space-y-1 md:items-end"
-                        onClick={openBankSelectionModal}
+                        onClick={openModeSelectionModal}
                      >
                         <span className="text-sm text-gray-500 md:text-base">{selectedBankAccount?.bank || ""}</span>
                         <div className="text-base font-semibold md:text-lg">
@@ -233,32 +245,43 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
    }
 );
 
-function BankAccountSelectionForm({ 
+function ModeSelectionForm({ 
+   currentMode, 
    currentBankAccountId, 
    onSubmit, 
    onCancel 
 }: {
+   currentMode?: string;
    currentBankAccountId?: string;
-   onSubmit: (bankId: string) => void;
+   onSubmit: (mode: string, bankId?: string) => void;
    onCancel: () => void;
 }) {
    const [loading, setLoading] = useState(false);
    const [bankAccounts, setBankAccounts] = useState([]);
    
-   const { handleSubmit, control, formState: { errors } } = useForm({
+   const { handleSubmit, control, watch, formState: { errors } } = useForm({
       defaultValues: {
+         mode: currentMode || 'BANK',
          bankAccountId: currentBankAccountId || '',
       }
    });
+
+   const selectedMode = watch('mode');
+   const selectedBankAccountId = watch('bankAccountId');
    
-   const handleFormSubmit = (data: { bankAccountId: string }) => {
+   
+   const handleFormSubmit = (data: { mode: string; bankAccountId: string }) => {
       setLoading(true);
-      onSubmit(data.bankAccountId);
+      if (data.mode === 'BANK' && (data.bankAccountId || selectedBankAccountId)) {
+         onSubmit(data.mode, data.bankAccountId || selectedBankAccountId);
+      } else {
+         onSubmit(data.mode);
+      }
       onCancel();
       setLoading(false);
    };
 
-   useEffect(()=>{
+   useEffect(() => {
        const fetchBankAccounts = async () => {
          try {
             const response = await api.get('/bank-accounts');
@@ -277,34 +300,57 @@ function BankAccountSelectionForm({
       };
       fetchBankAccounts();
    }, []);
+
+   const modeOptions = [
+      { label: 'Dinheiro', value: 'CASH' },
+      { label: 'Banco', value: 'BANK' },
+   ];
    
    return (
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
          <Controller
             control={control}
-            name="bankAccountId"
+            name="mode"
             render={({ field: { value, onChange } }) => (
                <SelectField
-                  label="Conta Bancária"
-                  placeholder="Selecione a conta bancária"
-                  options={bankAccounts}
+                  label="Modo do Fluxo de Caixa"
+                  placeholder="Selecione o modo"
+                  options={modeOptions}
                   onChange={onChange}
                   value={value}
-                  error={errors.bankAccountId?.message}
+                  error={errors.mode?.message}
                />
             )}
          />
+
+         {selectedMode === 'BANK' && (
+            <Controller
+               control={control}
+               name="bankAccountId"
+               render={({ field: { value, onChange } }) => (
+                  <SelectField
+                     label="Conta Bancária"
+                     placeholder="Selecione a conta bancária"
+                     options={bankAccounts}
+                     onChange={onChange}
+                     value={value}
+                     error={errors.bankAccountId?.message}
+                  />
+               )}
+            />
+         )}
          
          <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={onCancel}>
                Cancelar
             </Button>
             <Button type="submit" disabled={loading}>
-               {loading ? 'Alterando...' : 'Alterar Conta'}
+               {loading ? 'Alterando...' : 'Alterar'}
             </Button>
          </div>
       </form>
    );
 }
+
 
 HeaderInfoDetails.displayName = 'HeaderInfoDetails';
