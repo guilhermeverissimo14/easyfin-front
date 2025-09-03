@@ -10,7 +10,7 @@ import { api } from '@/service/api';
 import { ListCashBookColumn } from '@/app/shared/cash-book/column';
 import { HeaderInfoDetails, HeaderInfoDetailsRef } from '@/app/shared/cash-book/header-info-details';
 import TableLayout from '../tables/table-layout';
-import { ICashBook } from '@/types';
+import { ICashBook, PaginationInfo } from '@/types';
 import { RegisterTransaction } from '@/app/shared/cash-book/register-transaction';
 import { toast } from 'react-toastify';
 import { apiCall } from '@/helpers/apiHelper';
@@ -33,14 +33,6 @@ export interface CashBookFilterParams {
    bankAccountId?: string;
 }
 
-interface PaginationInfo {
-   page: number;
-   limit: number;
-   totalCount: number;
-   totalPages: number;
-   hasNextPage: boolean;
-   hasPreviousPage: boolean;
-}
 
 export default function CashBook() {
    const [transactions, setTransactions] = useState<ICashBook[]>([]);
@@ -197,7 +189,7 @@ export default function CashBook() {
                return;
             }
 
-            const formattedData = dataArray.map((item: any) => ({
+            const formattedData = dataArray.map((item: ICashBook) => ({
                id: item.id,
                date: item.date,
                history: item.history || 'Sem histórico',
@@ -334,7 +326,7 @@ export default function CashBook() {
                title=""
                column={ListCashBookColumn(() => getTransactions())}
                variant="classic"
-               data={transactions}
+               data={transactions as any[]}
                tableHeader={true}
                searchAble={true}
                pagination={false}

@@ -8,8 +8,26 @@ import Table from '@core/components/table';
 import { useTanStackTable } from '@core/components/table/custom/use-TanStack-Table';
 import TablePagination from '@core/components/table/pagination';
 import { SkeletonLoader } from '../skeleton/skeleton';
+import { ColumnDef } from '@tanstack/react-table';
 
-export default function TableComponent({
+interface TableData {
+   id: string | number;
+   [key: string]: unknown;
+}
+
+interface TableComponentProps<T extends TableData> {
+   searchAble?: boolean;
+   variant?: TableVariantProps;
+   tableHeader?: boolean;
+   pagination?: boolean;
+   data: T[];
+   column: ColumnDef<T, unknown>[] | ((getList: () => void) => ColumnDef<T, unknown>[]);
+   title?: string;
+   loading?: boolean;
+   customFilters?: React.ReactNode;
+}
+
+export default function TableComponent<T extends TableData>({
    searchAble = true,
    variant = 'elegant',
    tableHeader = true,
@@ -19,17 +37,7 @@ export default function TableComponent({
    title = '',
    loading = false,
    customFilters,
-}: {
-   searchAble: boolean;
-   variant?: TableVariantProps;
-   tableHeader: boolean;
-   pagination: boolean;
-   data: any[];
-   column: any;
-   title: string;
-   loading: boolean;
-   customFilters?: React.ReactNode;
-}) {
+}: TableComponentProps<T>) {
    const getList = async () => {
       setData(data);
    };
@@ -38,14 +46,16 @@ export default function TableComponent({
       getList();
    }, [data]);
 
-   const { table, setData, handleDragEndColumn, sensors, columnOrder } = useTanStackTable<any>({
+   const columns = typeof column === 'function' ? column(getList) : column;
+
+   const { table, setData, handleDragEndColumn, sensors, columnOrder } = useTanStackTable<T>({
       tableData: data,
-      columnConfig: column,
+      columnConfig: columns,
       options: {
          initialState: {
             pagination: {
                pageIndex: 0,
-               pageSize: 50,
+               pageSize: 100,
             },
          },
          enableColumnResizing: false,

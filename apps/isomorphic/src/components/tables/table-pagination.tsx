@@ -1,4 +1,6 @@
-export const TablePagination = ({ pagination, onPageChange, onLimitChange }: any) => {
+import { PaginationInfo } from "@/types";
+
+export const TablePagination = ({ pagination, onPageChange, onLimitChange }: { pagination: PaginationInfo; onPageChange: (page: number) => void; onLimitChange: (limit: number) => void; }) => {
    return (
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between px-6 py-4 bg-white border-t border-gray-200">
          <div className="flex flex-1 justify-between sm:hidden">
@@ -35,6 +37,7 @@ export const TablePagination = ({ pagination, onPageChange, onLimitChange }: any
                         <option value={10}>10</option>
                         <option value={20}>20</option>
                         <option value={50}>50</option>
+                        <option value={100}>100</option>
                      </select>
                   </div>
                )}

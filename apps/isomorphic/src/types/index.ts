@@ -274,6 +274,16 @@ export interface Notifications {
    createdAt: Date;
 }
 
+
+export interface PaginationInfo {
+   page: number;
+   limit: number;
+   totalCount: number;
+   totalPages: number;
+   hasNextPage: boolean;
+   hasPreviousPage: boolean;
+}
+
 export interface ICashBook {
    id: string;
    cashBoxId?: string;
@@ -282,7 +292,7 @@ export interface ICashBook {
    value: string;
    type: string; // 'C' para crédito, 'D' para débito
    description: string;
-   costCenter: string | null;
+   costCenter: {name: string} | null;
    balance: string;
    createdAt?: Date;
    updatedAt?: Date;
