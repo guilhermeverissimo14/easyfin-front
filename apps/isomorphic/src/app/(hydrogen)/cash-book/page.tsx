@@ -324,7 +324,7 @@ export default function CashBook() {
                title=""
                column={ListCashBookColumn(() => getTransactions())}
                variant="classic"
-               data={transactions as any[]}
+               data={transactions}
                tableHeader={true}
                searchAble={true}
                pagination={false}

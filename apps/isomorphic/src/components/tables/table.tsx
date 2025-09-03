@@ -20,8 +20,8 @@ interface TableComponentProps<T extends TableData> {
    variant?: TableVariantProps;
    tableHeader?: boolean;
    pagination?: boolean;
-   data: T[];
-   column: ColumnDef<T, unknown>[] | ((getList: () => void) => ColumnDef<T, unknown>[]);
+   data: any[];
+   column: any;
    title?: string;
    loading?: boolean;
    customFilters?: React.ReactNode;
