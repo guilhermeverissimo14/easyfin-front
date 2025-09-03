@@ -6,7 +6,7 @@ import { Avatar, Text, Badge } from 'rizzui';
 import useApi from '@/hooks/useApi';
 import cn from '@core/utils/class-names';
 import { formatCurrency } from '@/utils/format';
-import { PiBuildings } from 'react-icons/pi';
+import { PiBuildings, PiCalendarBlank } from 'react-icons/pi';
 
 interface Supplier {
    id: string;
@@ -171,9 +171,15 @@ export default function TopSuppliers({ className }: { className?: string }) {
          </div>
 
          {(!displayData || displayData.length === 0) && (
-            <div className="flex flex-col items-center justify-center py-8">
-               <PiBuildings className="h-12 w-12 text-gray-300" />
-               <Text className="mt-2 text-gray-500">Nenhum fornecedor encontrado</Text>
+            <div className="mt-5 flex flex-col items-center justify-center h-[500px] text-center">
+               <PiCalendarBlank className="w-16 h-16 text-gray-300 mb-4" />
+               <h3 className="text-lg font-medium text-gray-600 mb-2">
+                  Nenhum lançamento encontrado
+               </h3>
+               <p className="text-sm text-gray-500 max-w-sm">
+                  Não foram encontrados lançamentos financeiros ou contas a pagar no período selecionado. 
+                  Tente ajustar o filtro de datas ou verifique se há movimentações cadastradas.
+               </p>
             </div>
          )}
       </WidgetCard>

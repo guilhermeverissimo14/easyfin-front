@@ -6,7 +6,7 @@ import { Avatar, Text, Badge } from 'rizzui';
 import useApi from '@/hooks/useApi';
 import cn from '@core/utils/class-names';
 import { formatDate, formatCurrency } from '@/utils/format';
-import { PiUser, PiCurrencyDollar, PiTrendUp } from 'react-icons/pi';
+import { PiUser, PiCurrencyDollar, PiTrendUp, PiCalendarBlank } from 'react-icons/pi';
 
 interface Customer {
    id: string;
@@ -158,9 +158,15 @@ export default function TopCustomers({ className }: { className?: string }) {
          </div>
 
          {(!displayData || displayData.length === 0) && (
-            <div className="flex flex-col items-center justify-center py-8">
-               <PiUser className="h-12 w-12 text-gray-300" />
-               <Text className="mt-2 text-gray-500">Nenhum cliente encontrado</Text>
+            <div className="flex h-[500px] flex-col items-center justify-center text-center">
+               <PiCalendarBlank className="h-16 w-16 text-gray-300" />
+               <h3 className="text-lg font-medium text-gray-600 mb-2">
+                  Nenhum lançamento encontrado
+               </h3>
+               <p className="text-sm text-gray-500 max-w-sm">
+                  Não foram encontrados lançamentos financeiros ou contas a receber no período selecionado. 
+                  Tente ajustar o filtro de datas ou verifique se há movimentações cadastradas.
+               </p>
             </div>
          )}
       </WidgetCard>
