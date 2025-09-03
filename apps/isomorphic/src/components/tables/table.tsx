@@ -19,7 +19,6 @@ export default function TableComponent({
    title = '',
    loading = false,
    customFilters,
-   pageSize = 25, 
 }: {
    searchAble: boolean;
    variant?: TableVariantProps;
@@ -30,7 +29,6 @@ export default function TableComponent({
    title: string;
    loading: boolean;
    customFilters?: React.ReactNode;
-   pageSize?: number;
 }) {
    const getList = async () => {
       setData(data);
@@ -47,7 +45,7 @@ export default function TableComponent({
          initialState: {
             pagination: {
                pageIndex: 0,
-               pageSize: pagination ? pageSize : data.length,
+               pageSize: 50,
             },
          },
          enableColumnResizing: false,

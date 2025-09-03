@@ -95,7 +95,6 @@ export default function CashBook() {
          }
       });
    
-      console.log('Query params:', queryParams.toString()); // Debug
       return queryParams.toString();
    };
 
@@ -193,7 +192,6 @@ export default function CashBook() {
                   setCashBoxId(newCashBoxId);
                }
             }
-
             if (dataArray.length === 0 && !newFilters) {
                toast.info('Nenhum lançamento encontrado no livro caixa.');
                return;
@@ -340,7 +338,6 @@ export default function CashBook() {
                tableHeader={true}
                searchAble={true}
                pagination={false}
-               pageSize={transactions.length}
                loading={loading}
             />
 
