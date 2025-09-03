@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import WidgetCard from '@core/components/cards/widget-card';
 import { CustomTooltip } from '@core/components/charts/custom-tooltip';
 import { useMedia } from '@core/hooks/use-media';
@@ -90,12 +90,12 @@ const viewOptions = [
 const CostCenterPodium = ({ data }: { data: { label: string; value: number }[] }) => {
    if (!data || data.length === 0) {
       return (
-         <div className="mt-5 flex flex-col items-center justify-center h-[500px] text-center">
-            <PiCalendarBlank className="w-16 h-16 text-gray-300 mb-4" />
+         <div className="mt-5 flex flex-col items-center justify-center h-[300px] text-center">
+            <PiCalendarBlank className="w-12 h-12 text-gray-300 mb-4" />
             <h3 className="text-lg font-medium text-gray-600 mb-2">
                Nenhum lançamento encontrado
             </h3>
-            <p className="text-sm text-gray-500 max-w-sm">
+            <p className="text-xs text-gray-500 max-w-sm">
                Não foram encontrados lançamentos financeiros no período selecionado. 
                Tente ajustar o filtro de datas ou verifique se há movimentações cadastradas.
             </p>
@@ -238,10 +238,33 @@ const CostCenterPodium = ({ data }: { data: { label: string; value: number }[] }
    );
 };
 
-export default function DashboardCharts() {
+interface DashboardChartsProps {
+   onDateChange?: (startDate: Date | null, endDate: Date | null) => void;
+}
+
+export default function DashboardCharts({ onDateChange }: DashboardChartsProps = {}) {
    const isTablet = useMedia('(max-width: 800px)', false);
    const [cashFlowStartDate, setCashFlowStartDate] = useState<Date | null>(subDays(new Date(), 30));
    const [cashFlowEndDate, setCashFlowEndDate] = useState<Date | null>(new Date());
+
+   // Notificar mudanças de data para o componente pai
+   useEffect(() => {
+      onDateChange?.(cashFlowStartDate, cashFlowEndDate);
+   }, [cashFlowStartDate, cashFlowEndDate]);
+
+   // Funções para manipular as datas
+   const handleStartDateChange = (date: Date | null) => {
+      setCashFlowStartDate(date);
+   };
+
+   const handleEndDateChange = (date: Date | null) => {
+      setCashFlowEndDate(date);
+   };
+
+   const handleClearDates = () => {
+      setCashFlowStartDate(null);
+      setCashFlowEndDate(null);
+   };
 
    const buildCashFlowApiUrl = () => {
       let url = '/dashboard/charts';
@@ -307,7 +330,7 @@ export default function DashboardCharts() {
                   <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Período:</span>
                   <DatePicker
                      selected={cashFlowStartDate}
-                     onChange={(date) => setCashFlowStartDate(date)}
+                     onChange={handleStartDateChange}
                      dateFormat="dd/MM/yyyy"
                      placeholderText="Data inicial"
                      inputProps={{
@@ -321,7 +344,7 @@ export default function DashboardCharts() {
                   <span className="text-gray-400 text-sm">até</span>
                   <DatePicker
                      selected={cashFlowEndDate}
-                     onChange={(date) => setCashFlowEndDate(date)}
+                     onChange={handleEndDateChange}
                      dateFormat="dd/MM/yyyy"
                      placeholderText="Data final"
                      inputProps={{
@@ -335,10 +358,7 @@ export default function DashboardCharts() {
                   />
                   {(cashFlowStartDate || cashFlowEndDate) && (
                      <button
-                        onClick={() => {
-                           setCashFlowStartDate(null);
-                           setCashFlowEndDate(null);
-                        }}
+                        onClick={handleClearDates}
                         className="text-xs text-gray-500 hover:text-gray-700 underline whitespace-nowrap"
                      >
                         Limpar
@@ -393,9 +413,9 @@ export default function DashboardCharts() {
                   <div className="mt-5 aspect-[1366/640] w-full">
                      <ResponsiveContainer width="100%" height="100%">
                         {!hasCashFlowData ? (
-                           <div className="mt-5 flex flex-col items-center justify-center h-[400px] text-center">
+                           <div className="mt-5 flex flex-col items-center justify-center h-[350px] text-center">
                               <PiCalendarBlank className="w-12 h-12 text-gray-300 mb-3" />
-                              <h3 className="text-base font-medium text-gray-600 mb-2">
+                              <h3 className="text-lg font-medium text-gray-600 mb-2">
                                  Nenhum lançamento encontrado
                               </h3>
                               <p className="text-xs text-gray-500 max-w-xs">
@@ -516,9 +536,9 @@ export default function DashboardCharts() {
                            </div>
                         </div>
                      ) : (
-                        <div className="flex flex-col items-center justify-center h-[250px] text-center">
+                        <div className="flex flex-col items-center justify-center h-[300px] text-center">
                            <PiCalendarBlank className="w-12 h-12 text-gray-300 mb-3" />
-                           <h3 className="text-base font-medium text-gray-600 mb-2">
+                           <h3 className="text-lg font-medium text-gray-600 mb-2">
                               Nenhum pagamento encontrado
                            </h3>
                            <p className="text-xs text-gray-500 max-w-xs">

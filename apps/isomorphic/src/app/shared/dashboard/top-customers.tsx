@@ -20,8 +20,20 @@ interface Customer {
    avatar?: string;
 }
 
-export default function TopCustomers({ className }: { className?: string }) {
-   const { data: customers, loading, error } = useApi<Customer[]>('/dashboard/top-customers');
+interface TopCustomersProps {
+   className?: string;
+   startDate?: Date | null;
+   endDate?: Date | null;
+   apiUrl?: string;
+}
+
+export default function TopCustomers({ 
+   className, 
+   startDate, 
+   endDate, 
+   apiUrl = '/dashboard/top-customers' 
+}: TopCustomersProps) {
+   const { data: customers, loading, error } = useApi<Customer[]>(apiUrl);
 
    const mockData: Customer[] = [
       {

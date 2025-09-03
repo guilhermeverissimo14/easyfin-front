@@ -1,11 +1,12 @@
 'use client';
 
+import { useState, useCallback } from 'react';
 import DashboardOverview from '../../shared/dashboard/dashboard-overview';
 import DashboardCharts from '../../shared/dashboard/dashboard-charts';
-import TopCustomers from '../../shared/dashboard/top-customers';
-import TopSuppliers from '../../shared/dashboard/top-suppliers';
+import DashboardAnalytics from '../../shared/dashboard/dashboard-analytics';
 import RecentTransactions from '../../shared/dashboard/recent-transactions';
 import PageHeader from '../../shared/page-header';
+import { subDays } from 'date-fns';
 
 const pageHeader = {
    title: 'Dashboard Administrativo',
@@ -18,6 +19,15 @@ const pageHeader = {
 };
 
 export default function DashAdmin() {
+   const [dateFilter, setDateFilter] = useState<{
+      startDate: Date | null;
+      endDate: Date | null;
+   }>({ startDate: subDays(new Date(), 30), endDate: new Date() });
+
+   const handleDateChange = useCallback((startDate: Date | null, endDate: Date | null) => {
+      setDateFilter({ startDate, endDate });
+   }, []);
+
    return (
       <>
          <PageHeader title={pageHeader.title} breadcrumb={pageHeader.breadcrumb} />
@@ -30,18 +40,20 @@ export default function DashAdmin() {
 
             {/* Charts Section */}
             <div className="mb-6">
-               <DashboardCharts />
-            </div>
-
-            {/* Top Customers and Suppliers */}
-            <div className="mb-6 grid grid-cols-1 gap-6 @4xl:grid-cols-2">
-               <TopCustomers />
-               <TopSuppliers />
+               <DashboardCharts onDateChange={handleDateChange} />
             </div>
 
             {/* Recent Transactions */}
             <div className="mb-6">
-               <RecentTransactions />
+               <RecentTransactions 
+                  startDate={dateFilter.startDate} 
+                  endDate={dateFilter.endDate} 
+               />
+            </div>
+
+            {/* Analytics Section - Nova seção */}
+            <div className="mb-6">
+               <DashboardAnalytics />
             </div>
          </div>
       </>

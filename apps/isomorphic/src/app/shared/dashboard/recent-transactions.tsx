@@ -7,6 +7,7 @@ import useApi from '@/hooks/useApi';
 import cn from '@core/utils/class-names';
 import { formatDate, formatCurrency } from '@/utils/format';
 import { PiArrowUp, PiArrowDown, PiClock, PiEye, PiCaretRight } from 'react-icons/pi';
+import { format } from 'date-fns';
 
 interface Transaction {
    id: string;
@@ -32,9 +33,31 @@ interface DisplayTransaction {
    supplierName?: string;
 }
 
-export default function RecentTransactions({ className }: { className?: string }) {
-   const { data: transactions, loading, error } = useApi<Transaction[]>('/dashboard/recent-transactions');
+interface RecentTransactionsProps {
+   className?: string;
+   startDate?: Date | null;
+   endDate?: Date | null;
+}
+
+export default function RecentTransactions({ className, startDate, endDate }: RecentTransactionsProps) {
    const [showAll, setShowAll] = useState(false);
+
+   // Construir URL da API com filtros de data
+   const buildApiUrl = () => {
+      let url = '/dashboard/recent-transactions';
+      const params = new URLSearchParams();
+      
+      if (startDate) {
+         params.append('startDate', format(startDate, 'yyyy-MM-dd'));
+      }
+      if (endDate) {
+         params.append('endDate', format(endDate, 'yyyy-MM-dd'));
+      }
+      
+      return params.toString() ? `${url}?${params.toString()}` : url;
+   };
+
+   const { data: transactions, loading, error } = useApi<Transaction[]>(buildApiUrl());
 
    const transformToDisplayData = (apiData: Transaction[]): DisplayTransaction[] => {
       return apiData.map((transaction) => {
@@ -155,7 +178,7 @@ export default function RecentTransactions({ className }: { className?: string }
                   <span className="text-sm font-medium">{rawData.filter((t) => t.status === 'PENDING').length} pendentes</span>
                </div>
                <Button variant="outline" size="sm" className="h-8 px-3" onClick={() => setShowAll(!showAll)}>
-                  <PiEye className="h-4 w-4" />
+                  <PiEye className="h-4 w-4 mr-2" />
                   {showAll ? 'Ver menos' : 'Ver todas'}
                </Button>
             </div>

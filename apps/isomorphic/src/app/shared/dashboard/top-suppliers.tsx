@@ -20,8 +20,20 @@ interface Supplier {
    avatar?: string;
 }
 
-export default function TopSuppliers({ className }: { className?: string }) {
-   const { data: suppliers, loading, error } = useApi<Supplier[]>('/dashboard/top-suppliers');
+interface TopSuppliersProps {
+   className?: string;
+   startDate?: Date | null;
+   endDate?: Date | null;
+   apiUrl?: string;
+}
+
+export default function TopSuppliers({ 
+   className, 
+   startDate, 
+   endDate, 
+   apiUrl = '/dashboard/top-suppliers' 
+}: TopSuppliersProps) {
+   const { data: suppliers, loading, error } = useApi<Supplier[]>(apiUrl);
 
    const mockData: Supplier[] = [
       {

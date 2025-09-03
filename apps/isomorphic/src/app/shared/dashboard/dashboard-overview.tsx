@@ -73,30 +73,33 @@ export default function DashboardOverview() {
                </p>
             </div>
             
-            <div className="flex items-center gap-3">
-               <DatePicker
-                  selected={selectedMonth}
-                  onChange={(date) => setSelectedMonth(date)}
-                  dateFormat="MM/yyyy"
-                  showMonthYearPicker
-                  placeholderText="Selecionar mês"
-                  inputProps={{
-                     variant: 'outline',
-                     inputClassName: 'h-10 px-3 text-sm [&_input]:text-ellipsis',
-                     className: 'w-56'
-                  }}
-                  locale={ptBR}
-                  maxDate={new Date()}
-               />
-               
-               {selectedMonth && (
-                  <button
-                     onClick={() => setSelectedMonth(null)}
-                     className="text-sm text-gray-500 hover:text-gray-700 underline"
-                  >
-                     Limpar filtro
-                  </button>
-               )}
+            <div className="flex items-center gap-2 md:flex-row flex-col bg-gray-50 p-3 rounded-lg border">
+                <span className="text-sm font-medium text-gray-700 whitespace-nowrap">Período:</span>
+               <div className="flex items-center gap-3">
+                  <DatePicker
+                     selected={selectedMonth}
+                     onChange={(date) => setSelectedMonth(date)}
+                     dateFormat="MM/yyyy"
+                     showMonthYearPicker
+                     placeholderText="Selecionar mês"
+                     inputProps={{
+                        variant: 'outline',
+                        inputClassName: 'h-10 px-3 text-sm [&_input]:text-ellipsis',
+                        className: 'w-56'
+                     }}
+                     locale={ptBR}
+                     maxDate={new Date()}
+                  />
+                  
+                  {selectedMonth && (
+                     <button
+                        onClick={() => setSelectedMonth(null)}
+                        className="text-sm text-gray-500 hover:text-gray-700 underline"
+                     >
+                        Limpar filtro
+                     </button>
+                  )}
+               </div>
             </div>
          </div>
 
