@@ -276,6 +276,7 @@ export interface Notifications {
 
 export interface ICashBook {
    id: string;
+   cashBoxId?: string;
    date: string;
    history: string;
    value: string;
@@ -393,4 +394,26 @@ export interface LocalUser {
    cpfCnpj: string;
    avatar: string;
    lastLogin: Date;
+}
+
+export interface BankTransaction {
+   date: string;
+   historic: string;
+   value: number;
+   type: 'DEBIT' | 'CREDIT';
+   detailing: string;
+   originalRow: number;
+   costCenterId?: string;
+}
+
+export interface ParseBankTransactionsResponse {
+   filename: string;
+   sheetNumber: number;
+   totalRows: number;
+   validTransactions: BankTransaction[];
+}
+
+export interface EditableBankTransaction extends BankTransaction {
+   id: string;
+   isEdited?: boolean;
 }

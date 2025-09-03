@@ -16,6 +16,7 @@ import cn from '@core/utils/class-names';
 import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/app/globals.css';
+import { ImportLoadingProvider } from '@/components/modal/global-import-loading';
 
 export const metadata = {
    title: siteConfig.title,
@@ -37,13 +38,15 @@ export default async function RootLayout({
          >
             <AuthProvider session={session}>
                <ThemeProvider>
-                  <NextProgress />
-                  <JotaiProvider>
-                     {children}
-                     <ToastContainer />
-                     <GlobalDrawer />
-                     <GlobalModal />
-                  </JotaiProvider>
+                  <ImportLoadingProvider>
+                     <NextProgress />
+                     <JotaiProvider>
+                        {children}
+                        <ToastContainer />
+                        <GlobalDrawer />
+                        <GlobalModal />
+                     </JotaiProvider>
+                  </ImportLoadingProvider>
                </ThemeProvider>
             </AuthProvider>
          </body>

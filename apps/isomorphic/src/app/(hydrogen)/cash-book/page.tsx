@@ -86,16 +86,16 @@ export default function CashBook() {
       ],
    };
 
-   // Função para construir query params
    const buildQueryParams = (params: CashBookFilterParams): string => {
       const queryParams = new URLSearchParams();
-
+   
       Object.entries(params).forEach(([key, value]) => {
          if (value !== undefined && value !== null && value !== '') {
             queryParams.append(key, value.toString());
          }
       });
-
+   
+      console.log('Query params:', queryParams.toString()); // Debug
       return queryParams.toString();
    };
 
@@ -246,19 +246,16 @@ export default function CashBook() {
       }
    };
 
-   // Função para mudança de página
    const handlePageChange = (page: number) => {
       const newFilters = { ...filterParams, page };
       getTransactions(newFilters);
    };
 
-   // Função para mudança de limite por página
    const handleLimitChange = (limit: number) => {
       const newFilters = { ...filterParams, limit, page: 1 };
       getTransactions(newFilters);
    };
 
-   // Função para aplicar filtros
    const handleFilter = async (filters: CashBookFilterParams) => {
       const newFilters = { ...filters, page: 1 };
       await getTransactions(newFilters);
@@ -278,7 +275,7 @@ export default function CashBook() {
    const openImportModal = () => {
       openModal({
          view: (
-            <ModalForm title="Importar Extrato Bancário">
+            <ModalForm title="Importar Extrato Bancário" customWidth="w-[1200px] max-w-[1600px] mx-auto">
                <ImportExtractModal onSuccess={getTransactions} />
             </ModalForm>
          ),
@@ -343,6 +340,7 @@ export default function CashBook() {
                tableHeader={true}
                searchAble={true}
                pagination={false}
+               pageSize={transactions.length}
                loading={loading}
             />
 

@@ -19,7 +19,7 @@ collection:
         meta:
           id: req_b34cf8e0320e4e519884106add4800ab
           created: 1746536736149
-          modified: 1754447343783
+          modified: 1756172612585
           isPrivate: false
           description: ""
           sortKey: -1732182113718
@@ -78,7 +78,7 @@ collection:
         meta:
           id: req_ec2040edef6148e9a37ac4d4184b9170
           created: 1746536736151
-          modified: 1746536736151
+          modified: 1756777436170
           isPrivate: false
           description: ""
           sortKey: -1732039260862.3594
@@ -88,8 +88,8 @@ collection:
           text: |-
             {
             	"email": "eduardoepalmeiras@gmail.com",
-            	"code": "754816",
-            	"newPassword": "Eduardo@2025"
+            	"code": "571080",
+            	"newPassword": "Eduardo#30"
             }
         headers:
           - name: Content-Type
@@ -142,7 +142,7 @@ collection:
         meta:
           id: req_002e6e6200cd4e9fa37ec479348df42d
           created: 1746536736154
-          modified: 1746536736154
+          modified: 1756777422654
           isPrivate: false
           description: ""
           sortKey: -1732063069671.6328
@@ -152,7 +152,7 @@ collection:
           text: |-
             {
             	"email": "eduardoepalmeiras@gmail.com",
-            	"code": "265862"
+            	"code": "571080"
             }
         headers:
           - name: Content-Type
@@ -204,7 +204,7 @@ collection:
         meta:
           id: req_5f5b41bba10f446694c5723f8c573670
           created: 1746536736160
-          modified: 1752962059011
+          modified: 1756177326826
           isPrivate: false
           description: ""
           sortKey: -1731324996584.1562
@@ -374,6 +374,42 @@ collection:
             {
             	"password": "xtk58xpt",
             	"newPassword": "Eduardo#30"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/10.3.0
+        authentication:
+          type: bearer
+          token: "{{ _.token }}"
+          disabled: false
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}users"
+        name: createAdmin
+        meta:
+          id: req_dd2f48c0f5ea4dcfb2d2634674a30212
+          created: 1756214139266
+          modified: 1756214729888
+          isPrivate: false
+          description: ""
+          sortKey: -1731317541655.1172
+        method: POST
+        body:
+          mimeType: application/json
+          text: |-
+            {
+                "name": "Easyfin",
+                "email": "admineasyfin@gmail.com",
+                "role": "admin",
+            		"password": "admin123"
             }
         headers:
           - name: Content-Type
@@ -1658,7 +1694,7 @@ collection:
         meta:
           id: req_ed36a5c80c324d9e8c04c4bbcc33d59f
           created: 1749249413085
-          modified: 1754352893097
+          modified: 1756225177386
           isPrivate: false
           description: ""
           sortKey: -1732182113718
@@ -1688,12 +1724,12 @@ collection:
             name: dueDateStart
             value: 2025-08-01
             description: ""
-            disabled: false
+            disabled: true
           - id: pair_445f7824cfd84618a260b160eda4314b
             name: dueDateEnd
             value: 2025-08-31
             description: ""
-            disabled: false
+            disabled: true
           - id: pair_81faa60335834cf98b233e7431031851
             name: documentDateStart
             value: ""
@@ -1718,12 +1754,12 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: "{{ _.baseURL }}accounts-receivable/de5f9b72-01c6-468a-ad63-53b80acacd87"
+      - url: "{{ _.baseURL }}accounts-receivable/d5859686-70de-4d75-b202-d2159c770567"
         name: getById
         meta:
           id: req_c8f047e940f4463c8f1005788182d7ab
           created: 1749249413087
-          modified: 1749249437041
+          modified: 1756255131274
           isPrivate: false
           description: ""
           sortKey: -1732181369692.7102
@@ -1747,7 +1783,7 @@ collection:
         meta:
           id: req_6b58201f991b4fc482832faf93bbe8db
           created: 1749249413088
-          modified: 1749296140165
+          modified: 1756418524646
           isPrivate: false
           description: ""
           sortKey: -1732180997680.0654
@@ -1756,14 +1792,15 @@ collection:
           mimeType: application/json
           text: |-
             {
-            	"customerId": "0c0aa352-2341-472b-8793-5ebd3958dcd8",
-            	"documentNumber": "Conta 001-A",
-            	"plannedPaymentMethod": "dc861f63-126e-407f-9001-8d6473d82000",
-            	"documentDate": "2025-06-05T03:00:00.000Z",
-            	"dueDate": "2025-06-30T03:00:00.000Z",
-            	"value": 195.15,
-            	"costCenterId": "36e78c1e-eda6-4719-9b7d-3bbcf78fc430",
-            	"observation": "Venda a prazo"
+            	"customerId": "13e5911e-0013-45f6-81c9-6b1bc3ae38d5",
+            	"documentNumber": "789",
+            	"plannedPaymentMethod": "961371f0-d90f-4c16-8201-de4434d0d4c0",
+            	"documentDate": "2025-08-28T03:00:00.000Z",
+            	"dueDate": "2025-09-30T03:00:00.000Z",
+            	"value": 2100,
+            	"costCenterId": "c5d52603-c9b5-4c15-8e6d-289502bfbf6a",
+            	"observation": "Venda a prazo",
+            	"bankAccountId": "22313ed4-3ad6-44a1-a377-7b866d326ded"
             }
         headers:
           - name: Content-Type
@@ -1898,6 +1935,39 @@ collection:
             send: true
             store: true
           rebuildPath: true
+      - url: "{{ _.baseURL
+          }}accounts-receivable/d5859686-70de-4d75-b202-d2159c770567/reverse"
+        name: reverse
+        meta:
+          id: req_1e22636d5fcf46ca9060f8af206bd15d
+          created: 1755968383446
+          modified: 1756255862140
+          isPrivate: false
+          description: ""
+          sortKey: -1732180858175.3237
+        method: PUT
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"reason": "Estornando como teste"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/10.3.0
+        authentication:
+          type: bearer
+          token: "{{ _.token }}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
   - name: 12. Cash Flow (Fluxo de Caixa)
     meta:
       id: fld_ce67371d851943168ce461fd2c30ec79
@@ -1906,12 +1976,12 @@ collection:
       sortKey: -1731420090593.4517
       description: ""
     children:
-      - url: "{{ _.baseURL }}cash-flow/account/22313ed4-3ad6-44a1-a377-7b866d326ded"
+      - url: "{{ _.baseURL }}cash-flow/account/8225b613-5930-4593-adb5-c638abf1ac57"
         name: getByAccountId
         meta:
           id: req_33629d7ac48740b9a6d7935c3b61f977
           created: 1749249469479
-          modified: 1754420403941
+          modified: 1756852175572
           isPrivate: false
           description: ""
           sortKey: -1732181369692.7102
@@ -1997,7 +2067,7 @@ collection:
         meta:
           id: req_25984321d7eb47018e604f1a7f5966d8
           created: 1749252683345
-          modified: 1749932228374
+          modified: 1756257483194
           isPrivate: false
           description: ""
           sortKey: -1732181183686.3877
@@ -2007,17 +2077,17 @@ collection:
             name: bankAccountId
             value: 0b7c5d51-648e-4d91-a22c-4b098152067b
             description: ""
-            disabled: false
+            disabled: true
           - id: pair_05ffc81d3ed943a29d5bac4fbfe5194f
             name: cashId
-            value: ""
+            value: 3255c2a2-8429-418f-885f-d6fe8c150e66
             description: ""
-            disabled: true
+            disabled: false
           - id: pair_ffa98eb96f0d40859f4675a950335c16
             name: date
-            value: ""
+            value: 2025-08-27
             description: ""
-            disabled: true
+            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/10.3.0
@@ -2032,32 +2102,58 @@ collection:
             send: true
             store: true
           rebuildPath: true
-      - url: "{{ _.baseURL }}cash-flow/import-bank-extract"
-        name: importExtract
+      - url: "{{ _.baseURL }}cash-flow/parse-bank-extract"
+        name: parseBankTransactions
         meta:
-          id: req_0dac0346310443eea3189c7f6eaa71b0
-          created: 1749305044777
-          modified: 1749931086729
+          id: req_4012e924a272430e999b0c1a28c6647c
+          created: 1756909246670
+          modified: 1756909417249
           isPrivate: false
           description: ""
-          sortKey: -1732180951178.4849
+          sortKey: -1732180927927.6946
         method: POST
         body:
           mimeType: multipart/form-data
           params:
-            - name: bankAccountId
-              value: 0b7c5d51-648e-4d91-a22c-4b098152067b
-              id: pair_4ecce22cfc364dfc89743897dd4d02e8
             - id: pair_e3f7158130bb41bebbc655d14c59efc6
               name: file
               value: ""
               description: ""
               disabled: false
               type: file
-              fileName: /Users/eduardotrindade/Downloads/Extrato BB 2025_04_Guilherme.xlsx
+              fileName: /Users/eduardotrindade/Downloads/Extrato-28-08.xlsx
         headers:
           - name: Content-Type
             value: multipart/form-data
+          - name: User-Agent
+            value: insomnia/10.3.0
+        authentication:
+          type: bearer
+          token: "{{ _.token }}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}cash-flow/process-bank-transactions"
+        name: processBankTransactions
+        meta:
+          id: req_1fb83a9eb821454a8fa89fbfb6a45f35
+          created: 1756909262577
+          modified: 1756909351400
+          isPrivate: false
+          description: ""
+          sortKey: -1732180916302.2993
+        method: POST
+        body:
+          mimeType: application/json
+          text: ""
+        headers:
+          - name: Content-Type
+            value: application/json
           - name: User-Agent
             value: insomnia/10.3.0
         authentication:
@@ -2143,12 +2239,12 @@ collection:
       sortKey: -1731419532452.4878
       description: ""
     children:
-      - url: "{{ _.baseURL }}invoices/83e26544-3a85-46ea-ab17-c4ad24d9d633"
+      - url: "{{ _.baseURL }}invoices/73de9598-5a50-47d8-9a18-fb5c4530bd41"
         name: update
         meta:
           id: req_fcd9fac0b33b447bb44b0abc3c24943b
           created: 1749323407252
-          modified: 1749332956003
+          modified: 1756224969113
           isPrivate: false
           description: ""
           sortKey: -1732180997680.0654
@@ -2157,11 +2253,13 @@ collection:
           mimeType: application/json
           text: |-
             {
+            	"customerId": "6f2e3ca4-3d95-4e06-8f26-a464082363bf",
+            	"paymentConditionId": "06cecd07-7876-4f00-b1fb-1703cb433754",
+            	"costCenterId": "1e5c1e63-2c0d-41b0-9bc5-8e6f8d88acbf",
+            	"issueDate": "2025-08-26T15:00:00.000Z",
             	"serviceValue": 1500,
             	"retainsIss": true,
-            	"issueDate": "2025-05-07T15:00:00.000Z",
-            	"notes": "Nota de teste",
-            	"costCenterId": "dae699f2-e3c2-4381-977d-0bbb1d1ed26c"
+            	"notes": "Nota de teste com iss"
             }
         headers:
           - name: Content-Type
@@ -2208,23 +2306,23 @@ collection:
         meta:
           id: req_d3ca9c6bb0964e50a8fa40ee73f7bdc7
           created: 1749323420141
-          modified: 1749940388578
+          modified: 1756419067734
           isPrivate: false
           description: ""
           sortKey: -1732181369742.7102
         method: POST
         body:
           mimeType: application/json
-          text: |-
+          text: |
             {
-            	"invoiceNumber": "2025/001",
-            	"customerId": "414f3b1e-7460-4a26-bb08-8bcbc5a623e0",
-            	"paymentConditionId": "89f4f354-9fdd-49c8-9d3f-852424976ec9",
-            	"costCenterId": "04dcf5b9-c5a3-4b5a-8fcc-440beeca9fed",
-            	"issueDate": "2025-06-14T15:00:00.000Z",
-            	"serviceValue": 1200,
-            	"retainsIss": false,
-            	"notes": "Nota de teste"
+            	"invoiceNumber": "789",
+            	"customerId": "13e5911e-0013-45f6-81c9-6b1bc3ae38d5",
+            	"paymentConditionId": "01a17f81-16a0-4a84-8c71-379a5f4ea2d9",
+            	"costCenterId": "c5d52603-c9b5-4c15-8e6d-289502bfbf6a",
+            	"issueDate": "2025-08-28T15:00:00.000Z",
+            	"serviceValue": 2100,
+            	"retainsIss": true,
+            	"notes": "Nota de teste com iss"
             }
         headers:
           - name: Content-Type
@@ -2270,7 +2368,7 @@ collection:
     meta:
       id: fld_8a509a2706384a988afe9e6c3c250dd2
       created: 1754446614504
-      modified: 1754446614504
+      modified: 1756851416524
       sortKey: -1731419439428.994
       description: ""
     children:
@@ -2279,11 +2377,17 @@ collection:
         meta:
           id: req_05f5ab55ed284c5fb588404869541b90
           created: 1754446614509
-          modified: 1754446641924
+          modified: 1756778348732
           isPrivate: false
           description: ""
           sortKey: -1732181369792.7102
         method: GET
+        parameters:
+          - id: pair_f2204c0f6497429c8f52012c466c59af
+            name: month
+            value: 08/2025
+            description: ""
+            disabled: true
         headers:
           - name: User-Agent
             value: insomnia/10.3.0
@@ -2303,11 +2407,22 @@ collection:
         meta:
           id: req_04920cdead404559b0fb70fb4a266217
           created: 1754446674924
-          modified: 1754446678891
+          modified: 1756855912964
           isPrivate: false
           description: ""
           sortKey: -1732181369780.2102
         method: GET
+        parameters:
+          - id: pair_ea297a9232564d23b3e1db0b18a1edbf
+            name: startDate
+            value: 2025-07-03
+            description: ""
+            disabled: false
+          - id: pair_1919e26e75f74e67aae0f1270504ed41
+            name: endDate
+            value: 2025-09-02
+            description: ""
+            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/10.3.0
@@ -2375,11 +2490,22 @@ collection:
         meta:
           id: req_178347e171714954941c70c55fdfb2f6
           created: 1754446705590
-          modified: 1754446712170
+          modified: 1756906362752
           isPrivate: false
           description: ""
           sortKey: -1732181369769.2727
         method: GET
+        parameters:
+          - id: pair_73c0dc5ccfdd4c0c89a81c5a3220df46
+            name: startDate
+            value: 2025-07-03
+            description: ""
+            disabled: false
+          - id: pair_76fdf696d3514cb19c95f8a69a9ce03b
+            name: endDate
+            value: 2025-07-03
+            description: ""
+            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/10.3.0
@@ -2412,13 +2538,13 @@ environments:
       meta:
         id: env_339e55f028994e779813ac8cb6de44e9
         created: 1746536736141
-        modified: 1754447357377
+        modified: 1756906409190
         isPrivate: false
         sortKey: 1735229491596
       data:
         baseURL: http://localhost:3333/api/
-        token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJjZTk1YjJhMC1hZGE1LTQ0N2EtODhlOC0yMWE2Y2Y1MmE4N2MiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NTQ0NDczNDcsImV4cCI6MTc1NTA1MjE0N30.kfQxMotfFzeLg2XZtzWUAYUoLOp0_wBHDLSCGdjnKbg
-      color: "#6de9ca"
+        token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNWI5MWFlNC04M2QzLTRkMTctODllNC00NThiZDQ2Mzg5NWUiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NTY5MDM5ODIsImV4cCI6MTc1NzUwODc4Mn0.IfOm--LVjJkzc06e5wyZTz9PCKfS15ggc5fWDgCOWP4
+      color: "#e76de9"
     - name: Ambiente Dev
       meta:
         id: env_1c0c26c31ee5417c9e754c2c48ed60b4
@@ -2430,3 +2556,14 @@ environments:
         baseURL: https://easyfin-api.onrender.com/api/
         token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI3YzgxYmQxZS1lNzRiLTRkNTQtOTgyZC0zMzZjZjNjNWU1MjMiLCJyb2xlIjoiTUFOQUdFUiIsImlhdCI6MTc0NTUxMzUxMSwiZXhwIjoxNzQ1NTk5OTExfQ.IDJSPbb4ULCG9tufol2koPeMk2xuiy2I9cTD13Et66U
       color: "#d4e96d"
+    - name: Ambiente Prod
+      meta:
+        id: env_301abc0897584aa1b47f8dd12559763f
+        created: 1756172309568
+        modified: 1756214866900
+        isPrivate: false
+        sortKey: 1739002413940.5
+      data:
+        baseURL: https://easyapp-api.mgioqc.easypanel.host/api/
+        token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI5OTI1YWQyNC05OWYzLTRmNTgtOWRjMy1mODNlMjMzMGNhYzUiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NTYyMTQ4NTAsImV4cCI6MTc1NjgxOTY1MH0.8BteI-E5gpgk1E-f5avCoVKlKfoH3Ij7dCwl2YM6FKM
+      color: "#43a879"
