@@ -185,7 +185,7 @@ export default function CashBook() {
                }
             }
             if (dataArray.length === 0 && !newFilters) {
-               toast.info('Nenhum lançamento encontrado no livro caixa.');
+               // toast.info('Nenhum lançamento encontrado no livro caixa.');
                return;
             }
 
@@ -258,7 +258,6 @@ export default function CashBook() {
                <FilterCashBookAdvanced onFilter={handleFilter} currentFilters={filterParams} />
             </ModalForm>
          ),
-         size: 'lg',
       });
    };
 
@@ -269,7 +268,6 @@ export default function CashBook() {
                <ImportExtractModal onSuccess={getTransactions} />
             </ModalForm>
          ),
-         size: 'md',
       });
    };
 

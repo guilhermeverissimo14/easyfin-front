@@ -13,6 +13,11 @@ export default function GlobalModal() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
+  // Apply custom class for large modals when customSize is set
+  const customContainerClass = customSize 
+    ? "dark:bg-gray-100 !max-w-none" 
+    : "dark:bg-gray-100 [&.max-w-lg]:max-w-none";
+
   return (
     <Modal
       isOpen={isOpen}
@@ -20,7 +25,7 @@ export default function GlobalModal() {
       customSize={customSize}
       size={size}
       overlayClassName="dark:bg-opacity-40 dark:backdrop-blur-lg"
-      containerClassName="dark:bg-gray-100"
+      containerClassName={customContainerClass}
       className="z-[9999] [&_.pointer-events-none]:overflow-visible"
     >
       {view}

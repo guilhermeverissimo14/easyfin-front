@@ -283,6 +283,15 @@
          0px 1px 0 rgba(0, 0, 0, 0.02),
          0px 2px 6px rgba(0, 0, 0, 0.05);
    }
+   
+   /* Modal width override for large modals */
+   .rizzui-modal-container.max-w-lg {
+      max-width: none !important;
+   }
+   
+   .rizzui-modal-container[data-custom-size] {
+      max-width: none !important;
+   }
 }
 
 /* ................................................... */
