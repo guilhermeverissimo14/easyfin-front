@@ -65,4 +65,11 @@ export const pageLinks = [
 		name: "Livro Caixa",
 		href: routes.cashBook,
 	},
+	{
+		name: "Relatórios",
+	},
+	{
+		name: "Análise por Centro de Custo",
+		href: routes.reports.costCenterAnalysis
+	},
 ];

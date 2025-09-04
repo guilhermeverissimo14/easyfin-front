@@ -13,6 +13,11 @@ import {
    PiUserGearDuotone,
    PiFileCDuotone,
    PiChartLineUpDuotone,
+   PiReceiptDuotone,
+   PiCreditCardDuotone,
+   PiWalletDuotone,
+   PiBookOpenDuotone,
+   PiTargetDuotone,
 } from 'react-icons/pi';
 
 export const menuItems = [
@@ -74,6 +79,7 @@ export const menuItems = [
          {
             name: 'Notas Fiscais',
             href: routes.invoicing,
+            icon: <PiReceiptDuotone />,
          },
       ],
    },
@@ -85,14 +91,17 @@ export const menuItems = [
          {
             name: 'Contas a Pagar',
             href: routes.accountsPayable,
+            icon: <PiCreditCardDuotone />,
          },
          {
             name: 'Contas a Receber',
             href: routes.accountsReceivable,
+            icon: <PiWalletDuotone />,
          },
          {
             name: 'Livro Caixa',
             href: routes.cashBook,
+            icon: <PiBookOpenDuotone />,
          },
       ],
    },
@@ -104,6 +113,7 @@ export const menuItems = [
          {
             name: 'Análise por Centro de Custo',
             href: routes.reports.costCenterAnalysis,
+            icon: <PiTargetDuotone />,
          },
       ],
    },
