@@ -515,7 +515,7 @@ export default function ImportExtractModal({ onSuccess }: ImportExtractModalProp
         </div>
       </div>
 
-      <div className="flex justify-end space-x-3 pt-4">
+      <div className="flex justify-end space-x-3 pt-4 fixed bottom-0 z-50 bg-white p-6 w-[95%]">
         <Button 
           type="button"
           variant="outline"
