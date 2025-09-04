@@ -12,6 +12,7 @@ import {
    PiStackDuotone,
    PiUserGearDuotone,
    PiFileCDuotone,
+   PiChartLineUpDuotone,
 } from 'react-icons/pi';
 
 export const menuItems = [
@@ -92,6 +93,17 @@ export const menuItems = [
          {
             name: 'Livro Caixa',
             href: routes.cashBook,
+         },
+      ],
+   },
+   {
+      name: 'Relatórios',
+      href: '#',
+      icon: <PiChartLineUpDuotone />,
+      dropdownItems: [
+         {
+            name: 'Análise por Centro de Custo',
+            href: routes.reports.costCenterAnalysis,
          },
       ],
    },

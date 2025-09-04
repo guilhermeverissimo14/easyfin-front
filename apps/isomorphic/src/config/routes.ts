@@ -157,4 +157,7 @@ export const routes = {
    cashBook: '/cash-book',
    accountsPayable: '/accounts-payable',
    accountsReceivable: '/accounts-receivable',
+   reports: {
+      costCenterAnalysis: '/reports/cost-center-analysis',
+   },
 };
