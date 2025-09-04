@@ -1,8 +1,8 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { env } from '@/env.mjs';
 
-//const BASE_URL = env.NEXT_PUBLIC_API_URL || 'https://easyapp-api.mgioqc.easypanel.host/api/';
-const BASE_URL = "http://localhost:3333/api/";
+const BASE_URL = env.NEXT_PUBLIC_API_URL || 'https://easyapp-api.mgioqc.easypanel.host/api/';
+//const BASE_URL = "http://localhost:3333/api/";
 
 export const api: AxiosInstance = axios.create({
    baseURL: BASE_URL,
