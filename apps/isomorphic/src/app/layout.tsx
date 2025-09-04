@@ -17,6 +17,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import '@/app/globals.css';
 import { ImportLoadingProvider } from '@/components/modal/global-import-loading';
+import { SettingsProvider } from '@/contexts/SettingsContext';
 
 export const metadata = {
    title: siteConfig.title,
@@ -41,7 +42,9 @@ export default async function RootLayout({
                   <ImportLoadingProvider>
                      <NextProgress />
                      <JotaiProvider>
-                        {children}
+                        <SettingsProvider>
+                           {children}
+                        </SettingsProvider>
                         <ToastContainer />
                         <GlobalDrawer />
                         <GlobalModal />

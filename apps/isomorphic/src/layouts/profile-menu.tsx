@@ -38,7 +38,7 @@ export default function ProfileMenu({
                )}
             >
                <Avatar
-                  src={avatar ? avatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '')}&background=2563eb&color=ffffff`}
+                  src={avatar ? avatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '')}&background=2da270&color=ffffff`}
                   name={user?.name || ''}
                   className={cn('!h-9 w-9 sm:!h-10 sm:!w-10', avatarClassName)}
                />
@@ -90,7 +90,7 @@ function DropdownMenu({ avatar }: { avatar: string | null }) {
       <div className="w-64 text-left rtl:text-right">
          <div className="flex items-center border-b border-gray-300 px-6 pb-5 pt-6">
             <Avatar
-               src={avatar ? avatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '')}&background=2563eb&color=ffffff`}
+               src={avatar ? avatar : `https://ui-avatars.com/api/?name=${encodeURIComponent(user?.name || '')}&background=2da270&color=ffffff`}
                name={user.name}
             />
             <div className="ms-3">

@@ -1,13 +1,16 @@
 'use client';
 
 import ProfileMenu from '@/layouts/profile-menu';
+import WelcomeMessage from '@/components/welcome/welcome-message';
 import { useState } from 'react';
 import { userType } from '@/types';
 
 export default function HeaderMenuRight() {
 
    return (
-      <div className="ms-auto grid shrink-0 grid-cols-2 items-center gap-2 text-gray-700 xs:gap-3 xl:gap-4">
+      <div className="ms-auto flex shrink-0 items-center gap-3 text-gray-700 xs:gap-4 xl:gap-6">
+         <WelcomeMessage className="hidden md:block" />
+         
          {/* <NotificationDropdown setHasNotification={setHasNotification} userId={user.id}>
             <ActionIcon
                aria-label="Notification"
