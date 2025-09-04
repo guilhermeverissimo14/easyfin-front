@@ -196,7 +196,7 @@ export default function CashBook() {
                value: item.value,
                type: item.type === 'CREDIT' ? 'C' : 'D',
                description: item.description || '',
-               costCenter: item.costCenter?.name || '',
+               costCenter: item.costCenter?.name ,
                balance: item.balance,
             }));
 

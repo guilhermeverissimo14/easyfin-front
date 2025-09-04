@@ -292,7 +292,7 @@ export interface ICashBook {
    value: string;
    type: string; // 'C' para crédito, 'D' para débito
    description: string;
-   costCenter: {name: string} | null;
+   costCenter: string | any;
    balance: string;
    createdAt?: Date;
    updatedAt?: Date;

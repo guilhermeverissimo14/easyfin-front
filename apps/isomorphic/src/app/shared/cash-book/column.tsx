@@ -55,7 +55,7 @@ export const ListCashBookColumn = (getList: () => void) => {
          id: 'costCenter',
          size: 120,
          header: 'Centro de Custo',
-         cell: ({ row }) => <span>{row.original.costCenter ? row.original.costCenter.name : ''}</span>,
+         cell: ({ row }) => <span>{row.original.costCenter as string}</span>,
       }),
       columnHelper.accessor('balance', {
          id: 'balance',
