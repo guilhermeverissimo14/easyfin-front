@@ -134,7 +134,7 @@ export const FilterAccountsPayable = ({ getAccounts }: FilterAccountsPayableProp
    const statusOptions = [
       { label: 'Pendente', value: 'PENDING' },
       { label: 'Vencido', value: 'OVERDUE' },
-      { label: 'Pago', value: 'PAID' },
+      { label: 'Recebido', value: 'PAID' },
       { label: 'Cancelado', value: 'CANCELLED' }
    ];
 

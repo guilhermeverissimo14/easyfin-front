@@ -8,14 +8,24 @@ import ModalForm from "@/components/modal/modal-form";
 import { useModal } from "@/app/shared/modal-views/use-modal";
 import { apiCall } from "@/helpers/apiHelper";
 import { api } from "@/service/api";
-import { PaymentTermModel } from "@/types";
+import { PaymentTermModel, PaginationInfo } from "@/types";
 import { ListPaymentTermColumn } from "@/app/shared/payment-terms/column";
 import TableLayout from "../tables/table-layout";
 import { CreatePaymentTerm } from "@/app/shared/payment-terms/create-payment-terms";
+import { TablePagination } from "@/components/tables/table-pagination";
 
 export default function PaymentTerms() {
     const [paymentTerms, setPaymentTerms] = useState<PaymentTermModel[]>([]);
     const [loading, setLoading] = useState(false);
+    const [allPaymentTerms, setAllPaymentTerms] = useState<PaymentTermModel[]>([]);
+    const [pagination, setPagination] = useState<PaginationInfo>({
+        page: 1,
+        limit: 10,
+        totalCount: 0,
+        totalPages: 0,
+        hasNextPage: false,
+        hasPreviousPage: false,
+    });
 
     const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
 
@@ -30,7 +40,8 @@ export default function PaymentTerms() {
                 return;
             }
 
-            setPaymentTerms(response.data);
+            setAllPaymentTerms(response.data);
+            updatePaginatedData(response.data, 1, pagination.limit);
         } catch (error) {
             if ((error as any)?.response?.status === 401) {
                 localStorage.clear();
@@ -39,6 +50,30 @@ export default function PaymentTerms() {
         } finally {
             setLoading(false);
         }
+    };
+
+    const updatePaginatedData = (data: PaymentTermModel[], page: number, limit: number) => {
+        const startIndex = (page - 1) * limit;
+        const endIndex = startIndex + limit;
+        const paginatedData = data.slice(startIndex, endIndex);
+        
+        setPaymentTerms(paginatedData);
+        setPagination({
+            page,
+            limit,
+            totalCount: data.length,
+            totalPages: Math.ceil(data.length / limit),
+            hasNextPage: endIndex < data.length,
+            hasPreviousPage: page > 1,
+        });
+    };
+
+    const handlePageChange = (page: number) => {
+        updatePaginatedData(allPaymentTerms, page, pagination.limit);
+    };
+
+    const handleLimitChange = (limit: number) => {
+        updatePaginatedData(allPaymentTerms, 1, limit);
     };
 
     useEffect(() => {
@@ -89,8 +124,14 @@ export default function PaymentTerms() {
                     data={paymentTerms}
                     tableHeader={true}
                     searchAble={true}
-                    pagination={true}
+                    pagination={false}
                     loading={loading}
+                />
+                
+                <TablePagination 
+                    pagination={pagination} 
+                    onPageChange={handlePageChange} 
+                    onLimitChange={handleLimitChange} 
                 />
             </TableLayout>
         </div>

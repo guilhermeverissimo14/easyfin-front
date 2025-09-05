@@ -6,15 +6,25 @@ import { ListUserColumn } from '../../shared/users/column';
 import { useModal } from '@/app/shared/modal-views/use-modal';
 import ModalForm from '@/components/modal/modal-form';
 import { FormUser } from '@/app/shared/users/form-user';
-import { userType } from '@/types';
+import { userType, PaginationInfo } from '@/types';
 import TableComponent from '@/components/tables/table';
 import { apiCall } from '@/helpers/apiHelper';
 import { api } from '@/service/api';
 import { PiPlusBold } from 'react-icons/pi';
+import { TablePagination } from '@/components/tables/table-pagination';
 
 export default function Users() {
    const [dataUser, setDataUser] = useState<userType[]>([]);
    const [loading, setLoading] = useState(false);
+   const [allUsers, setAllUsers] = useState<userType[]>([]);
+   const [pagination, setPagination] = useState<PaginationInfo>({
+      page: 1,
+      limit: 10,
+      totalCount: 0,
+      totalPages: 0,
+      hasNextPage: false,
+      hasPreviousPage: false,
+   });
 
    const { openModal } = useModal();
 
@@ -37,8 +47,8 @@ export default function Users() {
             return 0;
          });
 
-         setDataUser(response.data);
-         setLoading(loading);
+         setAllUsers(response.data);
+         updatePaginatedData(response.data, 1, pagination.limit);
       } catch (error) {
          if ((error as any)?.response?.status === 401) {
             localStorage.clear();
@@ -47,6 +57,30 @@ export default function Users() {
       }finally{
          setLoading(false);
       }
+   };
+
+   const updatePaginatedData = (data: userType[], page: number, limit: number) => {
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedData = data.slice(startIndex, endIndex);
+      
+      setDataUser(paginatedData);
+      setPagination({
+         page,
+         limit,
+         totalCount: data.length,
+         totalPages: Math.ceil(data.length / limit),
+         hasNextPage: endIndex < data.length,
+         hasPreviousPage: page > 1,
+      });
+   };
+
+   const handlePageChange = (page: number) => {
+      updatePaginatedData(allUsers, page, pagination.limit);
+   };
+
+   const handleLimitChange = (limit: number) => {
+      updatePaginatedData(allUsers, 1, limit);
    };
 
    useEffect(() => {
@@ -106,8 +140,14 @@ export default function Users() {
                data={dataUser}
                tableHeader={true}
                searchAble={true}
-               pagination={true}
+               pagination={false}
                loading={loading}
+            />
+            
+            <TablePagination 
+               pagination={pagination} 
+               onPageChange={handlePageChange} 
+               onLimitChange={handleLimitChange} 
             />
          </TableLayout>
       </div>

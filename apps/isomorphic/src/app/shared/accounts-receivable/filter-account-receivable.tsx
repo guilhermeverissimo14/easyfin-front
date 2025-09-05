@@ -172,7 +172,7 @@ export const FilterAccountsReceivable = ({ getAccounts }: FilterAccountsReceivab
                         placeholder="Filtrar por status"
                         options={[
                             { label: 'Pendente', value: 'PENDING' },
-                            { label: 'Pago', value: 'PAID' },
+                            { label: 'Recebido', value: 'PAID' },
                             { label: 'Cancelado', value: 'CANCELLED' },
                             { label: 'Vencido', value: 'OVERDUE' },
                         ]}
