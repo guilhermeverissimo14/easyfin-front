@@ -294,6 +294,7 @@ export interface ICashBook {
    description: string;
    costCenter: string | any;
    balance: string;
+   documentNumber?: string;
    createdAt?: Date;
    updatedAt?: Date;
 }

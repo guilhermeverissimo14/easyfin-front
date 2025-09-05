@@ -185,7 +185,7 @@ export default function CashBook() {
                }
             }
             if (dataArray.length === 0 && !newFilters) {
-               // toast.info('Nenhum lançamento encontrado no livro caixa.');
+               toast.info('Nenhum lançamento encontrado no livro caixa.');
                return;
             }
 
@@ -196,8 +196,9 @@ export default function CashBook() {
                value: item.value,
                type: item.type === 'CREDIT' ? 'C' : 'D',
                description: item.description || '',
-               costCenter: item.costCenter?.name ,
+               costCenter: item.costCenter?.name,
                balance: item.balance,
+               documentNumber: item.documentNumber,
             }));
 
             setTransactions(formattedData);
