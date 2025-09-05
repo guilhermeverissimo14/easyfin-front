@@ -200,6 +200,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
       columnHelper.display({
          id: 'actions',
          size: 60,
+         header: 'Ações',
          cell: ({
             row,
             table: {
