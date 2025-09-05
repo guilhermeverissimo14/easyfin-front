@@ -6,6 +6,7 @@ import { IAccountsPayable } from '@/types';
 import { formatCurrency, formatDate } from '@/utils/format';
 import { PiCashRegister } from 'react-icons/pi';
 import { FiRotateCcw } from 'react-icons/fi';
+import { PiLinkBold } from 'react-icons/pi'; // Adicionar este import
 import { Tooltip } from 'rizzui/tooltip';
 import { Button } from 'rizzui/button';
 import { ActionIcon } from 'rizzui/action-icon';
@@ -93,7 +94,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
       columnHelper.accessor('documentNumber', {
          id: 'documentNumber',
          size: 120,
-         header: 'N Docto',
+         header: 'Nº Documento',
          cell: ({ row }) => <span className="font-medium">{row.original.documentNumber}</span>,
       }),
       columnHelper.accessor('supplierName', {
@@ -170,6 +171,28 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
          header: 'Valor',
          cell: ({ row }) => <span>{formatCurrency(row.original.value)}</span>,
          dataType: 'currency',
+      }),
+      // Adicionar nova coluna para indicador de vínculo com caixa
+      columnHelper.display({
+         id: 'cashFlowIndicator',
+         size: 40,
+         header: '',
+         cell: ({ row }) => {
+            // Mostrar badge quando não está pago e tem vínculo com caixa
+            if (row.original.status !== 'PAID' && row.original.hasCashFlow) {
+               return (
+                  <Tooltip size="sm" content="Documento vinculado ao livro caixa" placement="top" color="invert">
+                     <div className="flex items-center justify-center">
+                        <div className="flex items-center gap-1 rounded-md bg-blue-100 px-2 py-1 text-xs text-blue-800">
+                           <PiLinkBold size={12} />
+                           <span>Caixa</span>
+                        </div>
+                     </div>
+                  </Tooltip>
+               );
+            }
+            return null;
+         },
       }),
       columnHelper.display({
          id: 'actions',

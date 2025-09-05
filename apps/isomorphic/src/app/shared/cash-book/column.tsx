@@ -45,7 +45,7 @@ export const ListCashBookColumn = (getList: () => void) => {
          size: 100,
          header: 'Valor',
          cell: ({ row }) => <span>{row.original.value}</span>,
-         dataType: 'currency', 
+         dataType: 'currency',
       }),
       columnHelper.accessor('type', {
          id: 'type',
@@ -72,6 +72,12 @@ export const ListCashBookColumn = (getList: () => void) => {
          cell: ({ row }) => <span>{row.original.balance}</span>,
          dataType: 'currency',
       }),
+      columnHelper.accessor('documentNumber', {
+         id: 'documentNumber',
+         size: 100,
+         header: 'Nº Documento',
+         cell: ({ row }) => <span className="font-medium">{row.original.documentNumber || '-'}</span>,
+      }),
       columnHelper.accessor(null, {
          id: 'actions',
          size: 80,
@@ -83,7 +89,7 @@ export const ListCashBookColumn = (getList: () => void) => {
                      openModal({
                         view: (
                            <ModalForm title="Vincular Lançamento">
-                              <LinkAccountModal 
+                              <LinkAccountModal
                                  cashFlowId={row.original.id}
                                  transactionType={row.original.type}
                                  documentNumber={row.original.documentNumber}
