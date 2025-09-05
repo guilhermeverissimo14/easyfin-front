@@ -3,11 +3,12 @@
 import { useState, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { Button } from 'rizzui';
+import { Button, Title, Text } from 'rizzui';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
+import { PiQuestionBold } from 'react-icons/pi';
 
 import { api } from '@/service/api';
 import { useModal } from '../modal-views/use-modal';
@@ -28,6 +29,7 @@ const settleAccountReceivableSchema = z.object({
    paymentDate: z.date().optional().nullable(),
    value: z.string().nonempty('Valor não pode ser vazio'),
    bankAccountId: z.string().optional(),
+   generateCashFlow: z.boolean().optional(),
 });
 
 type SettleAccountFormData = z.infer<typeof settleAccountReceivableSchema>;
@@ -39,12 +41,48 @@ interface SettleAccountReceivableProps {
 
 type PaymentMethod = { label: string; value: string; requiresBank?: boolean };
 
+const CashFlowConfirmationModal = ({ onConfirm, onCancel }: { onConfirm: (generateCashFlow: boolean) => void; onCancel: () => void }) => {
+   return (
+      <div className="w-full max-w-md bg-white p-6">
+         <div className="mb-4 flex items-center">
+            <PiQuestionBold className="me-2 size-5 text-blue-500" />
+            <Title as="h6" className="text-lg font-semibold">
+               Gerar Movimentação no Livro Caixa?
+            </Title>
+         </div>
+         <Text className="mb-6 text-gray-600">
+            Deseja gerar uma movimentação no livro caixa para este recebimento?
+         </Text>
+         <div className="flex gap-3">
+            <Button
+               variant="outline"
+               className="flex-1"
+               onClick={() => {
+                  onConfirm(false);
+                  onCancel();
+               }}
+            >
+               Não
+            </Button>
+            <Button
+               className="flex-1"
+               onClick={() => {
+                  onConfirm(true);
+                  onCancel();
+               }}
+            >
+               Sim
+            </Button>
+         </div>
+      </div>
+   );
+};
+
 export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountReceivableProps) => {
    const [loading, setLoading] = useState(false);
-   const { closeModal } = useModal();
+   const { closeModal, openModal } = useModal();
    const [showBankSelect, setShowBankSelect] = useState(false);
    const [costCenters, setCostCenters] = useState([]);
-
    const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
    const [bankAccounts, setBankAccounts] = useState([]);
 
@@ -58,7 +96,7 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
       resolver: zodResolver(settleAccountReceivableSchema),
    });
 
-   const onSubmit = async (data: SettleAccountFormData) => {
+   const processReceive = async (data: SettleAccountFormData, generateCashFlow: boolean) => {
       setLoading(true);
 
       try {
@@ -98,6 +136,7 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
             receiptDate: data.paymentDate ? data.paymentDate.toISOString() : new Date().toISOString(),
             costCenterId: data.costCenterId || '',
             bankAccountId: data.bankAccountId || '',
+            generateCashFlow,
          };
 
          await api.post(`/accounts-receivable/${account.id}/receive`, payload);
@@ -114,39 +153,43 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
       }
    };
 
+   const onSubmit = async (data: SettleAccountFormData) => {
+      openModal({
+         view: (
+            <CashFlowConfirmationModal
+               onConfirm={(generateCashFlow) => processReceive(data, generateCashFlow)}
+               onCancel={closeModal}
+            />
+         ),
+         customSize: '400px',
+      });
+   };
+
    useEffect(() => {
       const fetchData = async () => {
          try {
-            // Fetch cost centers
             const costCentersResponse = await api.get('/cost-centers');
-            setCostCenters(
-               costCentersResponse.data.map((center: any) => ({
-                  label: center.name,
-                  value: center.id,
-               }))
-            );
+            setCostCenters(costCentersResponse.data.map((center: any) => ({
+               label: center.name,
+               value: center.id
+            })));
 
-            // Fetch payment methods
             const paymentMethodsResponse = await api.get('/payment-methods');
-            setPaymentMethods(
-               paymentMethodsResponse.data.map((method: any) => ({
-                  label: method.name,
-                  value: method.id,
-                  requiresBank: method.requiresBank,
-               }))
-            );
+            setPaymentMethods(paymentMethodsResponse.data.map((method: any) => ({
+               label: method.name,
+               value: method.id,
+               requiresBank: method.requiresBank
+            })));
 
-            // Fetch bank accounts
             const bankAccountsResponse = await api.get('/bank-accounts');
-            setBankAccounts(
-               bankAccountsResponse.data.map((bank: any) => ({
-                  label: `${bank.bank} - Agência ${bank.agency} - CC ${bank.account}`,
-                  value: bank.id,
-               }))
-            );
+            setBankAccounts(bankAccountsResponse.data.map((bank: any) => ({
+               label: `${bank.bank} - Agência ${bank.agency} - CC ${bank.account}`,
+               value: bank.id
+            })));
+
          } catch (error) {
-            console.error('Erro ao carregar dados:', error);
-            toast.error('Erro ao carregar dados necessários');
+            console.error("Erro ao carregar dados:", error);
+            toast.error("Erro ao carregar dados necessários");
          }
       };
 
@@ -214,37 +257,54 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
             </div>
 
             <div className="flex flex-col items-start justify-center md:col-span-1">
-               <div className="text-sm text-gray-500">
-                  <div className="flex flex-row items-center gap-2">
-                     Situação:{' '}
-                     {account.status === 'Aberto' ? (
-                        <div className="w-22">
-                           <div className="border-1 cursor-pointer rounded-md border border-[#ABD2EF] bg-[#ABD2EF] px-2 text-center text-xs text-white">
-                              Aberto
-                           </div>
+               <div className="flex flex-row items-center gap-2">
+                  Situação:{' '}
+                  {account.status === 'Aberto' ? (
+                     <div className="w-22">
+                        <div className="border-1 cursor-pointer rounded-md border border-[#ABD2EF] bg-[#ABD2EF] px-2 text-center text-xs text-white">
+                           Aberto
                         </div>
-                     ) : account.status === 'Atrasado' ? (
-                        <div className="w-22">
-                           <div className="border-1 cursor-pointer rounded-md border border-red-400 bg-red-400 px-2 text-center text-xs text-white">
-                              Vencido
-                           </div>
+                     </div>
+                  ) : account.status === 'Atrasado' ? (
+                     <div className="w-22">
+                        <div className="border-1 cursor-pointer rounded-md border border-red-400 bg-red-400 px-2 text-center text-xs text-white">
+                           Vencido
                         </div>
-                     ) : null}
-                  </div>
-                  <span className="text-xs text-gray-500">Vencimento: {new Date(account.dueDate).toLocaleDateString('pt-BR')}</span>
+                     </div>
+                  ) : null}
                </div>
+               <span className="text-xs text-gray-500">Vencimento: {new Date(account.dueDate).toLocaleDateString('pt-BR')}</span>
             </div>
          </div>
 
          <hr className="my-3 md:col-span-3" />
 
          <InputField
+            label="Valor"
+            placeholder="Valor"
+            type="text"
+            register={register('value')}
+            error={errors.value?.message}
+         />
+
+         <InputField
+            label="Desconto"
+            placeholder="R$ 0,00"
+            type="text"
+            register={register('discount')}
+            error={errors.discount?.message}
+            onChange={(e) => {
+               const value = moneyMask(e.target.value);
+               setValue('discount', value);
+            }}
+         />
+
+         <InputField
             label="Multa"
-            placeholder=""
+            placeholder="R$ 0,00"
             type="text"
             register={register('fine')}
             error={errors.fine?.message}
-            maxLength={50}
             onChange={(e) => {
                const value = moneyMask(e.target.value);
                setValue('fine', value);
@@ -253,38 +313,23 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
 
          <InputField
             label="Juros"
-            placeholder=""
+            placeholder="R$ 0,00"
             type="text"
             register={register('interest')}
             error={errors.interest?.message}
-            maxLength={50}
             onChange={(e) => {
                const value = moneyMask(e.target.value);
                setValue('interest', value);
             }}
          />
 
-         <InputField
-            label="Desconto"
-            placeholder=""
-            type="text"
-            register={register('discount')}
-            error={errors.discount?.message}
-            maxLength={50}
-            onChange={(e) => {
-               const value = moneyMask(e.target.value);
-               setValue('discount', value);
-            }}
-         />
-
-         <div className="md:col-span-3">
+         <div className="md:col-span-2">
             <InputField
                label="Observação"
-               placeholder=""
+               placeholder="Observação"
                type="text"
                register={register('observation')}
                error={errors.observation?.message}
-               maxLength={200}
             />
          </div>
 
