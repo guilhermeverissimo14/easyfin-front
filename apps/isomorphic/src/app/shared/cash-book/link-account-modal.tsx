@@ -46,6 +46,7 @@ export function LinkAccountModal({
    const [selectedAccount, setSelectedAccount] = useState<PendingAccount | null>(null);
    const [loading, setLoading] = useState(true);
    const [linking, setLinking] = useState(false);
+   const [unlinking, setUnlinking] = useState(false);
    const { closeModal } = useModal();
 
    const isCredit = transactionType === 'C';
@@ -104,6 +105,27 @@ export function LinkAccountModal({
       }
    };
 
+   const handleUnlinkAccount = async () => {
+      try {
+         setUnlinking(true);
+         const endpoint = isCredit 
+            ? `/cash-flow/${cashFlowId}/unlink-receivable`
+            : `/cash-flow/${cashFlowId}/unlink-payable`;
+         
+         await api.patch(endpoint);
+
+         toast.success('Documento desvinculado com sucesso!');
+         onSuccess();
+         closeModal();
+      } catch (error: any) {
+         console.error('Erro ao desvincular documento:', error);
+         const errorMessage = error.response?.data?.message || 'Erro ao desvincular documento';
+         toast.error(errorMessage);
+      } finally {
+         setUnlinking(false);
+      }
+   };
+
    if (loading) {
       return (
          <div className="flex items-center justify-center p-8">
@@ -157,12 +179,21 @@ export function LinkAccountModal({
                </div>
             </div>
 
-            <div className="flex justify-end">
+            <div className="flex justify-end space-x-3">
                <Button
                   variant="outline"
                   onClick={closeModal}
+                  disabled={unlinking}
                >
                   Fechar
+               </Button>
+               <Button
+                  variant="solid"
+                  color="danger"
+                  onClick={handleUnlinkAccount}
+                  disabled={unlinking}
+               >
+                  {unlinking ? 'Desvinculando...' : 'Desvincular'}
                </Button>
             </div>
          </div>

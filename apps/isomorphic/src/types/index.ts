@@ -36,6 +36,7 @@ export interface AccountsReceivableResponse {
    };
    observation: string;
    hasInvoiceLink: boolean;
+   hasCashFlow: boolean;
    status: string;
    createdAt: string;
    updatedAt: string;
@@ -59,6 +60,7 @@ export interface IAccountsReceivable {
    observation?: string;
    paymentDate: string;
    hasInvoiceLink: boolean;
+   hasCashFlow: boolean;
 }
 
 export interface AccountsPayableResponse {
@@ -98,6 +100,7 @@ export interface AccountsPayableResponse {
    userId: string;
    observation: string;
    status: string;
+   hasCashFlow: boolean;
    createdAt: string;
    updatedAt: string;
 }
@@ -327,6 +330,7 @@ export interface IAccountsPayable {
    paymentMethodId?: string;
    plannedPaymentMethod?: string;
    observation?: string;
+   hasCashFlow: boolean;
    createdAt?: Date;
    updatedAt?: Date;
 }
@@ -354,6 +358,8 @@ export interface IAccountsReceivable {
    paymentMethodId?: string;
    userId?: string;
    observation?: string;
+   hasInvoiceLink: boolean;
+   hasCashFlow: boolean;
    createdAt?: Date;
    updatedAt?: Date;
    cancelledAt?: Date | null;

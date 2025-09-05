@@ -206,7 +206,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
                      </Tooltip>
                   )}
 
-                  {row.original.status !== 'PAID' && !(userRole === 'USER') && (
+                  {row.original.status !== 'PAID' && !row.original.hasCashFlow && !(userRole === 'USER') && (
                      <Tooltip size="sm" content="Editar" placement="top" color="invert">
                         <Button
                            onClick={() => {

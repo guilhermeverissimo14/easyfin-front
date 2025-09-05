@@ -51,11 +51,13 @@ export default function AccountsReceivable() {
          totalInstallments: item.totalInstallments,
          value: item.value,
          plannedPaymentMethod: item.plannedPaymentMethod?.name || '',
+         paymentMethodId: item.paymentMethod?.id || '',
          costCenterId: item.costCenter?.id || '',
          costCenterName: item.costCenter?.name || '',
          observation: item.observation,
          paymentDate: item.receiptDate || '',
          hasInvoiceLink: item.hasInvoiceLink,
+         hasCashFlow: item.hasCashFlow,
       }));
    };
 

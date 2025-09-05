@@ -293,7 +293,7 @@ export const SettleAccountPayable = ({ getAccounts, account }: SettleAccountPaya
                         setShowBankSelect(!isMoney);
                      }}
                      value={value || ''}
-                     error={errors.paymentMethodId?.message}
+                     error={"Método de pagamento é obrigatório"}
                   />
                )}
             />

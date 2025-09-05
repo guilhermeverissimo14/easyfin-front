@@ -1681,6 +1681,36 @@ collection:
             send: true
             store: true
           rebuildPath: true
+      - url: "{{ _.baseURL }}accounts-payable/pending"
+        name: listPendingAccounts
+        meta:
+          id: req_fcf2938302d5455c8d9da07a330f6d9e
+          created: 1757077818828
+          modified: 1757077834832
+          isPrivate: false
+          description: ""
+          sortKey: -1732181741705.355
+        method: GET
+        parameters:
+          - id: pair_1dd58a6e957a436dac49844fdebdeab1
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/10.3.0
+        authentication:
+          type: bearer
+          token: "{{ _.token }}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
   - name: 11. Accounts Receivable (Contas a Receber)
     meta:
       id: fld_f80a4406bdf84bb292543c9aebf9cf35
@@ -1783,7 +1813,7 @@ collection:
         meta:
           id: req_6b58201f991b4fc482832faf93bbe8db
           created: 1749249413088
-          modified: 1756418524646
+          modified: 1757080504399
           isPrivate: false
           description: ""
           sortKey: -1732180997680.0654
@@ -1792,15 +1822,15 @@ collection:
           mimeType: application/json
           text: |-
             {
-            	"customerId": "13e5911e-0013-45f6-81c9-6b1bc3ae38d5",
-            	"documentNumber": "789",
-            	"plannedPaymentMethod": "961371f0-d90f-4c16-8201-de4434d0d4c0",
-            	"documentDate": "2025-08-28T03:00:00.000Z",
-            	"dueDate": "2025-09-30T03:00:00.000Z",
-            	"value": 2100,
-            	"costCenterId": "c5d52603-c9b5-4c15-8e6d-289502bfbf6a",
+            	"customerId": "5584f384-a704-45cf-b161-041027f405cb",
+            	"documentNumber": "123",
+            	"plannedPaymentMethod": "2bb4a124-5fc3-48e6-a9c7-a0fa253e89d9",
+            	"documentDate": "2025-09-04T03:00:00.000Z",
+            	"dueDate": "2025-09-05T03:00:00.000Z",
+            	"value": 1000,
+            	"costCenterId": "5dff40a9-f450-4ad1-97d5-705ede36f372",
             	"observation": "Venda a prazo",
-            	"bankAccountId": "22313ed4-3ad6-44a1-a377-7b866d326ded"
+            	"bankAccountId": "8225b613-5930-4593-adb5-c638abf1ac57"
             }
         headers:
           - name: Content-Type
@@ -1907,7 +1937,7 @@ collection:
         meta:
           id: req_82186b65a1e74af1802c1c26f6f55060
           created: 1749249413093
-          modified: 1749296228247
+          modified: 1757043650110
           isPrivate: false
           description: ""
           sortKey: -1732180904676.9043
@@ -1917,7 +1947,8 @@ collection:
           text: |-
             {
             	"paymentDate": "2025-06-07T18:00:00.000Z",
-            	"bankAccountId": "3f2d341e-7ddb-4f4e-a8d1-418f0f919cf5"
+            	"bankAccountId": "3f2d341e-7ddb-4f4e-a8d1-418f0f919cf5",
+            	"generateCashFlow": true
             }
         headers:
           - name: Content-Type
@@ -1968,6 +1999,36 @@ collection:
             send: true
             store: true
           rebuildPath: true
+      - url: "{{ _.baseURL }}accounts-receivable/pending"
+        name: listPendingAccounts
+        meta:
+          id: req_e5fd176c362c4a85942b88ae9d22a7d6
+          created: 1757077661895
+          modified: 1757077813676
+          isPrivate: false
+          description: ""
+          sortKey: -1732181927736.6775
+        method: GET
+        parameters:
+          - id: pair_1dd58a6e957a436dac49844fdebdeab1
+            name: ""
+            value: ""
+            description: ""
+            disabled: false
+        headers:
+          - name: User-Agent
+            value: insomnia/10.3.0
+        authentication:
+          type: bearer
+          token: "{{ _.token }}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
   - name: 12. Cash Flow (Fluxo de Caixa)
     meta:
       id: fld_ce67371d851943168ce461fd2c30ec79
@@ -1981,11 +2042,22 @@ collection:
         meta:
           id: req_33629d7ac48740b9a6d7935c3b61f977
           created: 1749249469479
-          modified: 1756852175572
+          modified: 1757080535919
           isPrivate: false
           description: ""
           sortKey: -1732181369692.7102
         method: GET
+        parameters:
+          - id: pair_6e2fbbfa84104666a40f21f528983d0d
+            name: page
+            value: "1"
+            description: ""
+            disabled: false
+          - id: pair_a3469abc2a3d4a44855471fbfa943d2a
+            name: limit
+            value: "100"
+            description: ""
+            disabled: false
         headers:
           - name: User-Agent
             value: insomnia/10.3.0
@@ -2167,6 +2239,126 @@ collection:
             send: true
             store: true
           rebuildPath: true
+      - url: "{{ _.baseURL
+          }}cash-flow/5bb38c95-c8df-4da9-bfa0-fe94ffa05464/link-receivable"
+        name: linkReceivable
+        meta:
+          id: req_eee32f8bc4744adf8ec8c62348f5a801
+          created: 1757077457882
+          modified: 1757080581331
+          isPrivate: false
+          description: ""
+          sortKey: -1732180910489.6018
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"documentNumber": "123"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/10.3.0
+        authentication:
+          type: bearer
+          token: "{{ _.token }}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}cash-flow/:id/link-payable"
+        name: linkPayable
+        meta:
+          id: req_2fe9a32f0a9741fa800d3a72a7475b40
+          created: 1757077552884
+          modified: 1757077559261
+          isPrivate: false
+          description: ""
+          sortKey: -1732180907583.253
+        method: PATCH
+        body:
+          mimeType: application/json
+          text: |-
+            {
+            	"documentNumber": "XPTO"
+            }
+        headers:
+          - name: Content-Type
+            value: application/json
+          - name: User-Agent
+            value: insomnia/10.3.0
+        authentication:
+          type: bearer
+          token: "{{ _.token }}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: id
+            value: ""
+      - url: "{{ _.baseURL
+          }}cash-flow/5bb38c95-c8df-4da9-bfa0-fe94ffa05464/unlink-receivable"
+        name: unlinkReceivable
+        meta:
+          id: req_57ac9f0e8d354e1e84ab6df6334cc2b2
+          created: 1757077571490
+          modified: 1757080576228
+          isPrivate: false
+          description: ""
+          sortKey: -1732180909036.4272
+        method: PATCH
+        headers:
+          - name: User-Agent
+            value: insomnia/10.3.0
+        authentication:
+          type: bearer
+          token: "{{ _.token }}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+      - url: "{{ _.baseURL }}cash-flow/:id/unlink-payable"
+        name: unlinkPayable
+        meta:
+          id: req_6ae3b3d2acaa46e88eb8f46377de1ca6
+          created: 1757077598055
+          modified: 1757077605555
+          isPrivate: false
+          description: ""
+          sortKey: -1732180906130.0786
+        method: PATCH
+        headers:
+          - name: User-Agent
+            value: insomnia/10.3.0
+        authentication:
+          type: bearer
+          token: "{{ _.token }}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
+        pathParameters:
+          - name: id
+            value: ""
   - name: 13. Settings (Configurações)
     meta:
       id: fld_637c423956494000939650ba0d59c501
@@ -2180,7 +2372,7 @@ collection:
         meta:
           id: req_eb1b7f010ae247e9a8565957ec17c0f3
           created: 1749293667655
-          modified: 1749475117032
+          modified: 1757043630020
           isPrivate: false
           description: ""
           sortKey: -1732180997680.0654
@@ -2189,7 +2381,8 @@ collection:
           mimeType: application/json
           text: |-
             {
-            	"cashFlowDefault": "BANK"
+            	"cashFlowDefault": "CASH",
+            	"showClock": true
             }
         headers:
           - name: Content-Type
@@ -2364,11 +2557,11 @@ collection:
             send: true
             store: true
           rebuildPath: true
-  - name: 15. Dashboard (Relatórios)
+  - name: 15. Dashboard (Dashboard)
     meta:
       id: fld_8a509a2706384a988afe9e6c3c250dd2
       created: 1754446614504
-      modified: 1756851416524
+      modified: 1756947210562
       sortKey: -1731419439428.994
       description: ""
     children:
@@ -2520,6 +2713,49 @@ collection:
             send: true
             store: true
           rebuildPath: true
+  - name: 16. Reports (Relatórios)
+    meta:
+      id: fld_45bd374e526f4d21ac5dca3ab66439ce
+      created: 1756947221398
+      modified: 1756947221398
+      sortKey: -1731419392917.247
+      description: ""
+    children:
+      - url: "{{ _.baseURL }}reports/cost-center-analysis"
+        name: getCostCenterAnalysis
+        meta:
+          id: req_00b059e15359475aab612c0196d9152f
+          created: 1756947221399
+          modified: 1756947326349
+          isPrivate: false
+          description: ""
+          sortKey: -1732181369792.7102
+        method: GET
+        parameters:
+          - id: pair_f2204c0f6497429c8f52012c466c59af
+            name: year
+            value: "2025"
+            description: ""
+            disabled: false
+          - id: pair_554fa8a82c184f5ca8ca605404288af2
+            name: type
+            value: ALL
+            description: ""
+            disabled: true
+        headers:
+          - name: User-Agent
+            value: insomnia/10.3.0
+        authentication:
+          type: bearer
+          token: "{{ _.token }}"
+        settings:
+          renderRequestBody: true
+          encodeUrl: true
+          followRedirects: global
+          cookies:
+            send: true
+            store: true
+          rebuildPath: true
 cookieJar:
   name: Default Jar
   meta:
@@ -2538,12 +2774,12 @@ environments:
       meta:
         id: env_339e55f028994e779813ac8cb6de44e9
         created: 1746536736141
-        modified: 1756906409190
+        modified: 1757080343677
         isPrivate: false
         sortKey: 1735229491596
       data:
         baseURL: http://localhost:3333/api/
-        token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhNWI5MWFlNC04M2QzLTRkMTctODllNC00NThiZDQ2Mzg5NWUiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NTY5MDM5ODIsImV4cCI6MTc1NzUwODc4Mn0.IfOm--LVjJkzc06e5wyZTz9PCKfS15ggc5fWDgCOWP4
+        token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Y2RmMDA4OS04YjVhLTQxZDItYjc4Ni1lMjhiNjMzMzMxMzEiLCJyb2xlIjoiQURNSU4iLCJpYXQiOjE3NTcwODAzMzUsImV4cCI6MTc1NzY4NTEzNX0.eKno22qI3rf4Fbl3Uf7EKIwv6vDI2pJFxHphMPI920Q
       color: "#e76de9"
     - name: Ambiente Dev
       meta:

@@ -196,7 +196,7 @@ export const EditAccountPayable = ({ getAccounts, account }: EditAccountPayableP
             placeholder="Informe o número do documento"
             type="text"
             register={register('documentNumber')}
-            error={errors.documentNumber?.message}
+            error={"Número do documento é obrigatório"}
             maxLength={50}
          />
 
@@ -212,7 +212,7 @@ export const EditAccountPayable = ({ getAccounts, account }: EditAccountPayableP
                      onChange(selected);
                   }}
                   value={value || ''}
-                  error={errors.plannedPaymentMethod?.message}
+                  error={"Método de pagamento previsto é obrigatório"}
                />
             )}
          />

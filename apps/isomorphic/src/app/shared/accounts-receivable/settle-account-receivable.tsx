@@ -422,7 +422,7 @@ export const SettleAccountReceivable = ({ getAccounts, account }: SettleAccountR
 
          <div className="md:col-span-3">
             <Button disabled={loading} className="w-full" type="submit" size="lg">
-               <span>{loading ? 'Salvando...' : 'Receber'}</span>
+               <span>{loading ? 'Salvando...' : 'Liquidar'}</span>
             </Button>
          </div>
       </form>

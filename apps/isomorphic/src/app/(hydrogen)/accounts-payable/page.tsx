@@ -52,11 +52,12 @@ export default function AccountsPayable() {
       totalInstallments: item.totalInstallments,
       value: item.value,
       plannedPaymentMethod: item.plannedPaymentMethod?.name || '',
-     
+      paymentMethodId: item.paymentMethod?.id || '',
       costCenterId: item.costCenter?.id || '',
       costCenterName: item.costCenter?.name || '',
       observation: item.observation,
       paymentDate: item.paymentDate || '',
+      hasCashFlow: item.hasCashFlow,
     }));
   };
 
