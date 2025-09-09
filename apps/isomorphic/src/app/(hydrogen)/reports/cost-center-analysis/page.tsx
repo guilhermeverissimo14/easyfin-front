@@ -191,19 +191,19 @@ export default function CostCenterAnalysisReport() {
                   <div className="text-lg">Carregando...</div>
                </div>
             ) : (
-               <div className="overflow-x-auto">
-                  <table className="min-w-full bg-white border border-gray-200">
-                     <thead className="bg-gray-50">
+               <div className="overflow-auto max-h-[70vh] relative border border-gray-200">
+                  <table className="min-w-full bg-white">
+                     <thead className="bg-gray-50 sticky top-0 z-20">
                         <tr>
-                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                           <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider border-b bg-gray-50 sticky left-0 z-30">
                               Centro de Custo
                            </th>
                            {monthNames.map((month) => (
-                              <th key={month} className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                              <th key={month} className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b bg-gray-50">
                                  {month}
                               </th>
                            ))}
-                           <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b">
+                           <th className="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider border-b bg-gray-50">
                               Total
                            </th>
                         </tr>
@@ -211,7 +211,7 @@ export default function CostCenterAnalysisReport() {
                      <tbody className="bg-white divide-y divide-gray-200">
                         {costCenters.map((costCenter) => (
                            <tr key={costCenter} className="hover:bg-gray-50">
-                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 border-r bg-white sticky left-0 z-10">
                                  {costCenter}
                               </td>
                               {monthNames.map((_, index) => {
@@ -233,14 +233,14 @@ export default function CostCenterAnalysisReport() {
                               </td>
                            </tr>
                         ))}
-                        <tr className="bg-gray-100 font-semibold">
-                           <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-r">
+                        <tr className="bg-gray-100 font-semibold sticky bottom-0 z-20">
+                           <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 border-r bg-gray-100 sticky left-0 z-30">
                               Total Geral
                            </td>
                            {monthNames.map((_, index) => {
                               const total = getMonthTotal(index);
                               return (
-                                 <td key={index} className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-center">
+                                 <td key={index} className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900 text-center bg-gray-100">
                                     {total.toLocaleString('pt-BR', {
                                        style: 'currency',
                                        currency: 'BRL'
