@@ -7,10 +7,11 @@ import DeletePopover from "../delete-popover";
 import ImageIcon from "../icons/image-solid";
 import CommentsIcon from "../icons/comments";
 import PageBlankIcon from "../icons/page-blank";
-import TrashIcon from "../icons/trash";
+import { PiLinkBold } from "react-icons/pi";
 
 export default function TableRowActionGroup({
   openModalEdit,
+  openModalLink,
   openModalList,
   openModalNote,
   openModalImage,
@@ -24,6 +25,7 @@ export default function TableRowActionGroup({
   isVisibleImg = false,
   isVisibleDelete,
   isVisibleEdit,
+  isLink,
   deletePopoverTitle,
   deletePopoverDescription,
   onDelete,
@@ -31,6 +33,7 @@ export default function TableRowActionGroup({
   openModalEdit?: () => void;
   openModalList?: () => void;
   openModalNote?: () => void;
+  openModalLink?: () => void;
   openModalImage?: () => void;
   navigationEdit?: () => void;
   navigationCopySheet?: () => void;
@@ -44,12 +47,27 @@ export default function TableRowActionGroup({
   isVisibleImg?: boolean;
   isVisibleDelete: boolean;
   isVisibleEdit: boolean;
+  isLink?: boolean;
   deletePopoverTitle?: string | undefined;
   deletePopoverDescription?: string | undefined;
   onDelete?: () => void;
 }) {
   return (
     <Flex align="center" justify="end" gap="0" className={className}>
+
+      {isLink && (
+         <Tooltip size="sm" content="Vincular Conta" placement="top" color="invert">
+                  <Button
+                    onClick={openModalLink} as="span" 
+                    className=" bg-white cursor-pointer hover:bg-transparent px-2"
+                  >
+                     <ActionIcon as="span" size="sm" variant="outline" aria-label="Vincular">
+                        <PiLinkBold size={16} className="text-gray-500 hover:text-gray-700" />
+                     </ActionIcon>
+                  </Button>
+               </Tooltip>
+      )}
+
       {isVisibleEdit && (
         <Tooltip size="sm" content="Editar" placement="top" color="invert">
           <Button onClick={!editPayroll ? openModalEdit : navigationEdit} as="span" className=" bg-white cursor-pointer hover:bg-transparent px-2">
@@ -107,6 +125,7 @@ export default function TableRowActionGroup({
           </Button>
         </Tooltip>
       )}
+
     </Flex>
   );
 }
