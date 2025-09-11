@@ -8,8 +8,8 @@ import ModalForm from '@/components/modal/modal-form';
 import { LinkAccountModal } from './link-account-modal';
 import { UpdateCostCenter } from './update-cost-center';
 import { api } from '@/service/api';
-import TableRowActionGroup from '@core/components/table-utils/table-row-action-group';
-import { apiCall } from '@/helpers/apiHelper';
+import { toast } from 'react-toastify';
+import CashBookTableRowActionGroup from '@/components/cash-book-table-row-action-group';
 
 type CustomColumnDef<TData, TValue> = ColumnDef<TData, TValue> & {
   dataType?: 'date' | 'currency' | string
@@ -88,7 +88,7 @@ export const ListCashBookColumn = (getList: () => void) => {
             <>
             
                {userRole === 'ADMIN' && (
-                  <TableRowActionGroup
+                  <CashBookTableRowActionGroup
                      isVisibleDelete={true}
                      isVisible={false}
                      isVisibleEdit={true}
@@ -129,8 +129,29 @@ export const ListCashBookColumn = (getList: () => void) => {
                      deletePopoverTitle="Excluir Lançamento"
                      deletePopoverDescription={`Tem certeza que deseja excluir o lançamento "${row.original.history}"?`}
                      onDelete={async () => {
-                        await apiCall(() => api.delete(`/cash-flow/${row.original.id}`));
-                        getList();
+                        const itemId = row.original.id;
+                        
+                        // Toast de início do processo
+                        toast.info('Excluindo lançamento...', {
+                           autoClose: false,
+                           toastId: `deleting-${itemId}`
+                        });
+
+                        try {
+                           await api.delete(`/cash-flow/${itemId}`);
+
+                           // Toast de sucesso
+                           toast.dismiss(`deleting-${itemId}`);
+                           toast.success('Lançamento excluído com sucesso!');
+                           
+                           getList();
+                        } catch (error) {
+                           // Toast de erro
+                           toast.dismiss(`deleting-${itemId}`);
+                           toast.error('Erro ao excluir lançamento');
+                           console.error('Erro ao excluir lançamento:', error);
+                           throw error; // Re-throw para que o loading pare
+                        }
                      }}
                   />
                )}
