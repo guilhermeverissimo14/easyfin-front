@@ -1,13 +1,13 @@
 'use client';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { PiPlusBold, PiDownloadSimpleBold } from 'react-icons/pi';
+import { redirect } from 'next/navigation';
 
 import TableComponent from '@/components/tables/table';
 import ModalForm from '@/components/modal/modal-form';
 import { useModal } from '@/app/shared/modal-views/use-modal';
 import { api } from '@/service/api';
 import { ListInvoicingColumn } from '@/app/shared/invoicing/column';
-import { HeaderInfoDetailsRef } from '@/app/shared/cash-book/header-info-details';
 import TableLayout from '../tables/table-layout';
 import { IInvoice, PaginationInfo } from '@/types';
 import { toast } from 'react-toastify';
@@ -15,20 +15,12 @@ import { apiCall } from '@/helpers/apiHelper';
 import { CreateInvoice } from '@/app/shared/invoicing/create-invoicing';
 import { TablePagination } from '@/components/tables/table-pagination';
 
-export interface InvoicingFilterParams {
-  page?: number;
-  limit?: number;
-}
-
 export default function Invoicing() {
    const { openModal } = useModal();
 
-   const [loading, setLoading] = useState(true);
+   const [loading, setLoading] = useState(false);
    const [invoices, setInvoices] = useState<IInvoice[]>([]);
-   const [filterParams, setFilterParams] = useState<InvoicingFilterParams>({
-      page: 1,
-      limit: 10,
-   });
+   const [allInvoices, setAllInvoices] = useState<IInvoice[]>([]);
    const [pagination, setPagination] = useState<PaginationInfo>({
       page: 1,
       limit: 10,
@@ -55,88 +47,49 @@ export default function Invoicing() {
 
     const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
 
-   const buildQueryParams = (params: InvoicingFilterParams): string => {
-      const queryParams = new URLSearchParams();
-
-      Object.entries(params).forEach(([key, value]) => {
-         if (value !== undefined && value !== null && value !== '') {
-            queryParams.append(key, value.toString());
-         }
-      });
-
-      return queryParams.toString();
-   };
-
-   const getInvoices = async (newFilters?: InvoicingFilterParams) => {
+   const getInvoices = async () => {
       setLoading(true);
-      const filters = newFilters || filterParams;
-      
       try {
-         const queryParams = buildQueryParams(filters);
-         const endpoint = `/invoices${queryParams ? `?${queryParams}` : ''}`;
-         
-         const response = await apiCall(() => api.get(endpoint));
-         
-         if (response?.data) {
-            let dataArray = [];
-            let paginationInfo: PaginationInfo = {
-               page: 1,
-               limit: 10,
-               totalCount: 0,
-               totalPages: 0,
-               hasNextPage: false,
-               hasPreviousPage: false,
-            };
+         const response = await apiCall(() => api.get<IInvoice[]>('/invoices'));
 
-            // Verifica se a resposta tem estrutura de paginação
-            if (response.data.data && response.data.pagination) {
-               dataArray = response.data.data;
-               paginationInfo = response.data.pagination;
-            } else if (Array.isArray(response.data)) {
-               dataArray = response.data;
-            }
-
-            setInvoices(dataArray);
-            setPagination(paginationInfo);
-            
-            if (newFilters) {
-               setFilterParams(newFilters);
-            }
-         } else {
-            setInvoices([]);
-            setPagination({
-               page: 1,
-               limit: 10,
-               totalCount: 0,
-               totalPages: 0,
-               hasNextPage: false,
-               hasPreviousPage: false,
-            });
+         if (!response) {
+            return;
          }
+
+         setAllInvoices(response.data);
+         updatePaginatedData(response.data, 1, pagination.limit);
       } catch (error) {
-         toast.error('Ocorreu um erro ao carregar as faturas');
-         setInvoices([]);
-         setPagination({
-            page: 1,
-            limit: 10,
-            totalCount: 0,
-            totalPages: 0,
-            hasNextPage: false,
-            hasPreviousPage: false,
-         });
+         if ((error as any)?.response?.status === 401) {
+            localStorage.clear();
+            redirect('/signin');
+         }
       } finally {
          setLoading(false);
       }
    };
 
+   const updatePaginatedData = (data: IInvoice[], page: number, limit: number) => {
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedData = data.slice(startIndex, endIndex);
+      
+      setInvoices(paginatedData);
+      setPagination({
+         page,
+         limit,
+         totalCount: data.length,
+         totalPages: Math.ceil(data.length / limit),
+         hasNextPage: endIndex < data.length,
+         hasPreviousPage: page > 1,
+      });
+   };
+
    const handlePageChange = (page: number) => {
-      const newFilters = { ...filterParams, page };
-      getInvoices(newFilters);
+      updatePaginatedData(allInvoices, page, pagination.limit);
    };
 
    const handleLimitChange = (limit: number) => {
-      const newFilters = { ...filterParams, limit, page: 1 };
-      getInvoices(newFilters);
+      updatePaginatedData(allInvoices, 1, limit);
    };
 
    useEffect(() => {

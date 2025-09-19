@@ -26,9 +26,15 @@ export const ListCustomerColumn = (getList: () => void) => {
    const columns = [
       columnHelper.accessor('name', {
          id: 'name',
-         size: 150,
+         size: 210,
          header: 'Nome',
-         cell: ({ row }) => <span>{row.original.name}</span>,
+         cell: ({ row }) => (
+            <span>
+               {row.original.name.length > 50 
+                  ? `${row.original.name.substring(0, 50)}...` 
+                  : row.original.name}
+            </span>
+         ),
       }),
       columnHelper.accessor('cnpj', {
          id: 'cnpj',
@@ -38,13 +44,13 @@ export const ListCustomerColumn = (getList: () => void) => {
       }),
       columnHelper.accessor('email', {
          id: 'email',
-         size: 200,
+         size: 170,
          header: 'E-mail',
          cell: ({ row }) => <span>{row.original.email || '-'}</span>,
       }),
       columnHelper.accessor('phone', {
          id: 'phone',
-         size: 200,
+         size: 170,
          header: 'Telefone',
          cell: ({ row }) => <span>{row.original.phone || '-'}</span>,
       }),

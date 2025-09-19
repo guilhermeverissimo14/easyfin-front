@@ -163,7 +163,7 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
          header: 'Datas',
          cell: ({ row }) => (
             <div className="flex flex-col">
-               <span className="text-gray-600">{formatDate(row.original.launchDate)}</span>
+               <span className="text-gray-600">{formatDate(row.original.documentDate)}</span>
                <span className="text-red-500">{formatDate(row.original.dueDate)}</span>
             </div>
          ),

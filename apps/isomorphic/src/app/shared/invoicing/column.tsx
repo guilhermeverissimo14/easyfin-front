@@ -28,7 +28,13 @@ export const ListInvoicingColumn = (getList: () => void) => {
          id: 'customer',
          size: 140,
          header: 'Cliente',
-         cell: ({ row }) => <span>{row.original.customer.name}</span>,
+          cell: ({ row }) => (
+            <span>
+               {row.original.customer.name.length > 50
+                  ? `${row.original.customer.name.substring(0, 40)}...`
+                  : row.original.customer.name}
+            </span>
+         ),
       }),
       columnHelper.accessor('issueDate', {
          id: 'issueDate',

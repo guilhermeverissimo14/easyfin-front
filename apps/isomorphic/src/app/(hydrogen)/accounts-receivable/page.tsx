@@ -32,6 +32,7 @@ export interface AccountsReceivableFilterParams {
 
 export default function AccountsReceivable() {
    const [data, setData] = useState<IAccountsReceivable[]>([]);
+   const [allData, setAllData] = useState<IAccountsReceivable[]>([]);
    const [loading, setLoading] = useState(true);
    const [filterParams, setFilterParams] = useState<AccountsReceivableFilterParams>({
       page: 1,
@@ -129,14 +130,22 @@ export default function AccountsReceivable() {
             }
 
             const mappedData = mapApiDataToAccountsReceivable(dataArray);
-            setData(mappedData);
-            setPagination(paginationInfo);
+            
+            // Se é uma nova busca com filtros, armazena todos os dados e pagina do início
+            if (newFilters || !allData.length) {
+               setAllData(mappedData);
+               updatePaginatedData(mappedData, 1, newFilters?.limit || filterParams.limit || 10);
+            } else {
+               // Se é apenas mudança de página/limite, usa os dados já filtrados
+               updatePaginatedData(allData, 1, filterParams.limit || 10);
+            }
             
             if (newFilters) {
                setFilterParams(newFilters);
             }
             setRefreshTrigger(prev => prev + 1);
          } else {
+            setAllData([]);
             setData([]);
             setPagination({
                page: 1,
@@ -150,6 +159,7 @@ export default function AccountsReceivable() {
       } catch (error) {
          console.error('Erro ao buscar contas a receber:', error);
          toast.error('Não foi possível carregar as contas a receber');
+         setAllData([]);
          setData([]);
          setPagination({
             page: 1,
@@ -164,19 +174,32 @@ export default function AccountsReceivable() {
       }
    };
 
+   const updatePaginatedData = (dataToUpdate: IAccountsReceivable[], page: number, limit: number) => {
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+      const paginatedData = dataToUpdate.slice(startIndex, endIndex);
+      
+      setData(paginatedData);
+      
+      const totalCount = dataToUpdate.length;
+      const totalPages = Math.ceil(totalCount / limit);
+      
+      setPagination({
+         page,
+         limit,
+         totalCount,
+         totalPages,
+         hasNextPage: page < totalPages,
+         hasPreviousPage: page > 1,
+      });
+   };
+
    const handlePageChange = (page: number) => {
-      const newFilters = { ...filterParams, page };
-      getData(newFilters);
+      updatePaginatedData(allData, page, pagination.limit);
    };
 
    const handleLimitChange = (limit: number) => {
-      const newFilters = { ...filterParams, limit, page: 1 };
-      getData(newFilters);
-   };
-
-   const handleFilter = async (filters: AccountsReceivableFilterParams) => {
-      const newFilters = { ...filters, page: 1 };
-      await getData(newFilters);
+      updatePaginatedData(allData, 1, limit);
    };
 
    const handleFilterWrapper = async (filters?: FilterParams) => {
