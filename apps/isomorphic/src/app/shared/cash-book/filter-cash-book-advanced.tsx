@@ -124,6 +124,7 @@ export const FilterCashBookAdvanced = ({
                placeholder="Filtrar por centro de custo"
                options={[
                   { label: 'Todos os centros de custo', value: '' },
+                  { label: 'Sem centro de custo', value: 'empty' },
                   ...costCenters
                ]}
                onChange={(selected) => {
