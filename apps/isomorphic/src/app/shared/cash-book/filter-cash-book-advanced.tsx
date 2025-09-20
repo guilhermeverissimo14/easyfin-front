@@ -1,5 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useModal } from "../modal-views/use-modal";
+import { api } from "@/service/api";
+import { Button } from 'rizzui';
+import { SelectField } from '@/components/input/select-field';
+import { DatePicker } from '@core/ui/datepicker';
+import { ptBR } from 'date-fns/locale';
 
 type FilterCashBookFormData = {
    type: string;
@@ -37,6 +42,32 @@ export const FilterCashBookAdvanced = ({
 
    const { closeModal } = useModal();
 
+   const [costCenters, setCostCenters] = useState<{ label: string; value: string }[]>([]);
+
+   const stringToDate = (dateString: string): Date | null => {
+      return dateString ? new Date(dateString) : null;
+   };
+
+   const dateToString = (date: Date | null): string => {
+      return date ? date.toISOString().split('T')[0] : '';
+   };
+
+   useEffect(() => {
+      const fetchCostCenters = async () => {
+         try {
+            const costCentersResponse = await api.get('/cost-centers');
+            setCostCenters(costCentersResponse.data.map((costCenter: any) => ({
+               label: costCenter.name,
+               value: costCenter.id
+            })));
+         } catch (error) {
+            console.error('Erro ao buscar centros de custo:', error);
+         }
+      };
+
+      fetchCostCenters();
+   }, []);
+
    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const filters: Record<string, any> = { page: 1, limit: 10 };
@@ -72,126 +103,162 @@ export const FilterCashBookAdvanced = ({
          className="grid grid-cols-1 gap-4 md:grid-cols-2"
       >
          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-               Tipo
-            </label>
-            <select
+            <SelectField
+               label="Tipo"
+               placeholder="Filtrar por tipo"
+               options={[
+                  { label: 'Todos', value: '' },
+                  { label: 'Crédito', value: 'CREDIT' },
+                  { label: 'Débito', value: 'DEBIT' },
+               ]}
+               onChange={(selected) => {
+                  setFormData((prev) => ({ ...prev, type: selected }));
+               }}
                value={formData.type}
-               onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, type: e.target.value }))
-               }
-               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            >
-               <option value="">Todos</option>
-               <option value="CREDIT">Crédito</option>
-               <option value="DEBIT">Débito</option>
-            </select>
+            />
          </div>
 
-         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-               Data Início
-            </label>
-            <input
-               type="date"
-               value={formData.dateStart}
-               onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, dateStart: e.target.value }))
-               }
-               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+          <div>
+            <SelectField
+               label="Centro de Custo"
+               placeholder="Filtrar por centro de custo"
+               options={[
+                  { label: 'Todos os centros de custo', value: '' },
+                  ...costCenters
+               ]}
+               onChange={(selected) => {
+                  setFormData((prev) => ({ ...prev, costCenterId: selected }));
+               }}
+               value={formData.costCenterId}
             />
          </div>
 
          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-               Data Fim
-            </label>
-            <input
-               type="date"
-               value={formData.dateEnd}
-               onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, dateEnd: e.target.value }))
-               }
-               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            <DatePicker
+               label="Data Início"
+               selected={stringToDate(formData.dateStart)}
+               onChange={(date) => {
+                  setFormData((prev) => ({ ...prev, dateStart: dateToString(date) }));
+               }}
+               dateFormat="dd/MM/yyyy"
+               minDate={new Date('1900-01-01')}
+               maxDate={new Date('2100-01-01')}
+               showMonthYearDropdown
+               scrollableMonthYearDropdown
+               placeholderText="Data inicial"
+               popperPlacement="bottom-end"
+               inputProps={{
+                  variant: 'outline',
+                  inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+               }}
+               className="flex-grow [&>label>span]:font-medium"
+               locale={ptBR}
             />
          </div>
 
          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-               Valor Mínimo
-            </label>
-            <input
-               type="number"
-               step="0.01"
-               value={formData.valueMin}
-               onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, valueMin: e.target.value }))
-               }
-               placeholder="0.00"
-               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+            <DatePicker
+               label="Data Fim"
+               selected={stringToDate(formData.dateEnd)}
+               onChange={(date) => {
+                  setFormData((prev) => ({ ...prev, dateEnd: dateToString(date) }));
+               }}
+               dateFormat="dd/MM/yyyy"
+               minDate={new Date('1900-01-01')}
+               maxDate={new Date('2100-01-01')}
+               showMonthYearDropdown
+               scrollableMonthYearDropdown
+               placeholderText="Data final"
+               popperPlacement="bottom-end"
+               inputProps={{
+                  variant: 'outline',
+                  inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+               }}
+               className="flex-grow [&>label>span]:font-medium"
+               locale={ptBR}
             />
          </div>
+         <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+               <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Valor Mínimo
+               </label>
+               <input
+                  type="number"
+                  step="0.01"
+                  value={formData.valueMin}
+                  onChange={(e) =>
+                     setFormData((prev) => ({ ...prev, valueMin: e.target.value }))
+                  }
+                  placeholder="0.00"
+                  className="block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+               />
+            </div>
 
-         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-               Valor Máximo
-            </label>
-            <input
-               type="number"
-               step="0.01"
-               value={formData.valueMax}
-               onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, valueMax: e.target.value }))
-               }
-               placeholder="0.00"
-               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            />
+            <div>
+               <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Valor Máximo
+               </label>
+               <input
+                  type="number"
+                  step="0.01"
+                  value={formData.valueMax}
+                  onChange={(e) =>
+                     setFormData((prev) => ({ ...prev, valueMax: e.target.value }))
+                  }
+                  placeholder="0.00"
+                  className="block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+               />
+            </div>
          </div>
 
-         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-               Descrição
-            </label>
-            <input
-               type="text"
-               value={formData.description}
-               onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, description: e.target.value }))
-               }
-               placeholder="Buscar por descrição"
-               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            />
+         <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+               <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Descrição
+               </label>
+               <input
+                  type="text"
+                  value={formData.description}
+                  onChange={(e) =>
+                     setFormData((prev) => ({ ...prev, description: e.target.value }))
+                  }
+                  placeholder="Buscar por descrição"
+                  className="block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+               />
+            </div>
+
+            <div>
+               <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Histórico
+               </label>
+               <input
+                  type="text"
+                  value={formData.history}
+                  onChange={(e) =>
+                     setFormData((prev) => ({ ...prev, history: e.target.value }))
+                  }
+                  placeholder="Buscar por histórico"
+                  className="block w-full px-3 py-2 rounded-md border border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
+               />
+            </div>
          </div>
 
-         <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-               Histórico
-            </label>
-            <input
-               type="text"
-               value={formData.history}
-               onChange={(e) =>
-                  setFormData((prev) => ({ ...prev, history: e.target.value }))
-               }
-               placeholder="Buscar por histórico"
-               className="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-            />
-         </div>
-
-         <div className="col-span-2 flex justify-end gap-4 pt-4">
-            <button
+         <div className="md:col-span-2 flex flex-row gap-4">
+            <Button
                type="button"
+               className="flex-1"
+               variant="outline"
                onClick={handleClear}
-               className="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
             >
                Limpar Filtros
-            </button>
-            <button
+            </Button>
+            <Button
+               className="flex-1"
                type="submit"
-               className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600  focus:outline-none"
             >
                Aplicar Filtros
-            </button>
+            </Button>
          </div>
       </form>
    );
