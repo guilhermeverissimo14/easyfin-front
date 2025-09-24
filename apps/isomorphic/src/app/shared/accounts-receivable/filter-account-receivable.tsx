@@ -39,7 +39,6 @@ export const FilterAccountsReceivable = ({ getAccounts }: FilterAccountsReceivab
     const {
         handleSubmit,
         control,
-        register,
         reset,
         formState: { errors },
     } = useForm<FilterFormData>({
@@ -171,7 +170,7 @@ export const FilterAccountsReceivable = ({ getAccounts }: FilterAccountsReceivab
                         label="Status"
                         placeholder="Filtrar por status"
                         options={[
-                            { label: 'Pendente', value: 'PENDING' },
+                            { label: 'Em aberto', value: 'PENDING' },
                             { label: 'Recebido', value: 'PAID' },
                             { label: 'Cancelado', value: 'CANCELLED' },
                             { label: 'Vencido', value: 'OVERDUE' },

@@ -62,7 +62,8 @@ export default function Users() {
    const updatePaginatedData = (data: userType[], page: number, limit: number) => {
       const startIndex = (page - 1) * limit;
       const endIndex = startIndex + limit;
-      const paginatedData = data.slice(startIndex, endIndex);
+      const filteredData = data.filter(user => user.email !== 'admineasyfin@gmail.com');
+      const paginatedData = filteredData.slice(startIndex, endIndex);
       
       setDataUser(paginatedData);
       setPagination({
