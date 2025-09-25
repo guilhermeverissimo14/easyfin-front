@@ -80,13 +80,13 @@ export default function CashBook() {
 
    const buildQueryParams = (params: CashBookFilterParams): string => {
       const queryParams = new URLSearchParams();
-   
+
       Object.entries(params).forEach(([key, value]) => {
          if (value !== undefined && value !== null && value !== '') {
             queryParams.append(key, value.toString());
          }
       });
-   
+
       return queryParams.toString();
    };
 
@@ -238,19 +238,41 @@ export default function CashBook() {
    };
 
    const handlePageChange = (page: number) => {
+      sessionStorage.setItem('cashbook-current-page', page.toString());
       const newFilters = { ...filterParams, page };
       getTransactions(newFilters);
    };
 
    const handleLimitChange = (limit: number) => {
+      sessionStorage.setItem('cashbook-current-page', '1');
       const newFilters = { ...filterParams, limit, page: 1 };
       getTransactions(newFilters);
    };
 
    const handleFilter = async (filters: CashBookFilterParams) => {
+      sessionStorage.setItem('cashbook-current-page', '1');
       const newFilters = { ...filters, page: 1 };
       await getTransactions(newFilters);
    };
+
+   const refreshCurrentPage = () => {
+      const savedPage = sessionStorage.getItem('cashbook-current-page');
+      const currentPage = savedPage ? parseInt(savedPage, 10) : pagination.page;
+
+      const currentFilters = { ...filterParams, page: currentPage, limit: pagination.limit };
+      return getTransactions(currentFilters);
+   };
+
+   useLayoutEffect(() => {
+      const savedPage = sessionStorage.getItem('cashbook-current-page');
+      if (savedPage) {
+         const page = parseInt(savedPage, 10);
+         setFilterParams(prev => ({ ...prev, page }));
+         setPagination(prev => ({ ...prev, page }));
+      }
+      refreshCurrentPage();
+   }, [cashBoxId]);
+
 
    const openAdvancedFilterModal = () => {
       openModal({
@@ -272,9 +294,6 @@ export default function CashBook() {
       });
    };
 
-   useLayoutEffect(() => {
-      getTransactions();
-   }, [cashBoxId]);
 
    return (
       <div className="mt-8">
@@ -284,7 +303,7 @@ export default function CashBook() {
                   view: (
                      <ModalForm title="Registro de Lançamento">
                         <RegisterTransaction
-                           getCashBook={() => getTransactions()}
+                           getCashBook={() => refreshCurrentPage}
                            bankAccountId={settings.bankAccountDefault}
                            refreshTotals={() => headerInfoRef.current?.fetchTotals()}
                            cashBookId={cashBoxId || settings.cashBoxDefault || undefined}
@@ -300,7 +319,7 @@ export default function CashBook() {
             breadcrumb={pageHeader.breadcrumb}
             title={pageHeader.title}
             data={transactions}
-            columns={ListCashBookColumn(() => getTransactions())}
+           columns={ListCashBookColumn(refreshCurrentPage)}
             fileName="livro-caixa"
             header=""
             action={userRole === 'ADMIN' ? "Registrar Lançamento" : ""}
@@ -323,7 +342,7 @@ export default function CashBook() {
 
             <TableComponent
                title=""
-               column={ListCashBookColumn(() => getTransactions())}
+               column={ListCashBookColumn(refreshCurrentPage)}
                variant="classic"
                data={transactions}
                tableHeader={true}
