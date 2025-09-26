@@ -155,7 +155,7 @@ export const HeaderInfoDetails = forwardRef<HeaderInfoDetailsRef, HeaderInfoDeta
             } else {
                window.location.reload();
             }
-            
+            sessionStorage.removeItem('cashbook-current-page');
             toast.success('Modo do fluxo de caixa alterado com sucesso!');
          } catch (error) {
             console.error('Erro ao alterar modo:', error);
