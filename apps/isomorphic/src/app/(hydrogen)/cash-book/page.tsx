@@ -303,7 +303,7 @@ export default function CashBook() {
                   view: (
                      <ModalForm title="Registro de Lançamento">
                         <RegisterTransaction
-                           getCashBook={() => refreshCurrentPage}
+                           getCashBook={refreshCurrentPage}
                            bankAccountId={settings.bankAccountDefault}
                            refreshTotals={() => headerInfoRef.current?.fetchTotals()}
                            cashBookId={cashBoxId || settings.cashBoxDefault || undefined}
