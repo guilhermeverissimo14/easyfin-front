@@ -99,7 +99,6 @@ export default function ImportExtractModal({ onSuccess }: ImportExtractModalProp
 
     const formData = new FormData();
     formData.append('file', selectedFile);
-
     try {
       const response = await api.post<ParseBankTransactionsResponse>('/cash-flow/parse-bank-extract', formData, {
         headers: {
@@ -220,7 +219,8 @@ export default function ImportExtractModal({ onSuccess }: ImportExtractModalProp
         value: transaction.value,
         type: transaction.type,
         detailing: transaction.detailing,
-        originalRow: transaction.originalRow
+        originalRow: transaction.originalRow,
+        costCenterId: transaction.costCenterId
       }));
   
       const response = await api.post('/cash-flow/process-bank-transactions', {
