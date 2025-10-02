@@ -355,7 +355,10 @@ export default function ImportExtractModal({ onSuccess }: ImportExtractModalProp
           <div>
             <h3 className="text-lg font-semibold text-gray-900">Transações Importadas</h3>
             <p className="text-sm text-gray-600">
-              Arquivo: {parsedData.filename} | Total de linhas: {parsedData.totalRows} | Transações válidas: {editableTransactions.length}
+              Arquivo: {parsedData.filename} | Total de linhas: {(editableTransactions.length || 0) + (parsedData.invalidRows.length || 0)} | Transações válidas: {editableTransactions.length}
+              {parsedData.invalidRows.length > 0 && (
+                <span className="text-red-600 font-medium"> | Linhas inválidas: {parsedData.invalidRows.length}</span>
+              )}
             </p>
           </div>
           <Button
@@ -371,6 +374,41 @@ export default function ImportExtractModal({ onSuccess }: ImportExtractModalProp
             Escolher outro arquivo
           </Button>
         </div>
+
+        {parsedData.invalidRows.length > 0 && (
+          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+            <div className="flex items-start space-x-2 mb-3">
+              <div className="flex-shrink-0">
+                <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                </svg>
+              </div>
+              <div>
+                <h4 className="text-sm font-medium text-red-800">Linhas com Problemas</h4>
+                <p className="text-sm text-red-700 mt-1">
+                  As seguintes linhas do arquivo não puderam ser importadas:
+                </p>
+              </div>
+            </div>
+            <div className="max-h-40 overflow-y-auto">
+              <div className="space-y-2">
+                {parsedData.invalidRows.map((invalidRow, index) => (
+                  <div key={index} className="bg-white border border-red-200 rounded p-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-sm font-medium text-red-800">
+                        Linha {invalidRow.row}
+                      </span>
+                    </div>
+                    <p className="text-sm text-red-700 mb-2">{invalidRow.reason}</p>
+                    <div className="text-xs text-gray-600 bg-gray-50 p-2 rounded">
+                      Dados: {JSON.stringify(invalidRow.data)}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         <div className="space-y-2">
           <label className="block text-sm font-medium text-gray-900">
@@ -398,6 +436,9 @@ export default function ImportExtractModal({ onSuccess }: ImportExtractModalProp
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-16">
+                  Linha
+                </th>
                 <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-24">
                   Data
                 </th>
@@ -424,6 +465,11 @@ export default function ImportExtractModal({ onSuccess }: ImportExtractModalProp
             <tbody className="bg-white divide-y divide-gray-200">
               {editableTransactions.map((transaction) => (
                 <tr key={transaction.id} className={transaction.isEdited ? 'bg-yellow-50' : ''}>
+                  <td className="px-4 py-3 whitespace-nowrap text-center">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      {transaction.originalRow}
+                    </span>
+                  </td>
                   <td className="px-4 py-3 whitespace-nowrap">
                     {editingRow === transaction.id ? (
                       <Input

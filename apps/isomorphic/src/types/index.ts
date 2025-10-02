@@ -428,6 +428,13 @@ export interface ParseBankTransactionsResponse {
    sheetNumber: number;
    totalRows: number;
    validTransactions: BankTransaction[];
+   invalidRows: InvalidRow[];
+}
+
+export interface InvalidRow {
+  row: number;
+  data: (string | number)[];
+  reason: string;
 }
 
 export interface EditableBankTransaction extends BankTransaction {
