@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 import { FaFolder, FaCalendarAlt, FaEdit } from 'react-icons/fa';
-import { PiGridFourDuotone } from 'react-icons/pi';
 
 import { api } from '@/service/api';
 import { LoadingSpinner } from '@/components/loading-spinner';
