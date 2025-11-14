@@ -19,7 +19,6 @@ import { TablePagination } from '@/components/tables/table-pagination';
 export interface AccountsPayableFilterParams {
   page?: number;
   limit?: number;
-  customerId?: string;
   supplierId?: string;
   costCenterId?: string;
   status?: string;
@@ -28,6 +27,8 @@ export interface AccountsPayableFilterParams {
   documentDateEnd?: string;
   dueDateStart?: string;
   dueDateEnd?: string;
+  orderBy?: string;
+  order?: string;
 }
 
 export default function AccountsPayable() {
@@ -178,18 +179,24 @@ export default function AccountsPayable() {
     await getData(newFilters);
   };
 
-  const handleFilterWrapper = async (filters?: FilterParams) => {
-    const newFilters: AccountsPayableFilterParams = { 
-      ...filters, 
-      page: 1,
-      limit: filterParams.limit 
-    };
-    await getData(newFilters);
+  const refreshCurrentPage = () => {
+    const currentFilters = { ...filterParams, page: pagination.page, limit: pagination.limit };
+    return getData(currentFilters);
   };
 
   useEffect(() => {
     getData();
   }, []);
+
+  const openAdvancedFilterModal = () => {
+    openModal({
+      view: (
+        <ModalForm title="Pesquisa Avançada - Contas a Pagar">
+          <FilterAccountsPayable onFilter={handleFilter} currentFilters={filterParams} />
+        </ModalForm>
+      ),
+    });
+  };
 
   return (
     <div className="mt-8">
@@ -198,7 +205,7 @@ export default function AccountsPayable() {
           openModal({
             view: (
               <ModalForm title="Contas a Pagar">
-                <NewAccountPayable getAccounts={getData} />
+                <NewAccountPayable getAccounts={refreshCurrentPage} />
               </ModalForm>
             ),
             size: 'md',
@@ -208,7 +215,7 @@ export default function AccountsPayable() {
           openModal({
             view: (
               <ModalForm title="Pesquisa Avançada">
-                <FilterAccountsPayable getAccounts={handleFilterWrapper} />
+                <FilterAccountsPayable onFilter={handleFilter} currentFilters={filterParams} />
               </ModalForm>
             ),
             size: 'md',
@@ -216,7 +223,7 @@ export default function AccountsPayable() {
         }
         breadcrumb={pageHeader.breadcrumb}
         title={pageHeader.title}
-        columns={ListAccountsPayableColumn(getData)}
+        columns={ListAccountsPayableColumn(refreshCurrentPage)}
         data={data}
         fileName="contas-a-pagar"
         header=""
@@ -228,7 +235,7 @@ export default function AccountsPayable() {
         <HeaderInfoDetails refreshTrigger={refreshTrigger} />
         <TableComponent
           title=""
-          column={ListAccountsPayableColumn(getData)}
+          column={ListAccountsPayableColumn(refreshCurrentPage)}
           variant="classic"
           data={data}
           tableHeader={true}
