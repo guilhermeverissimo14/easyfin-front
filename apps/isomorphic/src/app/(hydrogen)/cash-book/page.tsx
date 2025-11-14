@@ -346,7 +346,7 @@ export default function CashBook() {
                variant="classic"
                data={transactions}
                tableHeader={true}
-               searchAble={true}
+               searchAble={false}
                pagination={false}
                loading={loading}
             />

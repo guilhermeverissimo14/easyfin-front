@@ -215,7 +215,7 @@ export default function Invoicing() {
                variant="classic"
                data={invoices}
                tableHeader={true}
-               searchAble={true}
+               searchAble={false}
                pagination={false}
                loading={loading}
             />
