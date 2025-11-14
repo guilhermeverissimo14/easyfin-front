@@ -159,5 +159,6 @@ export const routes = {
    accountsReceivable: '/accounts-receivable',
    reports: {
       costCenterAnalysis: '/reports/cost-center-analysis',
+      costCenterTransactions: '/reports/cost-center-transactions',
    },
 };
