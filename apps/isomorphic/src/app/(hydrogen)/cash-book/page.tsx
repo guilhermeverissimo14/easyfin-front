@@ -319,7 +319,7 @@ export default function CashBook() {
             breadcrumb={pageHeader.breadcrumb}
             title={pageHeader.title}
             data={transactions}
-           columns={ListCashBookColumn(refreshCurrentPage)}
+            columns={ListCashBookColumn(refreshCurrentPage)}
             fileName="livro-caixa"
             header=""
             action={userRole === 'ADMIN' ? "Registrar Lançamento" : ""}
