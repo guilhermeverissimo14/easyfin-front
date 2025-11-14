@@ -39,7 +39,7 @@ export const menuItems = [
             href: routes.taxRates,
             icon: <PiPercentDuotone />,
          },
-          {
+         {
             name: 'Centro de Custo',
             href: routes.constCenters,
             icon: <PiGridFourDuotone />,
@@ -49,11 +49,11 @@ export const menuItems = [
             href: routes.paymentTerms,
             icon: <PiFileCDuotone />,
          },
-          {
-      name: 'Contas Bancárias',
-      href: routes.bankAccounts,
-      icon: <PiBankDuotone />,
-   },
+         {
+            name: 'Contas Bancárias',
+            href: routes.bankAccounts,
+            icon: <PiBankDuotone />,
+         },
          {
             name: 'Clientes',
             href: routes.customers,
@@ -113,6 +113,11 @@ export const menuItems = [
          {
             name: 'Análise por Centro de Custo',
             href: routes.reports.costCenterAnalysis,
+            icon: <PiTargetDuotone />,
+         },
+         {
+            name: 'Apuração por Centro de Custo',
+            href: routes.reports.costCenterTransactions,
             icon: <PiTargetDuotone />,
          },
       ],
