@@ -47,8 +47,20 @@ export default function AccountsPayable() {
     hasPreviousPage: false,
   });
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [sortState, setSortState] = useState<{ columnId: string; direction: 'asc' | 'desc' } | null>(null);
 
   const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
+  const columnToFieldMap: Record<string, string> = {
+    'documentNumber': 'documentNumber',
+    'supplierName': 'supplier',
+    'documentDate': 'documentDate',
+    'launchDate': 'launchDate',
+    'dueDate': 'dueDate',
+    'paymentDate': 'paymentDate',
+    'value': 'value',
+    'paidValue': 'paidValue',
+  };
 
   const { openModal } = useModal();
 
@@ -97,6 +109,29 @@ export default function AccountsPayable() {
     });
     
     return queryParams.toString();
+  };
+
+  const handleSort = (columnId: string, direction: 'asc' | 'desc' | null) => {
+    if (direction === null) {
+      // Limpar ordenação
+      setSortState(null);
+      const { orderBy, order, ...restParams } = filterParams;
+      const newFilters = { ...restParams };
+      setFilterParams(newFilters);
+      getData(newFilters);
+    } else {
+      // Aplicar ordenação
+      const fieldName = columnToFieldMap[columnId] || columnId;
+      setSortState({ columnId, direction });
+      const newFilters = { 
+        ...filterParams, 
+        orderBy: fieldName, 
+        order: direction,
+        page: 1 
+      };
+      setFilterParams(newFilters);
+      getData(newFilters);
+    }
   };
 
   const getData = async (newFilters?: AccountsPayableFilterParams) => {
@@ -165,17 +200,40 @@ export default function AccountsPayable() {
   };
 
   const handlePageChange = (page: number) => {
-    const newFilters = { ...filterParams, page };
+    const newFilters = { 
+      ...filterParams, 
+      page,
+      ...(sortState && {
+        orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+        order: sortState.direction
+      })
+    };
     getData(newFilters);
   };
 
   const handleLimitChange = (limit: number) => {
-    const newFilters = { ...filterParams, limit, page: 1 };
+    const newFilters = { 
+      ...filterParams, 
+      limit, 
+      page: 1,
+      ...(sortState && {
+        orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+        order: sortState.direction
+      })
+    };
     getData(newFilters);
   };
 
   const handleFilter = async (filters: AccountsPayableFilterParams) => {
-    const newFilters = { ...filters, page: 1 };
+    // Preserva a ordenação atual ao aplicar filtros
+    const newFilters = { 
+      ...filters, 
+      page: 1,
+      ...(sortState && {
+        orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+        order: sortState.direction
+      })
+    };
     await getData(newFilters);
   };
 
@@ -188,15 +246,7 @@ export default function AccountsPayable() {
     getData();
   }, []);
 
-  const openAdvancedFilterModal = () => {
-    openModal({
-      view: (
-        <ModalForm title="Pesquisa Avançada - Contas a Pagar">
-          <FilterAccountsPayable onFilter={handleFilter} currentFilters={filterParams} />
-        </ModalForm>
-      ),
-    });
-  };
+ 
 
   return (
     <div className="mt-8">
@@ -242,6 +292,8 @@ export default function AccountsPayable() {
           searchAble={false}
           pagination={false}
           loading={loading}
+          onSort={handleSort}
+          sortState={sortState}
         />
         
         <TablePagination 
