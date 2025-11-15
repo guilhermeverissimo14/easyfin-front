@@ -71,7 +71,6 @@ export default function Invoicing() {
 
     const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
 
-   // Mapeamento das colunas da tabela para os campos do backend
    const columnToFieldMap: Record<string, string> = {
       'invoiceNumber': 'invoiceNumber',
       'customer': 'customer',

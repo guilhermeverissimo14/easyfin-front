@@ -51,7 +51,7 @@ export const ListCashBookColumn = (getList: () => void) => {
       }),
       columnHelper.accessor('type', {
          id: 'type',
-         size: 60,
+         size: 70,
          header: 'Tipo',
          cell: ({ row }) => <span>{row.original.type}</span>,
       }),

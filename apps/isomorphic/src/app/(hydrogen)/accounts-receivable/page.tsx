@@ -47,8 +47,20 @@ export default function AccountsReceivable() {
       hasPreviousPage: false,
    });
    const [refreshTrigger, setRefreshTrigger] = useState(0);
+   const [sortState, setSortState] = useState<{ columnId: string; direction: 'asc' | 'desc' } | null>(null);
 
    const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
+   const columnToFieldMap: Record<string, string> = {
+      'documentNumber': 'documentNumber',
+      'customerName': 'customer',
+      'documentDate': 'documentDate',
+      'launchDate': 'launchDate',
+      'dueDate': 'dueDate',
+      'receiptDate': 'receiptDate',
+      'value': 'value',
+      'receivedValue': 'receivedValue',
+   };
 
    const { openModal } = useModal();
 
@@ -98,6 +110,29 @@ export default function AccountsReceivable() {
       });
 
       return queryParams.toString();
+   };
+
+   const handleSort = (columnId: string, direction: 'asc' | 'desc' | null) => {
+      if (direction === null) {
+         // Limpar ordenação
+         setSortState(null);
+         const { orderBy, order, ...restParams } = filterParams;
+         const newFilters = { ...restParams };
+         setFilterParams(newFilters);
+         getData(newFilters);
+      } else {
+         // Aplicar ordenação
+         const fieldName = columnToFieldMap[columnId] || columnId;
+         setSortState({ columnId, direction });
+         const newFilters = { 
+            ...filterParams, 
+            orderBy: fieldName, 
+            order: direction,
+            page: 1 
+         };
+         setFilterParams(newFilters);
+         getData(newFilters);
+      }
    };
 
    const getData = async (newFilters?: AccountsReceivableFilterParams) => {
@@ -174,17 +209,41 @@ export default function AccountsReceivable() {
    };
 
    const handlePageChange = (page: number) => {
-      const newFilters = { ...filterParams, page };
+      const newFilters = { 
+         ...filterParams, 
+         page,
+         ...(sortState && {
+            orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+            order: sortState.direction
+         })
+      };
       getData(newFilters);
    };
 
    const handleLimitChange = (limit: number) => {
-      const newFilters = { ...filterParams, limit, page: 1 };
+      const newFilters = { 
+         ...filterParams, 
+         limit, 
+         page: 1,
+         ...(sortState && {
+            orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+            order: sortState.direction
+         })
+      };
       getData(newFilters);
    };
 
    const handleFilter = async (filters: AccountsReceivableFilterParams) => {
-      const newFilters = { ...filters, page: 1, limit: filterParams.limit };
+      // Preserva a ordenação atual ao aplicar filtros
+      const newFilters = { 
+         ...filters, 
+         page: 1, 
+         limit: filterParams.limit,
+         ...(sortState && {
+            orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+            order: sortState.direction
+         })
+      };
       await getData(newFilters);
    };
 
@@ -243,6 +302,8 @@ export default function AccountsReceivable() {
                searchAble={false}
                pagination={false}
                loading={loading}
+               onSort={handleSort}
+               sortState={sortState}
             />
             
             <TablePagination 
