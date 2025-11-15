@@ -11,6 +11,7 @@ import { UserDetails } from '@/app/shared/users/user-details';
 import { FormEdit } from '@/app/shared/users/form-edit';
 import { userType } from '@/types';
 import { api } from '@/service/api';
+import { toast } from 'react-toastify';
 
 const columnHelper = createColumnHelper<userType>();
 
@@ -27,6 +28,7 @@ function convertRoles(role: string) {
 export const ListUserColumn = (getList: () => void) => {
    const { openModal } = useModal();
    const isMobile = window.innerWidth < 768;
+   const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
 
    const handleUpdateStatus = async (userId: string, newStatus: boolean) => {
       await api.patch(`/users/${userId}/toggle-status`, { active: newStatus });
@@ -86,7 +88,7 @@ export const ListUserColumn = (getList: () => void) => {
             },
          }) => (
             <TableRowActionGroup
-               isVisibleDelete={false}
+               isVisibleDelete={userRole === 'ADMIN'}
                isVisible={true}
                isVisibleEdit={true}
                openModalList={() =>
@@ -109,6 +111,16 @@ export const ListUserColumn = (getList: () => void) => {
                      size: 'lg',
                   })
                }
+               deletePopoverTitle="Excluir esse usuário?"
+               deletePopoverDescription={`Tem certeza que deseja excluir o usuário "${row.original.name}"?`}
+               onDelete={async () => {
+                  try{
+                     await api.delete(`/users/${row.original.id}`);
+                  }catch(error:any){
+                     toast.error(error?.response?.data?.message || 'Erro ao excluir usuário.');
+                  }
+                  getList();
+               }}
             />
          ),
       }),
