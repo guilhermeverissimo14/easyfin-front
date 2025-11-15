@@ -133,30 +133,11 @@ export default function CostCenterTransactionsPage() {
                                 selected={startDate}
                                 onChange={setStartDate}
                                 dateFormat="dd/MM/yyyy"
+                                minDate={new Date('1900-01-01')}
                                 maxDate={endDate || new Date('2100-01-01')}
                                 showMonthYearDropdown
                                 scrollableMonthYearDropdown
                                 placeholderText="Selecione a data inicial"
-                                popperPlacement="bottom-start"
-                                locale={ptBR}
-                                inputProps={{
-                                    inputClassName: 'h-11'
-                                }}
-                            />
-                        </div>
-
-                        <div className="space-y-2">
-                            <label className="block text-sm font-semibold text-gray-700 mb-2">
-                                Data Final *
-                            </label>
-                            <DatePicker
-                                selected={endDate}
-                                onChange={setEndDate}
-                                dateFormat="dd/MM/yyyy"
-                                minDate={startDate || undefined}
-                                showMonthYearDropdown
-                                scrollableMonthYearDropdown
-                                placeholderText="Selecione a data final"
                                 popperPlacement="bottom-start"
                                 locale={ptBR}
                                 inputProps={{
