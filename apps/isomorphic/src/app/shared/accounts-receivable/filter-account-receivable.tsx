@@ -27,7 +27,6 @@ type FilterAccountsReceivableProps = {
 };
 
 export const FilterAccountsReceivable = ({ onFilter, currentFilters }: FilterAccountsReceivableProps) => {
-    const [loading, setLoading] = useState(false);
     const [customers, setCustomers] = useState<{ label: string; value: string }[]>([]);
     const [costCenters, setCostCenters] = useState<{ label: string; value: string }[]>([]);
     const [paymentMethods, setPaymentMethods] = useState<{ label: string; value: string }[]>([]);

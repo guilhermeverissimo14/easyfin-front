@@ -25,6 +25,8 @@ interface TableComponentProps<T extends TableData> {
    title?: string;
    loading?: boolean;
    customFilters?: React.ReactNode;
+   onSort?: (columnId: string, direction: 'asc' | 'desc' | null) => void;
+   sortState?: { columnId: string; direction: 'asc' | 'desc' } | null;
 }
 
 export default function TableComponent<T extends TableData>({
@@ -37,6 +39,8 @@ export default function TableComponent<T extends TableData>({
    title = '',
    loading = false,
    customFilters,
+   onSort,
+   sortState,
 }: TableComponentProps<T>) {
    const getList = async () => {
       setData(data);
@@ -99,6 +103,8 @@ export default function TableComponent<T extends TableData>({
                   variant={variant}
                   showLoadingText={loading}
                   columnOrder={columnOrder}
+                  onSort={onSort}
+                  sortState={sortState}
                   components={{
                      headerCell: DragAbleHeadWrapper,
                      bodyCell: DragAbleCellWrapper,

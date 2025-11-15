@@ -15,6 +15,8 @@ export type CustomHeaderProps<TData extends Record<string, any>> = {
   columnOrder?: string[];
   isLeftScrollable?: boolean;
   isRightScrollable?: boolean;
+  onSort?: (columnId: string, direction: 'asc' | 'desc' | null) => void;
+  sortState?: { columnId: string; direction: 'asc' | 'desc' } | null;
 };
 export type CustomHeaderCellProps<TData extends Record<string, any>> = {
   columnOrder?: string[];
@@ -22,6 +24,8 @@ export type CustomHeaderCellProps<TData extends Record<string, any>> = {
   isLeftScrollable?: boolean;
   isRightScrollable?: boolean;
   className?: string;
+  onSort?: (columnId: string, direction: 'asc' | 'desc' | null) => void;
+  sortState?: { columnId: string; direction: 'asc' | 'desc' } | null;
 };
 export type CustomBodyRowProps<TData extends Record<string, any>> = {
   table?: ReactTableType<TData>;
@@ -65,6 +69,8 @@ export type MainTableProps<T extends Record<string, any>> = {
   table?: ReactTableType<T>;
   variant?: TableVariantProps;
   dataIds?: UniqueIdentifier[];
+  onSort?: (columnId: string, direction: 'asc' | 'desc' | null) => void;
+  sortState?: { columnId: string; direction: 'asc' | 'desc' } | null;
   components?: {
     header?: (c: CustomHeaderProps<T>) => React.ReactNode;
     headerCell?: (c: CustomHeaderCellProps<T>) => React.ReactNode;

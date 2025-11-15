@@ -52,6 +52,7 @@ export default function Invoicing() {
       page: 1,
       limit: 10,
    });
+   const [sortState, setSortState] = useState<{ columnId: string; direction: 'asc' | 'desc' } | null>(null);
 
    const pageHeader = {
       title: 'Faturamento',
@@ -70,6 +71,17 @@ export default function Invoicing() {
 
     const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
 
+   // Mapeamento das colunas da tabela para os campos do backend
+   const columnToFieldMap: Record<string, string> = {
+      'invoiceNumber': 'invoiceNumber',
+      'customer': 'customer',
+      'issueDate': 'issueDate',
+      'dueDate': 'dueDate',
+      'paymentCondition.description': 'paymentCondition',
+      'paymentCondition.condition': 'paymentCondition',
+      'serviceValue': 'serviceValue',
+   };
+
    const buildQueryParams = (params: InvoicingFilterParams): string => {
       const queryParams = new URLSearchParams();
 
@@ -80,6 +92,29 @@ export default function Invoicing() {
       });
 
       return queryParams.toString();
+   };
+
+   const handleSort = (columnId: string, direction: 'asc' | 'desc' | null) => {
+      if (direction === null) {
+         // Limpar ordenação
+         setSortState(null);
+         const { orderBy, order, ...restParams } = filterParams;
+         const newFilters = { ...restParams };
+         setFilterParams(newFilters);
+         getInvoices(newFilters);
+      } else {
+         // Aplicar ordenação
+         const fieldName = columnToFieldMap[columnId] || columnId;
+         setSortState({ columnId, direction });
+         const newFilters = { 
+            ...filterParams, 
+            orderBy: fieldName, 
+            order: direction,
+            page: 1 
+         };
+         setFilterParams(newFilters);
+         getInvoices(newFilters);
+      }
    };
 
    const getInvoices = async (newFilters?: InvoicingFilterParams) => {
@@ -150,17 +185,40 @@ export default function Invoicing() {
    };
 
    const handlePageChange = (page: number) => {
-      const newFilters = { ...filterParams, page };
+      const newFilters = { 
+         ...filterParams, 
+         page,
+         ...(sortState && {
+            orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+            order: sortState.direction
+         })
+      };
       getInvoices(newFilters);
    };
 
    const handleLimitChange = (limit: number) => {
-      const newFilters = { ...filterParams, limit, page: 1 };
+      const newFilters = { 
+         ...filterParams, 
+         limit, 
+         page: 1,
+         ...(sortState && {
+            orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+            order: sortState.direction
+         })
+      };
       getInvoices(newFilters);
    };
 
    const handleFilter = async (filters: InvoicingFilterParams) => {
-      const newFilters = { ...filters, page: 1 };
+      // Preserva a ordenação atual ao aplicar filtros
+      const newFilters = { 
+         ...filters, 
+         page: 1,
+         ...(sortState && {
+            orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+            order: sortState.direction
+         })
+      };
       await getInvoices(newFilters);
    };
 
@@ -218,6 +276,8 @@ export default function Invoicing() {
                searchAble={false}
                pagination={false}
                loading={loading}
+               onSort={handleSort}
+               sortState={sortState}
             />
             
             <TablePagination 
