@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from 'rizzui';
@@ -13,6 +13,9 @@ import { CustomErrorLogin, userType } from '@/types';
 import { InputField } from '@/components/input/input-field';
 import { cpfCnpjMask, formatMoney, phoneNumberMask } from '@/utils/format';
 import { LoadingSpinner } from '@/components/loading-spinner';
+import { DatePicker } from '@core/ui/datepicker';
+import { ptBR } from 'date-fns/locale';
+import { format } from 'date-fns';
 
 const userSchema = z.object({
    name: z
@@ -34,6 +37,7 @@ const userSchema = z.object({
       z.string()
          .optional(),
    localManagerId: z.string().optional(),
+   birthdate: z.date().optional().nullable(),
 });
 
 
@@ -75,6 +79,9 @@ export const FormEdit = ({ getUsers, id }: FormUserProps) => {
       if (!requestData.cpfCnpj) {
          delete requestData.cpfCnpj;
       }
+      if (!requestData.birthdate) {
+         delete requestData.birthdate;
+      }
 
       requestData.phone = requestData.phone?.replace(/\D/g, '');
       requestData.cpfCnpj = requestData.cpfCnpj?.replace(/\D/g, '');
@@ -82,6 +89,10 @@ export const FormEdit = ({ getUsers, id }: FormUserProps) => {
 
       if (!requestData.commission || requestData.commission === 0 as any) {
          delete requestData.commission;
+      }
+
+      if (requestData.birthdate) {
+         requestData.birthdate = format(requestData.birthdate, 'yyyy-MM-dd') as any;
       }
 
       try {
@@ -112,6 +123,14 @@ export const FormEdit = ({ getUsers, id }: FormUserProps) => {
          setValue('cpfCnpj', response.data.cpfCnpj || '');
          setValue('commission', response.data.commission ? formatMoney(response.data.commission) : '');
          setValue('localManagerId', response.data.localManagerId || '');
+         if (response.data.birthdate) {
+            const [year, month, day] = response.data.birthdate.split('-');
+            const localDate = new Date(Number(year), Number(month) - 1, Number(day));
+            setValue('birthdate', localDate);
+         } else {
+            setValue('birthdate', null);
+         }
+
       } catch (error) {
          console.error('Erro ao buscar usuários:', error);
       } finally {
@@ -149,6 +168,9 @@ export const FormEdit = ({ getUsers, id }: FormUserProps) => {
       );
    }
 
+   const eighteenYearsAgo = new Date();
+   eighteenYearsAgo.setFullYear(eighteenYearsAgo.getFullYear() - 18);
+
    return (
       <div
          className="mx-auto rounded-lg shadow-md"
@@ -171,33 +193,55 @@ export const FormEdit = ({ getUsers, id }: FormUserProps) => {
                disabled={true}
             />
 
-            {userDetails?.phone && (
-               <InputField
-                  label="Telefone (opcional)"
-                  placeholder="Digite o telefone"
-                  type="text"
-                  register={register('phone')}
-                  error={errors.phone?.message}
-                  onChange={(e) => {
-                     const value = e.target.value;
-                     setValue('phone', phoneNumberMask(value));
-                  }}
-               />
-            )}
+            <InputField
+               label="Telefone (opcional)"
+               placeholder="Digite o telefone"
+               type="text"
+               register={register('phone')}
+               error={errors.phone?.message}
+               onChange={(e) => {
+                  const value = e.target.value;
+                  setValue('phone', phoneNumberMask(value));
+               }}
+            />
 
-            {userDetails?.cpfCnpj && (
-               <InputField
-                  label="CPF/CNPJ (opcional)"
-                  placeholder="Digite o CPF ou CNPJ"
-                  type="text"
-                  register={register('cpfCnpj')}
-                  error={errors.cpfCnpj?.message}
-                  onChange={(e) => {
-                     const value = e.target.value;
-                     setValue('cpfCnpj', cpfCnpjMask(value));
-                  }}
-               />
-            )}
+            <InputField
+               label="CPF/CNPJ (opcional)"
+               placeholder="Digite o CPF ou CNPJ"
+               type="text"
+               register={register('cpfCnpj')}
+               error={errors.cpfCnpj?.message}
+               onChange={(e) => {
+                  const value = e.target.value;
+                  setValue('cpfCnpj', cpfCnpjMask(value));
+               }}
+            />
+
+            <Controller
+               control={control}
+               name="birthdate"
+               render={({ field: { onChange, value } }) => (
+                  <DatePicker
+                     label='Data de nascimento (opcional)'
+                     selected={value}
+                     onChange={onChange}
+                     dateFormat="dd/MM/yyyy"
+                     showMonthYearDropdown
+                     minDate={new Date('1930-02-01')}
+                     maxDate={eighteenYearsAgo}
+                     scrollableMonthYearDropdown
+                     placeholderText="Sua data de nascimento"
+                     popperPlacement="bottom-end"
+                     inputProps={{
+                        variant: 'outline',
+                        inputClassName:
+                           'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+                     }}
+                     className="flex-grow [&>label>span]:font-medium"
+                     locale={ptBR}
+                  />
+               )}
+            />
 
             {userDetails?.firstAccess == true && (
                <Button
@@ -209,7 +253,6 @@ export const FormEdit = ({ getUsers, id }: FormUserProps) => {
                   {isLoading ? 'Carregando...' : 'Reenviar e-mail de boas-vindas'}
                </Button>
             )}
-
             <Button
                onClick={handleSubmit(onSubmit)}
                disabled={loading}
