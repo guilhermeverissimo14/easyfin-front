@@ -97,13 +97,13 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
    const columns = [
       columnHelper.accessor('documentNumber', {
          id: 'documentNumber',
-         size: 120,
+         size: 150,
          header: 'Nº Documento',
          cell: ({ row }) => <span className="font-medium">{row.original.documentNumber}</span>,
       }),
       columnHelper.accessor('customerName', {
          id: 'customerName',
-         size: 280,
+         size: 240,
          header: 'Cliente',
          cell: ({ row }) => <span>{row.original.customerName}</span>,
       }),

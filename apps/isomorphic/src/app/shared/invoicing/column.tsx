@@ -9,6 +9,7 @@ import { useModal } from '../modal-views/use-modal';
 import ModalForm from '@/components/modal/modal-form';
 import { InvoiceDetails } from './invoice-details';
 import { EditInvoice } from './edit-invoicing';
+import { toast } from 'react-toastify';
 
 const columnHelper = createColumnHelper<IInvoice>();
 
@@ -62,7 +63,7 @@ export const ListInvoicingColumn = (getList: () => void) => {
       }),
       columnHelper.accessor('serviceValue', {
          id: 'serviceValue',
-         size: 120,
+         size: 160,
          header: 'Valor do Serviço',
          cell: ({ row }) => <span>{formatCurrency(row.original.serviceValue)}</span>,
       }),
@@ -106,7 +107,11 @@ export const ListInvoicingColumn = (getList: () => void) => {
                deletePopoverTitle="Excluir Nota Fiscal?"
                deletePopoverDescription={`Tem certeza que deseja excluir a Nota Fiscal ${row.original.invoiceNumber}?`}
                onDelete={async () => {
-                  await api.delete(`/invoices/${row.original.id}`);
+                  try{
+                     await api.delete(`/invoices/${row.original.id}`);
+                  }catch(error:any){
+                     toast.error(error?.response?.data?.message || 'Erro ao excluir nota fiscal.');
+                  }
                   getList();
                }}
             />
