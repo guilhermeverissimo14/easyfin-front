@@ -385,7 +385,7 @@ export default function CostCenterTransactionsPage() {
                 {!reportData && !loading && (
                     <div className="bg-gray-50 rounded-lg border border-gray-200 p-12 text-center">
                         <p className="text-gray-600">
-                            Selecione os filtros e clique em "Gerar Relatório" para visualizar os dados
+                            Selecione os filtros e clique em &quot;Gerar Relatório&quot; para visualizar os dados
                         </p>
                     </div>
                 )}
