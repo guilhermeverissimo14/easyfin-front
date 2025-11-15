@@ -93,7 +93,7 @@ export const ListAccountsPayableColumn = (getList: () => void) => {
    const columns = [
       columnHelper.accessor('documentNumber', {
          id: 'documentNumber',
-         size: 120,
+         size: 140,
          header: 'Nº Documento',
          cell: ({ row }) => <span className="font-medium">{row.original.documentNumber}</span>,
       }),
