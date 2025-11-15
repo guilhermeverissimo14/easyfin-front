@@ -34,7 +34,7 @@ export default function EnvironmentBanner() {
             style.remove();
          }
       };
-   }, [environment]);
+   }, [environment]); 
 
    if (environment !== 'homolog') {
       return null;
