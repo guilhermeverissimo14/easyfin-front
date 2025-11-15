@@ -11,6 +11,7 @@ import { siteConfig } from '@/config/site.config';
 import { inter, lexendDeca } from '@/app/fonts';
 import NextProgress from '@core/components/next-progress';
 import cn from '@core/utils/class-names';
+import { EnvironmentBanner } from '@/components/environment-banner';
 
 // styles
 import 'swiper/css';
@@ -37,6 +38,7 @@ export default async function RootLayout({
             suppressHydrationWarning
             className={cn(inter.variable, lexendDeca.variable, 'font-inter')}
          >
+            <EnvironmentBanner />
             <AuthProvider session={session}>
                <ThemeProvider>
                   <ImportLoadingProvider>
