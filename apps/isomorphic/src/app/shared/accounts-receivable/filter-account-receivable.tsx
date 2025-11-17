@@ -1,70 +1,95 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useForm, Controller } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
 import { Button } from 'rizzui';
-import { z } from 'zod';
 import { useModal } from '../modal-views/use-modal';
 import { SelectField } from '@/components/input/select-field';
 import { api } from '@/service/api';
-import { FilterParams } from '@/types';
 import { ptBR } from 'date-fns/locale';
 import { DatePicker } from '@core/ui/datepicker';
+import { apiCall } from '@/helpers/apiHelper';
 
-const filterSchema = z.object({
-    customerId: z.string().optional(),
-    costCenterId: z.string().optional(),
-    status: z.string().optional(),
-    paymentMethodId: z.string().optional(),
-    documentDateStart: z.date().nullable().optional(),
-    documentDateEnd: z.date().nullable().optional(),
-    dueDateStart: z.date().nullable().optional(),
-    dueDateEnd: z.date().nullable().optional(),
-});
+type FilterAccountsReceivableFormData = {
+    customerId: string;
+    costCenterId: string;
+    status: string;
+    paymentMethodId: string;
+    documentDateStart: string;
+    documentDateEnd: string;
+    dueDateStart: string;
+    dueDateEnd: string;
+};
 
-type FilterFormData = z.infer<typeof filterSchema>;
+type FilterAccountsReceivableProps = {
+    onFilter: (filters: Record<string, any>) => void;
+    currentFilters?: Partial<FilterAccountsReceivableFormData>;
+};
 
-interface FilterAccountsReceivableProps {
-    getAccounts: (params: FilterParams) => void;
-}
+export const FilterAccountsReceivable = ({ onFilter, currentFilters }: FilterAccountsReceivableProps) => {
+    const [customers, setCustomers] = useState<{ label: string; value: string }[]>([]);
+    const [costCenters, setCostCenters] = useState<{ label: string; value: string }[]>([]);
+    const [paymentMethods, setPaymentMethods] = useState<{ label: string; value: string }[]>([]);
 
-export const FilterAccountsReceivable = ({ getAccounts }: FilterAccountsReceivableProps) => {
-    const [loading, setLoading] = useState(false);
-    const [customers, setCustomers] = useState([]);
-    const [costCenters, setCostCenters] = useState([]);
-    const [paymentMethods, setPaymentMethods] = useState([]);
+    const { setValue, watch, getValues } = useForm<FilterAccountsReceivableFormData>({
+        defaultValues: {
+            customerId: currentFilters?.customerId || "",
+            costCenterId: currentFilters?.costCenterId || "",
+            status: currentFilters?.status || "",
+            paymentMethodId: currentFilters?.paymentMethodId || "",
+            documentDateStart: currentFilters?.documentDateStart || "",
+            documentDateEnd: currentFilters?.documentDateEnd || "",
+            dueDateStart: currentFilters?.dueDateStart || "",
+            dueDateEnd: currentFilters?.dueDateEnd || "",
+        }
+    });
+
+    const formData = watch();
     const { closeModal } = useModal();
 
-    const {
-        handleSubmit,
-        control,
-        reset,
-        formState: { errors },
-    } = useForm<FilterFormData>({
-        resolver: zodResolver(filterSchema),
-    });
+    const stringToDate = (dateString: string): Date | null => {
+        if (!dateString) return null;
+        const [year, month, day] = dateString.split('-');
+        return new Date(Number(year), Number(month) - 1, Number(day));
+    };
+
+    const dateToString = (date: Date | null): string => {
+        if (!date) return '';
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    };
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const customersResponse = await api.get('/customers');
-                setCustomers(customersResponse.data.map((customer: any) => ({
-                    label: customer.name,
-                    value: customer.id
-                })));
+                const [customersRes, costCentersRes, paymentMethodsRes] = await Promise.all([
+                    apiCall(() => api.get('/customers')),
+                    apiCall(() => api.get('/cost-centers')),
+                    apiCall(() => api.get('/payment-methods')),
+                ]);
 
-                const costCentersResponse = await api.get('/cost-centers');
-                setCostCenters(costCentersResponse.data.map((center: any) => ({
-                    label: center.name,
-                    value: center.id
-                })));
+                if (customersRes?.data) {
+                    setCustomers(customersRes.data.map((customer: any) => ({
+                        label: customer.name,
+                        value: customer.id
+                    })));
+                }
 
-                const paymentMethodsResponse = await api.get('/payment-methods');
-                setPaymentMethods(paymentMethodsResponse.data.map((method: any) => ({
-                    label: method.name,
-                    value: method.id
-                })));
+                if (costCentersRes?.data) {
+                    setCostCenters(costCentersRes.data.map((center: any) => ({
+                        label: center.name,
+                        value: center.id
+                    })));
+                }
+
+                if (paymentMethodsRes?.data) {
+                    setPaymentMethods(paymentMethodsRes.data.map((method: any) => ({
+                        label: method.name,
+                        value: method.id
+                    })));
+                }
             } catch (error) {
                 console.error("Erro ao carregar dados para filtros:", error);
             }
@@ -73,235 +98,192 @@ export const FilterAccountsReceivable = ({ getAccounts }: FilterAccountsReceivab
         fetchData();
     }, []);
 
-    const onSubmit = async (data: FilterFormData) => {
-        setLoading(true);
+    const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        const filters: Record<string, any> = { page: 1, limit: 10 };
 
-        try {
-            // Prepare filter parameters
-            const filters: FilterParams = {};
+        const currentValues = getValues();
 
-            if (data.customerId) filters.customerId = data.customerId;
-            if (data.costCenterId) filters.costCenterId = data.costCenterId;
-            if (data.status) filters.status = data.status;
-            if (data.paymentMethodId) filters.paymentMethodId = data.paymentMethodId;
-
-            if (data.documentDateStart) {
-                filters.documentDateStart = data.documentDateStart.toISOString();
+        Object.entries(currentValues).forEach(([key, value]) => {
+            if (value && value !== "") {
+                filters[key] = value;
             }
-
-            if (data.documentDateEnd) {
-                filters.documentDateEnd = data.documentDateEnd.toISOString();
-            }
-
-            if (data.dueDateStart) {
-                filters.dueDateStart = data.dueDateStart.toISOString();
-            }
-
-            if (data.dueDateEnd) {
-                filters.dueDateEnd = data.dueDateEnd.toISOString();
-            }
-
-            await getAccounts(filters);
-            closeModal();
-        } catch (error) {
-            console.error('Erro ao aplicar filtros:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const clearFilters = () => {
-        reset({
-            customerId: '',
-            costCenterId: '',
-            status: '',
-            paymentMethodId: '',
-            documentDateStart: null,
-            documentDateEnd: null,
-            dueDateStart: null,
-            dueDateEnd: null,
         });
 
-        getAccounts({});
+        onFilter(filters);
+        closeModal();
+    };
+
+    const handleClear = () => {
+        setValue('customerId', '');
+        setValue('costCenterId', '');
+        setValue('status', '');
+        setValue('paymentMethodId', '');
+        setValue('documentDateStart', '');
+        setValue('documentDateEnd', '');
+        setValue('dueDateStart', '');
+        setValue('dueDateEnd', '');
+        onFilter({ page: 1, limit: 10 });
         closeModal();
     };
 
     return (
-        <form className="grid grid-cols-1 gap-4 md:grid-cols-2" onSubmit={handleSubmit(onSubmit)}>
-            <Controller
-                control={control}
-                name="customerId"
-                render={({ field: { value, onChange } }) => (
-                    <SelectField
-                        label="Cliente"
-                        placeholder="Filtrar por cliente"
-                        options={customers}
-                        onChange={(selected) => {
-                            onChange(selected);
-                        }}
-                        value={value || ''}
-                        error={errors.customerId?.message}
-                    />
-                )}
-            />
-
-            <Controller
-                control={control}
-                name="costCenterId"
-                render={({ field: { value, onChange } }) => (
-                    <SelectField
-                        label="Centro de Custo"
-                        placeholder="Filtrar por centro de custo"
-                        options={costCenters}
-                        onChange={(selected) => {
-                            onChange(selected);
-                        }}
-                        value={value || ''}
-                        error={errors.costCenterId?.message}
-                    />
-                )}
-            />
-
-            <Controller
-                control={control}
-                name="status"
-                render={({ field: { value, onChange } }) => (
-                    <SelectField
-                        label="Status"
-                        placeholder="Filtrar por status"
-                        options={[
-                            { label: 'Em aberto', value: 'PENDING' },
-                            { label: 'Recebido', value: 'PAID' },
-                            { label: 'Cancelado', value: 'CANCELLED' },
-                            { label: 'Vencido', value: 'OVERDUE' },
-                        ]}
-                        onChange={(selected) => {
-                            onChange(selected);
-                        }}
-                        value={value || ''}
-                        error={errors.status?.message}
-                    />
-                )}
-            />
-
-            <Controller
-                control={control}
-                name="paymentMethodId"
-                render={({ field: { value, onChange } }) => (
-                    <SelectField
-                        label="Método de Pagamento"
-                        placeholder="Filtrar por método de pagamento"
-                        options={paymentMethods}
-                        onChange={(selected) => {
-                            onChange(selected);
-                        }}
-                        value={value || ''}
-                        error={errors.paymentMethodId?.message}
-                    />
-                )}
-            />
-
-            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Controller
-                    control={control}
-                    name="documentDateStart"
-                    render={({ field: { onChange, value } }) => (
-                        <DatePicker
-                            label="Data do documento inicial"
-                            selected={value}
-                            onChange={onChange}
-                            dateFormat="dd/MM/yyyy"
-                            minDate={new Date('1900-01-01')}
-                            maxDate={new Date('2100-01-01')}
-                            showMonthYearDropdown
-                            scrollableMonthYearDropdown
-                            placeholderText="Data inicial"
-                            popperPlacement="bottom-end"
-                            inputProps={{
-                                variant: 'outline',
-                                inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
-                            }}
-                            className="flex-grow [&>label>span]:font-medium"
-                            locale={ptBR}
-                        />
-                    )}
-                />
-
-                <Controller
-                    control={control}
-                    name="documentDateEnd"
-                    render={({ field: { onChange, value } }) => (
-                        <DatePicker
-                            label="Data do documento final"
-                            selected={value}
-                            onChange={onChange}
-                            dateFormat="dd/MM/yyyy"
-                            minDate={new Date('1900-01-01')}
-                            maxDate={new Date('2100-01-01')}
-                            showMonthYearDropdown
-                            scrollableMonthYearDropdown
-                            placeholderText="Data final"
-                            popperPlacement="bottom-end"
-                            inputProps={{
-                                variant: 'outline',
-                                inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
-                            }}
-                            className="flex-grow [&>label>span]:font-medium"
-                            locale={ptBR}
-                        />
-                    )}
+        <form
+            onSubmit={handleSubmit}
+            className="grid grid-cols-1 gap-4 md:grid-cols-2"
+        >
+            <div>
+                <SelectField
+                    label="Cliente"
+                    placeholder="Filtrar por cliente"
+                    options={[
+                        { label: 'Todos os clientes', value: '' },
+                        ...customers
+                    ]}
+                    onChange={(selected) => {
+                        setValue('customerId', selected);
+                    }}
+                    value={formData.customerId}
                 />
             </div>
 
-            <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                <Controller
-                    control={control}
-                    name="dueDateStart"
-                    render={({ field: { onChange, value } }) => (
-                        <DatePicker
-                            label="Vencimento inicial"
-                            selected={value}
-                            onChange={onChange}
-                            dateFormat="dd/MM/yyyy"
-                            minDate={new Date('1900-01-01')}
-                            maxDate={new Date('2100-01-01')}
-                            showMonthYearDropdown
-                            scrollableMonthYearDropdown
-                            placeholderText="Data inicial"
-                            popperPlacement="bottom-end"
-                            inputProps={{
-                                variant: 'outline',
-                                inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
-                            }}
-                            className="flex-grow [&>label>span]:font-medium"
-                            locale={ptBR}
-                        />
-                    )}
+            <div>
+                <SelectField
+                    label="Centro de Custo"
+                    placeholder="Filtrar por centro de custo"
+                    options={[
+                        { label: 'Todos os centros de custo', value: '' },
+                        ...costCenters
+                    ]}
+                    onChange={(selected) => {
+                        setValue('costCenterId', selected);
+                    }}
+                    value={formData.costCenterId}
                 />
+            </div>
 
-                <Controller
-                    control={control}
-                    name="dueDateEnd"
-                    render={({ field: { onChange, value } }) => (
-                        <DatePicker
-                            label="Vencimento final"
-                            selected={value}
-                            onChange={onChange}
-                            dateFormat="dd/MM/yyyy"
-                            minDate={new Date('1900-01-01')}
-                            maxDate={new Date('2100-01-01')}
-                            showMonthYearDropdown
-                            scrollableMonthYearDropdown
-                            placeholderText="Data final"
-                            popperPlacement="bottom-end"
-                            inputProps={{
-                                variant: 'outline',
-                                inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
-                            }}
-                            className="flex-grow [&>label>span]:font-medium"
-                            locale={ptBR}
-                        />
-                    )}
+            <div>
+                <SelectField
+                    label="Status"
+                    placeholder="Filtrar por status"
+                    options={[
+                        { label: 'Todos os status', value: '' },
+                        { label: 'Em aberto', value: 'PENDING' },
+                        { label: 'Recebido', value: 'PAID' },
+                        { label: 'Cancelado', value: 'CANCELLED' },
+                        { label: 'Vencido', value: 'OVERDUE' },
+                    ]}
+                    onChange={(selected) => {
+                        setValue('status', selected);
+                    }}
+                    value={formData.status}
+                />
+            </div>
+
+            <div>
+                <SelectField
+                    label="Método de Pagamento"
+                    placeholder="Filtrar por método de pagamento"
+                    options={[
+                        { label: 'Todos os métodos', value: '' },
+                        ...paymentMethods
+                    ]}
+                    onChange={(selected) => {
+                        setValue('paymentMethodId', selected);
+                    }}
+                    value={formData.paymentMethodId}
+                />
+            </div>
+
+            <div>
+                <DatePicker
+                    label="Data do Documento - Início"
+                    selected={stringToDate(formData.documentDateStart)}
+                    onChange={(date) => {
+                        setValue('documentDateStart', dateToString(date));
+                    }}
+                    dateFormat="dd/MM/yyyy"
+                    minDate={new Date('1900-01-01')}
+                    maxDate={new Date('2100-01-01')}
+                    showMonthYearDropdown
+                    scrollableMonthYearDropdown
+                    placeholderText="Data inicial do documento"
+                    popperPlacement="bottom-end"
+                    inputProps={{
+                        variant: 'outline',
+                        inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+                    }}
+                    className="flex-grow [&>label>span]:font-medium"
+                    locale={ptBR}
+                />
+            </div>
+
+            <div>
+                <DatePicker
+                    label="Data do Documento - Fim"
+                    selected={stringToDate(formData.documentDateEnd)}
+                    onChange={(date) => {
+                        setValue('documentDateEnd', dateToString(date));
+                    }}
+                    dateFormat="dd/MM/yyyy"
+                    minDate={new Date('1900-01-01')}
+                    maxDate={new Date('2100-01-01')}
+                    showMonthYearDropdown
+                    scrollableMonthYearDropdown
+                    placeholderText="Data final do documento"
+                    popperPlacement="bottom-end"
+                    inputProps={{
+                        variant: 'outline',
+                        inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+                    }}
+                    className="flex-grow [&>label>span]:font-medium"
+                    locale={ptBR}
+                />
+            </div>
+
+            <div>
+                <DatePicker
+                    label="Vencimento - Início"
+                    selected={stringToDate(formData.dueDateStart)}
+                    onChange={(date) => {
+                        setValue('dueDateStart', dateToString(date));
+                    }}
+                    dateFormat="dd/MM/yyyy"
+                    minDate={new Date('1900-01-01')}
+                    maxDate={new Date('2100-01-01')}
+                    showMonthYearDropdown
+                    scrollableMonthYearDropdown
+                    placeholderText="Data inicial de vencimento"
+                    popperPlacement="bottom-end"
+                    inputProps={{
+                        variant: 'outline',
+                        inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+                    }}
+                    className="flex-grow [&>label>span]:font-medium"
+                    locale={ptBR}
+                />
+            </div>
+
+            <div>
+                <DatePicker
+                    label="Vencimento - Fim"
+                    selected={stringToDate(formData.dueDateEnd)}
+                    onChange={(date) => {
+                        setValue('dueDateEnd', dateToString(date));
+                    }}
+                    dateFormat="dd/MM/yyyy"
+                    minDate={new Date('1900-01-01')}
+                    maxDate={new Date('2100-01-01')}
+                    showMonthYearDropdown
+                    scrollableMonthYearDropdown
+                    placeholderText="Data final de vencimento"
+                    popperPlacement="bottom-end"
+                    inputProps={{
+                        variant: 'outline',
+                        inputClassName: 'px-2 py-3 h-auto [&_input]:text-ellipsis ring-0',
+                    }}
+                    className="flex-grow [&>label>span]:font-medium"
+                    locale={ptBR}
                 />
             </div>
 
@@ -310,16 +292,15 @@ export const FilterAccountsReceivable = ({ getAccounts }: FilterAccountsReceivab
                     type="button"
                     className="flex-1"
                     variant="outline"
-                    onClick={clearFilters}
+                    onClick={handleClear}
                 >
                     Limpar Filtros
                 </Button>
                 <Button
                     className="flex-1"
                     type="submit"
-                    disabled={loading}
                 >
-                    {loading ? 'Aplicando...' : 'Aplicar Filtros'}
+                    Aplicar Filtros
                 </Button>
             </div>
         </form>

@@ -33,6 +33,8 @@ export function DragAbleHeadWrapper<TData extends Record<string, any>>({
   columnOrder,
   isLeftScrollable,
   isRightScrollable,
+  onSort,
+  sortState,
 }: CustomHeaderCellProps<TData>) {
   return (
     <>
@@ -47,6 +49,8 @@ export function DragAbleHeadWrapper<TData extends Record<string, any>>({
               header={header}
               isLeftScrollable={isLeftScrollable}
               isRightScrollable={isRightScrollable}
+              onSort={onSort}
+              sortState={sortState}
             />
           );
         })}
@@ -59,6 +63,8 @@ type DragAbleHeadProps<TData extends Record<string, any>> = {
   header: Header<TData, unknown>;
   isLeftScrollable?: boolean;
   isRightScrollable?: boolean;
+  onSort?: (columnId: string, direction: 'asc' | 'desc' | null) => void;
+  sortState?: { columnId: string; direction: 'asc' | 'desc' } | null;
 };
 
 // DnD head child
@@ -66,6 +72,8 @@ function DragAbleHead<TData extends Record<string, any>>({
   header,
   isLeftScrollable,
   isRightScrollable,
+  onSort,
+  sortState,
 }: DragAbleHeadProps<TData>) {
   const {
     canPin,
@@ -123,12 +131,31 @@ function DragAbleHead<TData extends Record<string, any>>({
           type="button"
           className="ms-2"
           aria-label="Sort Column"
-          onClick={header.column.getToggleSortingHandler()}
+          onClick={() => {
+            if (onSort) {
+              // Usar ordenação customizada (backend)
+              const currentSort = sortState?.columnId === header.column.id ? sortState.direction : null;
+              let nextDirection: 'asc' | 'desc' | null = null;
+              
+              if (currentSort === null) {
+                nextDirection = 'asc';
+              } else if (currentSort === 'asc') {
+                nextDirection = 'desc';
+              } else {
+                nextDirection = null;
+              }
+              
+              onSort(header.column.id, nextDirection);
+            } else {
+              // Usar ordenação padrão (frontend)
+              header.column.getToggleSortingHandler()?.({} as any);
+            }
+          }}
         >
           {{
             asc: <PiCaretUpFill size={16} className="-mb-0.5" />,
             desc: <PiCaretDownFill size={16} className="-mb-0.5" />,
-          }[header.column.getIsSorted() as string] ??
+          }[(onSort && sortState?.columnId === header.column.id ? sortState.direction : header.column.getIsSorted()) as string] ??
             (header.column.columnDef.header !== "" && (
               <PiCaretDownFill size={16} className="-mb-0.5" />
             ))}

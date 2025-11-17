@@ -19,7 +19,6 @@ import { TablePagination } from '@/components/tables/table-pagination';
 export interface AccountsPayableFilterParams {
   page?: number;
   limit?: number;
-  customerId?: string;
   supplierId?: string;
   costCenterId?: string;
   status?: string;
@@ -28,6 +27,8 @@ export interface AccountsPayableFilterParams {
   documentDateEnd?: string;
   dueDateStart?: string;
   dueDateEnd?: string;
+  orderBy?: string;
+  order?: string;
 }
 
 export default function AccountsPayable() {
@@ -46,8 +47,20 @@ export default function AccountsPayable() {
     hasPreviousPage: false,
   });
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [sortState, setSortState] = useState<{ columnId: string; direction: 'asc' | 'desc' } | null>(null);
 
   const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
+  const columnToFieldMap: Record<string, string> = {
+    'documentNumber': 'documentNumber',
+    'supplierName': 'supplier',
+    'documentDate': 'documentDate',
+    'launchDate': 'launchDate',
+    'dueDate': 'dueDate',
+    'paymentDate': 'paymentDate',
+    'value': 'value',
+    'paidValue': 'paidValue',
+  };
 
   const { openModal } = useModal();
 
@@ -96,6 +109,29 @@ export default function AccountsPayable() {
     });
     
     return queryParams.toString();
+  };
+
+  const handleSort = (columnId: string, direction: 'asc' | 'desc' | null) => {
+    if (direction === null) {
+      // Limpar ordenação
+      setSortState(null);
+      const { orderBy, order, ...restParams } = filterParams;
+      const newFilters = { ...restParams };
+      setFilterParams(newFilters);
+      getData(newFilters);
+    } else {
+      // Aplicar ordenação
+      const fieldName = columnToFieldMap[columnId] || columnId;
+      setSortState({ columnId, direction });
+      const newFilters = { 
+        ...filterParams, 
+        orderBy: fieldName, 
+        order: direction,
+        page: 1 
+      };
+      setFilterParams(newFilters);
+      getData(newFilters);
+    }
   };
 
   const getData = async (newFilters?: AccountsPayableFilterParams) => {
@@ -164,32 +200,53 @@ export default function AccountsPayable() {
   };
 
   const handlePageChange = (page: number) => {
-    const newFilters = { ...filterParams, page };
+    const newFilters = { 
+      ...filterParams, 
+      page,
+      ...(sortState && {
+        orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+        order: sortState.direction
+      })
+    };
     getData(newFilters);
   };
 
   const handleLimitChange = (limit: number) => {
-    const newFilters = { ...filterParams, limit, page: 1 };
+    const newFilters = { 
+      ...filterParams, 
+      limit, 
+      page: 1,
+      ...(sortState && {
+        orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+        order: sortState.direction
+      })
+    };
     getData(newFilters);
   };
 
   const handleFilter = async (filters: AccountsPayableFilterParams) => {
-    const newFilters = { ...filters, page: 1 };
+    // Preserva a ordenação atual ao aplicar filtros
+    const newFilters = { 
+      ...filters, 
+      page: 1,
+      ...(sortState && {
+        orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+        order: sortState.direction
+      })
+    };
     await getData(newFilters);
   };
 
-  const handleFilterWrapper = async (filters?: FilterParams) => {
-    const newFilters: AccountsPayableFilterParams = { 
-      ...filters, 
-      page: 1,
-      limit: filterParams.limit 
-    };
-    await getData(newFilters);
+  const refreshCurrentPage = () => {
+    const currentFilters = { ...filterParams, page: pagination.page, limit: pagination.limit };
+    return getData(currentFilters);
   };
 
   useEffect(() => {
     getData();
   }, []);
+
+ 
 
   return (
     <div className="mt-8">
@@ -198,7 +255,7 @@ export default function AccountsPayable() {
           openModal({
             view: (
               <ModalForm title="Contas a Pagar">
-                <NewAccountPayable getAccounts={getData} />
+                <NewAccountPayable getAccounts={refreshCurrentPage} />
               </ModalForm>
             ),
             size: 'md',
@@ -208,7 +265,7 @@ export default function AccountsPayable() {
           openModal({
             view: (
               <ModalForm title="Pesquisa Avançada">
-                <FilterAccountsPayable getAccounts={handleFilterWrapper} />
+                <FilterAccountsPayable onFilter={handleFilter} currentFilters={filterParams} />
               </ModalForm>
             ),
             size: 'md',
@@ -216,7 +273,7 @@ export default function AccountsPayable() {
         }
         breadcrumb={pageHeader.breadcrumb}
         title={pageHeader.title}
-        columns={ListAccountsPayableColumn(getData)}
+        columns={ListAccountsPayableColumn(refreshCurrentPage)}
         data={data}
         fileName="contas-a-pagar"
         header=""
@@ -228,13 +285,15 @@ export default function AccountsPayable() {
         <HeaderInfoDetails refreshTrigger={refreshTrigger} />
         <TableComponent
           title=""
-          column={ListAccountsPayableColumn(getData)}
+          column={ListAccountsPayableColumn(refreshCurrentPage)}
           variant="classic"
           data={data}
           tableHeader={true}
           searchAble={false}
           pagination={false}
           loading={loading}
+          onSort={handleSort}
+          sortState={sortState}
         />
         
         <TablePagination 
