@@ -30,6 +30,11 @@ export const ListUserColumn = (getList: () => void) => {
    const isMobile = window.innerWidth < 768;
    const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
 
+   const roleOptions = [
+      { label: 'Administrador', value: 'ADMIN' },
+      { label: 'Usuário', value: 'USER' },
+   ];
+
    const handleUpdateStatus = async (userId: string, newStatus: boolean) => {
       await api.patch(`/users/${userId}/toggle-status`, { active: newStatus });
       getList();
@@ -105,7 +110,7 @@ export const ListUserColumn = (getList: () => void) => {
                   openModal({
                      view: (
                         <ModalForm title="Editar usuário">
-                           <FormEdit getUsers={getList} id={row.original.id} />
+                           <FormEdit getUsers={getList} id={row.original.id} roleOptions={roleOptions} />
                         </ModalForm>
                      ),
                      size: 'lg',

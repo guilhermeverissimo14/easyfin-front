@@ -11,6 +11,7 @@ import { useModal } from '../modal-views/use-modal';
 import { api } from '@/service/api';
 import { CustomErrorLogin, userType } from '@/types';
 import { InputField } from '@/components/input/input-field';
+import { SelectField } from '@/components/input/select-field';
 import { cpfCnpjMask, formatMoney, phoneNumberMask } from '@/utils/format';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { DatePicker } from '@core/ui/datepicker';
@@ -36,6 +37,7 @@ const userSchema = z.object({
    commission:
       z.string()
          .optional(),
+   role: z.string().optional(),
    localManagerId: z.string().optional(),
    birthdate: z.date().optional().nullable(),
 });
@@ -43,18 +45,26 @@ const userSchema = z.object({
 
 type UserFormData = z.infer<typeof userSchema>;
 
+interface OptionsSelect {
+   label: string;
+   value: string;
+}
+
 interface FormUserProps {
    id: string;
    getUsers?: () => void;
+   roleOptions?: OptionsSelect[];
 }
 
-export const FormEdit = ({ getUsers, id }: FormUserProps) => {
+export const FormEdit = ({ getUsers, id, roleOptions }: FormUserProps) => {
 
    const [loading, setLoading] = useState(false);
    const [userDetails, setUserDetails] = useState<userType | null>(null);
    const [loadingUser, setLoadingUser] = useState(false);
    const [isLoading, setIsLoading] = useState(false);
 
+   const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+   const isAdmin = userRole === 'ADMIN';
 
    const { closeModal } = useModal();
 
@@ -83,6 +93,10 @@ export const FormEdit = ({ getUsers, id }: FormUserProps) => {
          delete requestData.birthdate;
       }
 
+      if (!requestData.role) {
+         delete requestData.role;
+      }
+
       requestData.phone = requestData.phone?.replace(/\D/g, '');
       requestData.cpfCnpj = requestData.cpfCnpj?.replace(/\D/g, '');
       requestData.commission = requestData.commission ? parseFloat(requestData.commission.replace(/[^\d,]/g, '').replace(',', '.')) : 0 as any;
@@ -93,6 +107,10 @@ export const FormEdit = ({ getUsers, id }: FormUserProps) => {
 
       if (requestData.birthdate) {
          requestData.birthdate = format(requestData.birthdate, 'yyyy-MM-dd') as any;
+      }
+
+      if(requestData.role) {
+         requestData.role = requestData.role.toLowerCase() as string;
       }
 
       try {
@@ -123,6 +141,7 @@ export const FormEdit = ({ getUsers, id }: FormUserProps) => {
          setValue('cpfCnpj', response.data.cpfCnpj || '');
          setValue('commission', response.data.commission ? formatMoney(response.data.commission) : '');
          setValue('localManagerId', response.data.localManagerId || '');
+         setValue('role', response.data.role || '');
          if (response.data.birthdate) {
             const [year, month, day] = response.data.birthdate.split('-');
             const localDate = new Date(Number(year), Number(month) - 1, Number(day));
@@ -216,6 +235,25 @@ export const FormEdit = ({ getUsers, id }: FormUserProps) => {
                   setValue('cpfCnpj', cpfCnpjMask(value));
                }}
             />
+
+            {isAdmin && roleOptions && (
+               <Controller
+                  control={control}
+                  name="role"
+                  render={({ field: { value, onChange } }) => (
+                     <SelectField
+                        label="Tipo de usuário"
+                        placeholder="Selecione o tipo de usuário"
+                        options={roleOptions}
+                        onChange={(selected) => {
+                           onChange(selected);
+                        }}
+                        value={value || ''}
+                        error={errors.role?.message}
+                     />
+                  )}
+               />
+            )}
 
             <Controller
                control={control}
