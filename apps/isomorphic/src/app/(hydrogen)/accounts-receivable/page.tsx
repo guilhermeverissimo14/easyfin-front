@@ -20,7 +20,6 @@ export interface AccountsReceivableFilterParams {
   page?: number;
   limit?: number;
   customerId?: string;
-  supplierId?: string;
   costCenterId?: string;
   status?: string;
   paymentMethodId?: string;
@@ -28,11 +27,12 @@ export interface AccountsReceivableFilterParams {
   documentDateEnd?: string;
   dueDateStart?: string;
   dueDateEnd?: string;
+  orderBy?: string;
+  order?: string;
 }
 
 export default function AccountsReceivable() {
    const [data, setData] = useState<IAccountsReceivable[]>([]);
-   const [allData, setAllData] = useState<IAccountsReceivable[]>([]);
    const [loading, setLoading] = useState(true);
    const [filterParams, setFilterParams] = useState<AccountsReceivableFilterParams>({
       page: 1,
@@ -47,8 +47,20 @@ export default function AccountsReceivable() {
       hasPreviousPage: false,
    });
    const [refreshTrigger, setRefreshTrigger] = useState(0);
+   const [sortState, setSortState] = useState<{ columnId: string; direction: 'asc' | 'desc' } | null>(null);
 
    const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
+   const columnToFieldMap: Record<string, string> = {
+      'documentNumber': 'documentNumber',
+      'customerName': 'customer',
+      'documentDate': 'documentDate',
+      'launchDate': 'launchDate',
+      'dueDate': 'dueDate',
+      'receiptDate': 'receiptDate',
+      'value': 'value',
+      'receivedValue': 'receivedValue',
+   };
 
    const { openModal } = useModal();
 
@@ -100,6 +112,29 @@ export default function AccountsReceivable() {
       return queryParams.toString();
    };
 
+   const handleSort = (columnId: string, direction: 'asc' | 'desc' | null) => {
+      if (direction === null) {
+         // Limpar ordenação
+         setSortState(null);
+         const { orderBy, order, ...restParams } = filterParams;
+         const newFilters = { ...restParams };
+         setFilterParams(newFilters);
+         getData(newFilters);
+      } else {
+         // Aplicar ordenação
+         const fieldName = columnToFieldMap[columnId] || columnId;
+         setSortState({ columnId, direction });
+         const newFilters = { 
+            ...filterParams, 
+            orderBy: fieldName, 
+            order: direction,
+            page: 1 
+         };
+         setFilterParams(newFilters);
+         getData(newFilters);
+      }
+   };
+
    const getData = async (newFilters?: AccountsReceivableFilterParams) => {
       setLoading(true);
       const filters = newFilters || filterParams;
@@ -127,25 +162,25 @@ export default function AccountsReceivable() {
                paginationInfo = response.data.pagination;
             } else if (Array.isArray(response.data)) {
                dataArray = response.data;
+               paginationInfo = {
+                  page: 1,
+                  limit: 10,
+                  totalCount: dataArray.length,
+                  totalPages: 1,
+                  hasNextPage: false,
+                  hasPreviousPage: false,
+               };
             }
 
             const mappedData = mapApiDataToAccountsReceivable(dataArray);
-            
-            // Se é uma nova busca com filtros, armazena todos os dados e pagina do início
-            if (newFilters || !allData.length) {
-               setAllData(mappedData);
-               updatePaginatedData(mappedData, 1, newFilters?.limit || filterParams.limit || 10);
-            } else {
-               // Se é apenas mudança de página/limite, usa os dados já filtrados
-               updatePaginatedData(allData, 1, filterParams.limit || 10);
-            }
-            
+            setData(mappedData);
+            setPagination(paginationInfo);
+
             if (newFilters) {
                setFilterParams(newFilters);
             }
             setRefreshTrigger(prev => prev + 1);
          } else {
-            setAllData([]);
             setData([]);
             setPagination({
                page: 1,
@@ -159,7 +194,6 @@ export default function AccountsReceivable() {
       } catch (error) {
          console.error('Erro ao buscar contas a receber:', error);
          toast.error('Não foi possível carregar as contas a receber');
-         setAllData([]);
          setData([]);
          setPagination({
             page: 1,
@@ -174,46 +208,64 @@ export default function AccountsReceivable() {
       }
    };
 
-   const updatePaginatedData = (dataToUpdate: IAccountsReceivable[], page: number, limit: number) => {
-      const startIndex = (page - 1) * limit;
-      const endIndex = startIndex + limit;
-      const paginatedData = dataToUpdate.slice(startIndex, endIndex);
-      
-      setData(paginatedData);
-      
-      const totalCount = dataToUpdate.length;
-      const totalPages = Math.ceil(totalCount / limit);
-      
-      setPagination({
-         page,
-         limit,
-         totalCount,
-         totalPages,
-         hasNextPage: page < totalPages,
-         hasPreviousPage: page > 1,
-      });
-   };
-
    const handlePageChange = (page: number) => {
-      updatePaginatedData(allData, page, pagination.limit);
+      const newFilters = { 
+         ...filterParams, 
+         page,
+         ...(sortState && {
+            orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+            order: sortState.direction
+         })
+      };
+      getData(newFilters);
    };
 
    const handleLimitChange = (limit: number) => {
-      updatePaginatedData(allData, 1, limit);
+      const newFilters = { 
+         ...filterParams, 
+         limit, 
+         page: 1,
+         ...(sortState && {
+            orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+            order: sortState.direction
+         })
+      };
+      getData(newFilters);
    };
 
-   const handleFilterWrapper = async (filters?: FilterParams) => {
-      const newFilters: AccountsReceivableFilterParams = { 
+   const handleFilter = async (filters: AccountsReceivableFilterParams) => {
+      // Preserva a ordenação atual ao aplicar filtros
+      const newFilters = { 
          ...filters, 
-         page: 1,
-         limit: filterParams.limit 
+         page: 1, 
+         limit: filterParams.limit,
+         ...(sortState && {
+            orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+            order: sortState.direction
+         })
       };
       await getData(newFilters);
+   };
+
+   const refreshCurrentPage = () => {
+      const currentFilters = { ...filterParams, page: pagination.page, limit: pagination.limit };
+      return getData(currentFilters);
    };
 
    useEffect(() => {
       getData();
    }, []);
+
+   const openAdvancedFilterModal = () => {
+      openModal({
+         view: (
+            <ModalForm title="Pesquisa Avançada">
+               <FilterAccountsReceivable onFilter={handleFilter} currentFilters={filterParams} />
+            </ModalForm>
+         ),
+         size: 'md',
+      });
+   };
 
    return (
       <div className="mt-8">
@@ -222,25 +274,16 @@ export default function AccountsReceivable() {
                openModal({
                   view: (
                      <ModalForm title="Contas a Receber">
-                        <NewAccountReceivable getAccounts={getData} />
+                        <NewAccountReceivable getAccounts={refreshCurrentPage} />
                      </ModalForm>
                   ),
                   size: 'md',
                })
             }
-            openModalFilter={() =>
-               openModal({
-                  view: (
-                     <ModalForm title="Pesquisa Avançada">
-                        <FilterAccountsReceivable getAccounts={handleFilterWrapper} />
-                     </ModalForm>
-                  ),
-                  size: 'md',
-               })
-            }
+            openModalFilter={openAdvancedFilterModal}
             breadcrumb={pageHeader.breadcrumb}
             title={pageHeader.title}
-            columns={ListAccountsReceivableColumn(getData)}
+            columns={ListAccountsReceivableColumn(refreshCurrentPage)}
             data={data}
             fileName="contas-a-receber"
             header=""
@@ -252,13 +295,15 @@ export default function AccountsReceivable() {
             <HeaderInfoDetails refreshTrigger={refreshTrigger} />
             <TableComponent
                title=""
-               column={ListAccountsReceivableColumn(getData)}
+               column={ListAccountsReceivableColumn(refreshCurrentPage)}
                variant="classic"
                data={data}
                tableHeader={true}
                searchAble={false}
                pagination={false}
                loading={loading}
+               onSort={handleSort}
+               sortState={sortState}
             />
             
             <TablePagination 

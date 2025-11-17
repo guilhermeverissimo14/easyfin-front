@@ -31,6 +31,8 @@ export interface CashBookFilterParams {
    valueMax?: string;
    cashId?: string;
    bankAccountId?: string;
+   orderBy?: string;
+   order?: string;
 }
 
 
@@ -60,11 +62,22 @@ export default function CashBook() {
       page: 1,
       limit: 10,
    });
+   const [sortState, setSortState] = useState<{ columnId: string; direction: 'asc' | 'desc' } | null>(null);
 
    const { openModal } = useModal();
    const headerInfoRef = useRef<HeaderInfoDetailsRef>(null);
 
    const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+
+   // Mapeamento das colunas da tabela para os campos do backend
+   const columnToFieldMap: Record<string, string> = {
+      'date': 'date',
+      'type': 'type',
+      'description': 'description',
+      'history': 'history',
+      'value': 'value',
+      'costCenter': 'costCenter',
+   };
 
    const pageHeader = {
       title: 'Livro Caixa',
@@ -88,6 +101,29 @@ export default function CashBook() {
       });
 
       return queryParams.toString();
+   };
+
+   const handleSort = (columnId: string, direction: 'asc' | 'desc' | null) => {
+      if (direction === null) {
+         // Limpar ordenação
+         setSortState(null);
+         const { orderBy, order, ...restParams } = filterParams;
+         const newFilters = { ...restParams };
+         setFilterParams(newFilters);
+         getTransactions(newFilters);
+      } else {
+         // Aplicar ordenação
+         const fieldName = columnToFieldMap[columnId] || columnId;
+         setSortState({ columnId, direction });
+         const newFilters = { 
+            ...filterParams, 
+            orderBy: fieldName, 
+            order: direction,
+            page: 1 
+         };
+         setFilterParams(newFilters);
+         getTransactions(newFilters);
+      }
    };
 
    const fetchSettings = async () => {
@@ -239,19 +275,42 @@ export default function CashBook() {
 
    const handlePageChange = (page: number) => {
       sessionStorage.setItem('cashbook-current-page', page.toString());
-      const newFilters = { ...filterParams, page };
+      const newFilters = { 
+         ...filterParams, 
+         page,
+         ...(sortState && {
+            orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+            order: sortState.direction
+         })
+      };
       getTransactions(newFilters);
    };
 
    const handleLimitChange = (limit: number) => {
       sessionStorage.setItem('cashbook-current-page', '1');
-      const newFilters = { ...filterParams, limit, page: 1 };
+      const newFilters = { 
+         ...filterParams, 
+         limit, 
+         page: 1,
+         ...(sortState && {
+            orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+            order: sortState.direction
+         })
+      };
       getTransactions(newFilters);
    };
 
    const handleFilter = async (filters: CashBookFilterParams) => {
       sessionStorage.setItem('cashbook-current-page', '1');
-      const newFilters = { ...filters, page: 1 };
+      // Preserva a ordenação atual ao aplicar filtros
+      const newFilters = { 
+         ...filters, 
+         page: 1,
+         ...(sortState && {
+            orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
+            order: sortState.direction
+         })
+      };
       await getTransactions(newFilters);
    };
 
@@ -319,7 +378,7 @@ export default function CashBook() {
             breadcrumb={pageHeader.breadcrumb}
             title={pageHeader.title}
             data={transactions}
-           columns={ListCashBookColumn(refreshCurrentPage)}
+            columns={ListCashBookColumn(refreshCurrentPage)}
             fileName="livro-caixa"
             header=""
             action={userRole === 'ADMIN' ? "Registrar Lançamento" : ""}
@@ -346,9 +405,11 @@ export default function CashBook() {
                variant="classic"
                data={transactions}
                tableHeader={true}
-               searchAble={true}
+               searchAble={false}
                pagination={false}
                loading={loading}
+               onSort={handleSort}
+               sortState={sortState}
             />
 
             <TablePagination pagination={pagination} onPageChange={handlePageChange} onLimitChange={handleLimitChange} />

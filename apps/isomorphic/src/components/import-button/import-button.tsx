@@ -11,7 +11,6 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { ParseBankTransactionsResponse, EditableBankTransaction, OptionsSelect } from '@/types';
-import ImportLoadingModal from '../modal/import-loading-modal';
 import { useImportLoading } from '@/components/modal/global-import-loading';
 
 const importFormSchema = z.object({
@@ -111,7 +110,7 @@ export default function ImportExtractModal({ onSuccess }: ImportExtractModalProp
         const transactionsWithId = response.data.validTransactions.map((transaction, index) => ({
           ...transaction,
           id: `transaction-${index}`,
-          costCenterId: ''
+          costCenterId: transaction.costCenterId || ''
         }));
         setEditableTransactions(transactionsWithId);
         toast.success('Arquivo processado com sucesso!');

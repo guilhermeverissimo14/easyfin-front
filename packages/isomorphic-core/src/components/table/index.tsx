@@ -26,6 +26,8 @@ export default function MainTable<TData extends Record<string, any>>({
   showLoadingText = false,
   components,
   stickyHeader = false,
+  onSort,
+  sortState,
 }: MainTableProps<TData>) {
   const { containerRef, tableRef, isLeftScrollable, isRightScrollable } =
     useScrollPosition();
@@ -51,6 +53,8 @@ export default function MainTable<TData extends Record<string, any>>({
     columnOrder,
     isLeftScrollable,
     isRightScrollable,
+    onSort,
+    sortState,
   };
 
   const rowParam = {
@@ -103,6 +107,8 @@ export default function MainTable<TData extends Record<string, any>>({
                     headerGroup,
                     isLeftScrollable,
                     isRightScrollable,
+                    onSort,
+                    sortState,
                   };
                   return (
                     <Table.Row
