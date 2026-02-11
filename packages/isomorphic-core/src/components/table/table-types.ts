@@ -69,7 +69,7 @@ export type MainTableProps<T extends Record<string, any>> = {
   table?: ReactTableType<T>;
   variant?: TableVariantProps;
   dataIds?: UniqueIdentifier[];
-  onSort?: (columnId: string, direction: 'asc' | 'desc' | null) => void;
+  onSort?: (columnId: string, direction: 'asc' | 'desc') => void;
   sortState?: { columnId: string; direction: 'asc' | 'desc' } | null;
   components?: {
     header?: (c: CustomHeaderProps<T>) => React.ReactNode;

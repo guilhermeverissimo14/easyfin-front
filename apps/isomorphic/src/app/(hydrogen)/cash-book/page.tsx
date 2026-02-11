@@ -103,27 +103,19 @@ export default function CashBook() {
       return queryParams.toString();
    };
 
-   const handleSort = (columnId: string, direction: 'asc' | 'desc' | null) => {
-      if (direction === null) {
-         // Limpar ordenação
-         setSortState(null);
-         const { orderBy, order, ...restParams } = filterParams;
-         const newFilters = { ...restParams };
-         setFilterParams(newFilters);
-         getTransactions(newFilters);
-      } else {
-         // Aplicar ordenação
-         const fieldName = columnToFieldMap[columnId] || columnId;
-         setSortState({ columnId, direction });
-         const newFilters = { 
-            ...filterParams, 
-            orderBy: fieldName, 
-            order: direction,
-            page: 1 
-         };
-         setFilterParams(newFilters);
-         getTransactions(newFilters);
-      }
+   const handleSort = (columnId: string, direction: 'asc' | 'desc') => {
+
+      const fieldName = columnToFieldMap[columnId] || columnId;
+      setSortState({ columnId, direction });
+      const newFilters = {
+         ...filterParams,
+         orderBy: fieldName,
+         order: direction,
+         page: 1
+      };
+      setFilterParams(newFilters);
+      getTransactions(newFilters);
+
    };
 
    const fetchSettings = async () => {
@@ -275,8 +267,8 @@ export default function CashBook() {
 
    const handlePageChange = (page: number) => {
       sessionStorage.setItem('cashbook-current-page', page.toString());
-      const newFilters = { 
-         ...filterParams, 
+      const newFilters = {
+         ...filterParams,
          page,
          ...(sortState && {
             orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
@@ -288,9 +280,9 @@ export default function CashBook() {
 
    const handleLimitChange = (limit: number) => {
       sessionStorage.setItem('cashbook-current-page', '1');
-      const newFilters = { 
-         ...filterParams, 
-         limit, 
+      const newFilters = {
+         ...filterParams,
+         limit,
          page: 1,
          ...(sortState && {
             orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
@@ -303,8 +295,8 @@ export default function CashBook() {
    const handleFilter = async (filters: CashBookFilterParams) => {
       sessionStorage.setItem('cashbook-current-page', '1');
       // Preserva a ordenação atual ao aplicar filtros
-      const newFilters = { 
-         ...filters, 
+      const newFilters = {
+         ...filters,
          page: 1,
          ...(sortState && {
             orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
