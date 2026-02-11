@@ -97,26 +97,28 @@ export const ListAccountsReceivableColumn = (getList: () => void) => {
    const columns = [
       columnHelper.accessor('documentNumber', {
          id: 'documentNumber',
-         size: 150,
+         size: 180,
          header: 'Nº Documento',
          cell: ({ row }) => <span className="font-medium">{row.original.documentNumber}</span>,
       }),
       columnHelper.accessor('customerName', {
          id: 'customerName',
-         size: 240,
+         size: 180,
          header: 'Cliente',
          cell: ({ row }) => <span>{row.original.customerName}</span>,
       }),
       columnHelper.accessor('costCenterName', {
          id: 'costCenterName',
-         size: 280,
+         size: 150,
          header: 'Centro de Custo',
+         enableSorting: false,
          cell: ({ row }) => <span>{row.original.costCenterName}</span>,
       }),
       columnHelper.accessor('status', {
          id: 'status',
          size: 60,
          header: 'Status',
+         enableSorting: false,
          cell: ({ row }) => {
             const status = row.original.status;
 

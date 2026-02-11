@@ -17,18 +17,18 @@ import { apiCall } from '@/helpers/apiHelper';
 import { TablePagination } from '@/components/tables/table-pagination';
 
 export interface AccountsReceivableFilterParams {
-  page?: number;
-  limit?: number;
-  customerId?: string;
-  costCenterId?: string;
-  status?: string;
-  paymentMethodId?: string;
-  documentDateStart?: string;
-  documentDateEnd?: string;
-  dueDateStart?: string;
-  dueDateEnd?: string;
-  orderBy?: string;
-  order?: string;
+   page?: number;
+   limit?: number;
+   customerId?: string;
+   costCenterId?: string;
+   status?: string;
+   paymentMethodId?: string;
+   documentDateStart?: string;
+   documentDateEnd?: string;
+   dueDateStart?: string;
+   dueDateEnd?: string;
+   orderBy?: string;
+   order?: string;
 }
 
 export default function AccountsReceivable() {
@@ -112,27 +112,18 @@ export default function AccountsReceivable() {
       return queryParams.toString();
    };
 
-   const handleSort = (columnId: string, direction: 'asc' | 'desc' | null) => {
-      if (direction === null) {
-         // Limpar ordenação
-         setSortState(null);
-         const { orderBy, order, ...restParams } = filterParams;
-         const newFilters = { ...restParams };
-         setFilterParams(newFilters);
-         getData(newFilters);
-      } else {
-         // Aplicar ordenação
-         const fieldName = columnToFieldMap[columnId] || columnId;
-         setSortState({ columnId, direction });
-         const newFilters = { 
-            ...filterParams, 
-            orderBy: fieldName, 
-            order: direction,
-            page: 1 
-         };
-         setFilterParams(newFilters);
-         getData(newFilters);
-      }
+   const handleSort = (columnId: string, direction: 'asc' | 'desc') => {
+      // Aplicar ordenação
+      const fieldName = columnToFieldMap[columnId] || columnId;
+      setSortState({ columnId, direction });
+      const newFilters = {
+         ...filterParams,
+         orderBy: fieldName,
+         order: direction,
+         page: 1
+      };
+      setFilterParams(newFilters);
+      getData(newFilters);
    };
 
    const getData = async (newFilters?: AccountsReceivableFilterParams) => {
@@ -144,7 +135,7 @@ export default function AccountsReceivable() {
          const endpoint = `/accounts-receivable${queryParams ? `?${queryParams}` : ''}`;
 
          const response = await apiCall(() => api.get(endpoint));
-         
+
          if (response?.data) {
             let dataArray = [];
             let paginationInfo: PaginationInfo = {
@@ -209,8 +200,8 @@ export default function AccountsReceivable() {
    };
 
    const handlePageChange = (page: number) => {
-      const newFilters = { 
-         ...filterParams, 
+      const newFilters = {
+         ...filterParams,
          page,
          ...(sortState && {
             orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
@@ -221,9 +212,9 @@ export default function AccountsReceivable() {
    };
 
    const handleLimitChange = (limit: number) => {
-      const newFilters = { 
-         ...filterParams, 
-         limit, 
+      const newFilters = {
+         ...filterParams,
+         limit,
          page: 1,
          ...(sortState && {
             orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
@@ -235,9 +226,9 @@ export default function AccountsReceivable() {
 
    const handleFilter = async (filters: AccountsReceivableFilterParams) => {
       // Preserva a ordenação atual ao aplicar filtros
-      const newFilters = { 
-         ...filters, 
-         page: 1, 
+      const newFilters = {
+         ...filters,
+         page: 1,
          limit: filterParams.limit,
          ...(sortState && {
             orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
@@ -305,11 +296,11 @@ export default function AccountsReceivable() {
                onSort={handleSort}
                sortState={sortState}
             />
-            
-            <TablePagination 
-               pagination={pagination} 
-               onPageChange={handlePageChange} 
-               onLimitChange={handleLimitChange} 
+
+            <TablePagination
+               pagination={pagination}
+               onPageChange={handlePageChange}
+               onLimitChange={handleLimitChange}
             />
          </TableLayout>
       </div>

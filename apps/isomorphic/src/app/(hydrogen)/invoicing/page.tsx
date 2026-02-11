@@ -51,8 +51,13 @@ export default function Invoicing() {
    const [filterParams, setFilterParams] = useState<InvoicingFilterParams>({
       page: 1,
       limit: 10,
+      orderBy: 'issueDate',
+      order: 'desc',
    });
-   const [sortState, setSortState] = useState<{ columnId: string; direction: 'asc' | 'desc' } | null>(null);
+   const [sortState, setSortState] = useState<{ columnId: string; direction: 'asc' | 'desc' } | null>({
+      columnId: 'issueDate',
+      direction: 'desc'
+   });
 
    const pageHeader = {
       title: 'Faturamento',
@@ -93,27 +98,17 @@ export default function Invoicing() {
       return queryParams.toString();
    };
 
-   const handleSort = (columnId: string, direction: 'asc' | 'desc' | null) => {
-      if (direction === null) {
-         // Limpar ordenação
-         setSortState(null);
-         const { orderBy, order, ...restParams } = filterParams;
-         const newFilters = { ...restParams };
-         setFilterParams(newFilters);
-         getInvoices(newFilters);
-      } else {
-         // Aplicar ordenação
-         const fieldName = columnToFieldMap[columnId] || columnId;
-         setSortState({ columnId, direction });
-         const newFilters = { 
-            ...filterParams, 
-            orderBy: fieldName, 
-            order: direction,
-            page: 1 
-         };
-         setFilterParams(newFilters);
-         getInvoices(newFilters);
-      }
+   const handleSort = (columnId: string, direction: 'asc' | 'desc') => {
+      const fieldName = columnToFieldMap[columnId] || columnId;
+      setSortState({ columnId, direction });
+      const newFilters = { 
+         ...filterParams, 
+         orderBy: fieldName, 
+         order: direction,
+         page: 1 
+      };
+      setFilterParams(newFilters);
+      getInvoices(newFilters);
    };
 
    const getInvoices = async (newFilters?: InvoicingFilterParams) => {

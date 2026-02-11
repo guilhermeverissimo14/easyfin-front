@@ -25,7 +25,7 @@ interface TableComponentProps<T extends TableData> {
    title?: string;
    loading?: boolean;
    customFilters?: React.ReactNode;
-   onSort?: (columnId: string, direction: 'asc' | 'desc' | null) => void;
+   onSort?: (columnId: string, direction: 'asc' | 'desc') => void;
    sortState?: { columnId: string; direction: 'asc' | 'desc' } | null;
 }
 

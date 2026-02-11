@@ -63,7 +63,7 @@ type DragAbleHeadProps<TData extends Record<string, any>> = {
   header: Header<TData, unknown>;
   isLeftScrollable?: boolean;
   isRightScrollable?: boolean;
-  onSort?: (columnId: string, direction: 'asc' | 'desc' | null) => void;
+  onSort?: (columnId: string, direction: 'asc' | 'desc') => void;
   sortState?: { columnId: string; direction: 'asc' | 'desc' } | null;
 };
 
@@ -134,16 +134,11 @@ function DragAbleHead<TData extends Record<string, any>>({
           onClick={() => {
             if (onSort) {
               // Usar ordenação customizada (backend)
-              const currentSort = sortState?.columnId === header.column.id ? sortState.direction : null;
-              let nextDirection: 'asc' | 'desc' | null = null;
+              const isCurrentColumn = sortState?.columnId === header.column.id;
+              const currentDirection = isCurrentColumn ? sortState.direction : null;
               
-              if (currentSort === null) {
-                nextDirection = 'asc';
-              } else if (currentSort === 'asc') {
-                nextDirection = 'desc';
-              } else {
-                nextDirection = null;
-              }
+              // Se é a mesma coluna, alterna; se é nova coluna, começa com desc
+              const nextDirection: 'asc' | 'desc' = currentDirection === 'asc' ? 'desc' : 'asc';
               
               onSort(header.column.id, nextDirection);
             } else {
