@@ -34,17 +34,25 @@ export interface AccountsReceivableFilterParams {
 export default function AccountsReceivable() {
    const [data, setData] = useState<IAccountsReceivable[]>([]);
    const [loading, setLoading] = useState(true);
-   const [filterParams, setFilterParams] = useState<AccountsReceivableFilterParams>({
-      page: 1,
-      limit: 10,
+   const [filterParams, setFilterParams] = useState<AccountsReceivableFilterParams>(() => {
+      const savedLimit = sessionStorage.getItem('accounts-receivable-limit');
+      const savedPage = sessionStorage.getItem('accounts-receivable-page');
+      return {
+         page: savedPage ? parseInt(savedPage, 10) : 1,
+         limit: savedLimit ? parseInt(savedLimit, 10) : 10,
+      };
    });
-   const [pagination, setPagination] = useState<PaginationInfo>({
-      page: 1,
-      limit: 10,
-      totalCount: 0,
-      totalPages: 0,
-      hasNextPage: false,
-      hasPreviousPage: false,
+   const [pagination, setPagination] = useState<PaginationInfo>(() => {
+      const savedLimit = sessionStorage.getItem('accounts-receivable-limit');
+      const savedPage = sessionStorage.getItem('accounts-receivable-page');
+      return {
+         page: savedPage ? parseInt(savedPage, 10) : 1,
+         limit: savedLimit ? parseInt(savedLimit, 10) : 10,
+         totalCount: 0,
+         totalPages: 0,
+         hasNextPage: false,
+         hasPreviousPage: false,
+      };
    });
    const [refreshTrigger, setRefreshTrigger] = useState(0);
    const [sortState, setSortState] = useState<{ columnId: string; direction: 'asc' | 'desc' } | null>(null);
@@ -200,6 +208,7 @@ export default function AccountsReceivable() {
    };
 
    const handlePageChange = (page: number) => {
+      sessionStorage.setItem('accounts-receivable-page', page.toString());
       const newFilters = {
          ...filterParams,
          page,
@@ -212,6 +221,8 @@ export default function AccountsReceivable() {
    };
 
    const handleLimitChange = (limit: number) => {
+      sessionStorage.setItem('accounts-receivable-limit', limit.toString());
+      sessionStorage.setItem('accounts-receivable-page', '1');
       const newFilters = {
          ...filterParams,
          limit,

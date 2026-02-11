@@ -50,17 +50,24 @@ export default function CashBook() {
       agency: '',
       account: '',
    });
-   const [pagination, setPagination] = useState<PaginationInfo>({
-      page: 1,
-      limit: 10,
-      totalCount: 0,
-      totalPages: 0,
-      hasNextPage: false,
-      hasPreviousPage: false,
+   const [pagination, setPagination] = useState<PaginationInfo>(() => {
+      const savedLimit = sessionStorage.getItem('cash-book-limit');
+      const savedPage = sessionStorage.getItem('cashbook-current-page');
+      return {
+         page: savedPage ? parseInt(savedPage, 10) : 1,
+         limit: savedLimit ? parseInt(savedLimit, 10) : 10,
+         totalCount: 0,
+         totalPages: 0,
+         hasNextPage: false,
+         hasPreviousPage: false,
+      };
    });
-   const [filterParams, setFilterParams] = useState<CashBookFilterParams>({
-      page: 1,
-      limit: 10,
+   const [filterParams, setFilterParams] = useState<CashBookFilterParams>(() => {
+      const savedLimit = sessionStorage.getItem('cash-book-limit');
+      return {
+         page: 1,
+         limit: savedLimit ? parseInt(savedLimit, 10) : 10,
+      };
    });
    const [sortState, setSortState] = useState<{ columnId: string; direction: 'asc' | 'desc' } | null>(null);
 
@@ -279,6 +286,7 @@ export default function CashBook() {
    };
 
    const handleLimitChange = (limit: number) => {
+      sessionStorage.setItem('cash-book-limit', limit.toString());
       sessionStorage.setItem('cashbook-current-page', '1');
       const newFilters = {
          ...filterParams,
@@ -294,10 +302,11 @@ export default function CashBook() {
 
    const handleFilter = async (filters: CashBookFilterParams) => {
       sessionStorage.setItem('cashbook-current-page', '1');
-      // Preserva a ordenação atual ao aplicar filtros
+      // Preserva a ordenação e limite atual ao aplicar filtros
       const newFilters = {
          ...filters,
          page: 1,
+         limit: filterParams.limit, // Preserva o limite atual
          ...(sortState && {
             orderBy: columnToFieldMap[sortState.columnId] || sortState.columnId,
             order: sortState.direction
@@ -315,12 +324,6 @@ export default function CashBook() {
    };
 
    useLayoutEffect(() => {
-      const savedPage = sessionStorage.getItem('cashbook-current-page');
-      if (savedPage) {
-         const page = parseInt(savedPage, 10);
-         setFilterParams(prev => ({ ...prev, page }));
-         setPagination(prev => ({ ...prev, page }));
-      }
       refreshCurrentPage();
    }, [cashBoxId]);
 

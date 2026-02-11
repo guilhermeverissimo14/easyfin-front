@@ -40,19 +40,27 @@ export default function Invoicing() {
 
    const [loading, setLoading] = useState(false);
    const [invoices, setInvoices] = useState<IInvoice[]>([]);
-   const [pagination, setPagination] = useState<PaginationInfo>({
-      page: 1,
-      limit: 10,
-      totalCount: 0,
-      totalPages: 0,
-      hasNextPage: false,
-      hasPreviousPage: false,
+   const [pagination, setPagination] = useState<PaginationInfo>(() => {
+      const savedLimit = sessionStorage.getItem('invoicing-limit');
+      const savedPage = sessionStorage.getItem('invoicing-page');
+      return {
+         page: savedPage ? parseInt(savedPage, 10) : 1,
+         limit: savedLimit ? parseInt(savedLimit, 10) : 10,
+         totalCount: 0,
+         totalPages: 0,
+         hasNextPage: false,
+         hasPreviousPage: false,
+      };
    });
-   const [filterParams, setFilterParams] = useState<InvoicingFilterParams>({
-      page: 1,
-      limit: 10,
-      orderBy: 'issueDate',
-      order: 'desc',
+   const [filterParams, setFilterParams] = useState<InvoicingFilterParams>(() => {
+      const savedLimit = sessionStorage.getItem('invoicing-limit');
+      const savedPage = sessionStorage.getItem('invoicing-page');
+      return {
+         page: savedPage ? parseInt(savedPage, 10) : 1,
+         limit: savedLimit ? parseInt(savedLimit, 10) : 10,
+         orderBy: 'issueDate',
+         order: 'desc',
+      };
    });
    const [sortState, setSortState] = useState<{ columnId: string; direction: 'asc' | 'desc' } | null>({
       columnId: 'issueDate',
@@ -179,6 +187,7 @@ export default function Invoicing() {
    };
 
    const handlePageChange = (page: number) => {
+      sessionStorage.setItem('invoicing-page', page.toString());
       const newFilters = { 
          ...filterParams, 
          page,
@@ -191,6 +200,8 @@ export default function Invoicing() {
    };
 
    const handleLimitChange = (limit: number) => {
+      sessionStorage.setItem('invoicing-limit', limit.toString());
+      sessionStorage.setItem('invoicing-page', '1');
       const newFilters = { 
          ...filterParams, 
          limit, 
