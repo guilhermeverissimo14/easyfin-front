@@ -10,12 +10,15 @@ import { toast } from 'react-toastify';
 import { api } from '@/service/api';
 import { useModal } from '../modal-views/use-modal';
 import { SelectField } from '@/components/input/select-field';
+import { InputField } from '@/components/input/input-field';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { apiCall } from '@/helpers/apiHelper';
 import { constCentersModel } from '@/types';
 
 const updateCostCenterSchema = z.object({
    costCenterId: z.string().optional(),
+   historic: z.string().optional(),
+   description: z.string().optional(),
 });
 
 type UpdateCostCenterFormData = z.infer<typeof updateCostCenterSchema>;
@@ -23,15 +26,17 @@ type UpdateCostCenterFormData = z.infer<typeof updateCostCenterSchema>;
 interface UpdateCostCenterProps {
    cashFlowId: string;
    currentCostCenterId?: string;
-   history: string;
+   historic: string;
+   description: string;
    documentNumber?: string;
    onSuccess: () => void;
 }
 
-export const UpdateCostCenter = ({ 
+export const UpdateCashBook = ({ 
    cashFlowId, 
    currentCostCenterId, 
-   history, 
+   historic, 
+   description,
    documentNumber, 
    onSuccess 
 }: UpdateCostCenterProps) => {
@@ -43,12 +48,15 @@ export const UpdateCostCenter = ({
 
    const {
       control,
+      register,
       handleSubmit,
       formState: { errors },
    } = useForm<UpdateCostCenterFormData>({
       resolver: zodResolver(updateCostCenterSchema),
       defaultValues: {
          costCenterId: currentCostCenterId || '',
+         historic: historic || '',
+         description: description || '',
       },
    });
 
@@ -84,17 +92,19 @@ export const UpdateCostCenter = ({
 
       try {
          await apiCall(() => 
-            api.patch(`/cash-flow/${cashFlowId}/update-cost-center`, {
+            api.put(`/cash-flow/${cashFlowId}`, {
                costCenterId: data.costCenterId || null,
+               historic: data.historic || '',
+               description: data.description || '',
             })
          );
 
-         toast.success('Centro de custo atualizado com sucesso!');
+         toast.success('Lançamento atualizado com sucesso!');
          onSuccess();
          closeModal();
       } catch (error) {
-         console.error('Erro ao atualizar centro de custo:', error);
-         toast.error('Erro ao atualizar centro de custo');
+         console.error('Erro ao atualizar lançamento:', error);
+         toast.error('Erro ao atualizar lançamento');
       } finally {
          setLoading(false);
       }
@@ -116,12 +126,25 @@ export const UpdateCostCenter = ({
          <div className="w-full space-y-5">
             <div className="text-center space-y-2 mb-6">
                <div className="bg-gray-50 p-4 rounded-md text-left">
-                  <p className="text-sm"><strong>Histórico:</strong> {history}</p>
-                  {documentNumber && (
-                     <p className="text-sm"><strong>Documento:</strong> {documentNumber}</p>
-                  )}
+                  <p className="text-sm"><strong>Documento:</strong> {documentNumber || '-'}</p>
                </div>
             </div>
+
+            <InputField
+               label="Histórico"
+               placeholder="Informe o histórico"
+               type="text"
+               register={register('historic')}
+               error={errors.historic?.message}
+            />
+
+            <InputField
+               label="Descrição"
+               placeholder="Informe a descrição"
+               type="text"
+               register={register('description')}
+               error={errors.description?.message}
+            />
 
             <Controller
                control={control}
@@ -146,7 +169,7 @@ export const UpdateCostCenter = ({
                type="submit" 
                size="lg"
             >
-               <span>{loading ? 'Atualizando...' : 'Atualizar Centro de Custo'}</span>
+               <span>{loading ? 'Atualizando...' : 'Atualizar Lançamento'}</span>
             </Button>
          </div>
       </form>

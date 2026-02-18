@@ -6,7 +6,7 @@ import { formatDate } from '@/utils/format';
 import { useModal } from '../modal-views/use-modal';
 import ModalForm from '@/components/modal/modal-form';
 import { LinkAccountModal } from './link-account-modal';
-import { UpdateCostCenter } from './update-cost-center';
+import { UpdateCashBook } from './update-cash-book';
 import { api } from '@/service/api';
 import { toast } from 'react-toastify';
 import CashBookTableRowActionGroup from '@/components/cash-book-table-row-action-group';
@@ -114,10 +114,11 @@ export const ListCashBookColumn = (getList: () => void) => {
                         openModal({
                            view: (
                               <ModalForm title="Editar Centro de Custo">
-                                 <UpdateCostCenter
+                                 <UpdateCashBook
                                     cashFlowId={row.original.id}
                                     currentCostCenterId={row.original.costCenter?.id || ''}
-                                    history={row.original.history}
+                                    historic={row.original.history}
+                                    description={row.original.description}
                                     documentNumber={row.original.documentNumber}
                                     onSuccess={getList}
                                  />
