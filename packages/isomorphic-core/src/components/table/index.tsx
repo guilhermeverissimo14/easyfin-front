@@ -93,7 +93,7 @@ export default function MainTable<TData extends Record<string, any>>({
         >
           <Fragment>
             {components?.header ? (
-              components.header(headerParam)
+              components.header(headerParam as any)
             ) : (
               <Table.Header
                 className={cn(
@@ -116,7 +116,7 @@ export default function MainTable<TData extends Record<string, any>>({
                       className={classNames?.rowClassName}
                     >
                       {components?.headerCell ? (
-                        components.headerCell(headerCellParam)
+                        components.headerCell(headerCellParam as any)
                       ) : (
                         <TableHeadBasic
                           headerGroup={headerGroup}
