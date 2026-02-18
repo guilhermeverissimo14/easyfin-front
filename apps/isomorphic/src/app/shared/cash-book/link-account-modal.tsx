@@ -55,6 +55,10 @@ export function LinkAccountModal({
    const linkButtonLabel = isCredit ? 'Vincular ao Contas a Receber' : 'Vincular ao Contas a Pagar';
    const isAlreadyLinked = !!documentNumber;
 
+   const sortedAccounts = [...accounts].sort((a, b) =>
+      a.documentNumber.localeCompare(b.documentNumber, 'pt-BR', { numeric: true })
+   );
+
    useEffect(() => {
       if (!isAlreadyLinked) {
          fetchPendingAccounts();
@@ -224,7 +228,7 @@ export function LinkAccountModal({
             <>
                <div className="max-h-96 overflow-y-auto border rounded-lg">
                   <div className="space-y-2 p-4">
-                     {accounts.map((account) => (
+                     {sortedAccounts.map((account) => (
                         <div
                            key={account.id}
                            onClick={() => setSelectedAccount(account)}
