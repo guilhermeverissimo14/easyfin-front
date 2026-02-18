@@ -283,6 +283,11 @@ export default function AccountsPayable() {
         iconFilter={<MdOutlineManageSearch className="me-1.5 h-[17px] w-[17px]" />}
       >
         <HeaderInfoDetails refreshTrigger={refreshTrigger} />
+         <TablePagination 
+          pagination={pagination} 
+          onPageChange={handlePageChange} 
+          onLimitChange={handleLimitChange} 
+        />
         <TableComponent
           title=""
           column={ListAccountsPayableColumn(refreshCurrentPage)}

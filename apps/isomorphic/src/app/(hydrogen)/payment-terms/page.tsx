@@ -56,7 +56,7 @@ export default function PaymentTerms() {
         const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
         const paginatedData = data.slice(startIndex, endIndex);
-        
+
         setPaymentTerms(paginatedData);
         setPagination({
             page,
@@ -117,6 +117,12 @@ export default function PaymentTerms() {
                 action={userRole === 'ADMIN' ? "Cadastrar condição" : ""}
                 icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             >
+                <TablePagination
+                    pagination={pagination}
+                    onPageChange={handlePageChange}
+                    onLimitChange={handleLimitChange}
+                />
+
                 <TableComponent
                     title=""
                     column={ListPaymentTermColumn(getPaymentTerms)}
@@ -127,11 +133,11 @@ export default function PaymentTerms() {
                     pagination={false}
                     loading={loading}
                 />
-                
-                <TablePagination 
-                    pagination={pagination} 
-                    onPageChange={handlePageChange} 
-                    onLimitChange={handleLimitChange} 
+
+                <TablePagination
+                    pagination={pagination}
+                    onPageChange={handlePageChange}
+                    onLimitChange={handleLimitChange}
                 />
             </TableLayout>
         </div>

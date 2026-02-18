@@ -117,6 +117,13 @@ export default function TaxRates() {
                 action={userRole === 'ADMIN' ? "Cadastrar alíquota" : ""}
                 icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             >
+
+                <TablePagination 
+                    pagination={pagination} 
+                    onPageChange={handlePageChange} 
+                    onLimitChange={handleLimitChange} 
+                />
+
                 <TableComponent
                     title=""
                     column={ListTaxRateColumn(getTaxRates)}

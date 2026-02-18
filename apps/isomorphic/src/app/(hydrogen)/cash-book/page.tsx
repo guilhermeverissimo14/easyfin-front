@@ -394,6 +394,12 @@ export default function CashBook() {
                <div className="flex justify-center p-6">Carregando dados...</div>
             )}
 
+            <TablePagination
+               pagination={pagination}
+               onPageChange={handlePageChange}
+               onLimitChange={handleLimitChange}
+            />
+
             <TableComponent
                title=""
                column={ListCashBookColumn(refreshCurrentPage)}

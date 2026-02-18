@@ -119,6 +119,12 @@ export default function Suppliers() {
                 action={userRole === 'ADMIN' ? "Cadastrar fornecedor" : ""}
                 icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             >
+                <TablePagination 
+                    pagination={pagination} 
+                    onPageChange={handlePageChange} 
+                    onLimitChange={handleLimitChange} 
+                />
+
                 <TableComponent
                     title=""
                     column={ListSupplierColumn(getSuppliers)}

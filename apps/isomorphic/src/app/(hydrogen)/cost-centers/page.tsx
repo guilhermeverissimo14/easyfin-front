@@ -29,7 +29,7 @@ export default function CostCenters() {
 
     const { openModal } = useModal();
 
-     const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
+    const userRole = (JSON.parse(localStorage.getItem('eas:user') || '{}') as { role: string }).role;
 
     const getCostCenters = async () => {
         setLoading(true);
@@ -56,7 +56,7 @@ export default function CostCenters() {
         const startIndex = (page - 1) * limit;
         const endIndex = startIndex + limit;
         const paginatedData = data.slice(startIndex, endIndex);
-        
+
         setCostCenters(paginatedData);
         setPagination({
             page,
@@ -117,6 +117,13 @@ export default function CostCenters() {
                 action={userRole === 'ADMIN' ? "Cadastrar centro de custo" : ""}
                 icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
             >
+
+                <TablePagination
+                    pagination={pagination}
+                    onPageChange={handlePageChange}
+                    onLimitChange={handleLimitChange}
+                />
+
                 <TableComponent
                     title=""
                     column={ListCostCenterColumn(getCostCenters)}
@@ -127,11 +134,11 @@ export default function CostCenters() {
                     pagination={false}
                     loading={loading}
                 />
-                
-                <TablePagination 
-                    pagination={pagination} 
-                    onPageChange={handlePageChange} 
-                    onLimitChange={handleLimitChange} 
+
+                <TablePagination
+                    pagination={pagination}
+                    onPageChange={handlePageChange}
+                    onLimitChange={handleLimitChange}
                 />
             </TableLayout>
         </div>

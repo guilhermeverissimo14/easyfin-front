@@ -54,7 +54,7 @@ export default function Users() {
             localStorage.clear();
             redirect('/signin');
          }
-      }finally{
+      } finally {
          setLoading(false);
       }
    };
@@ -64,7 +64,7 @@ export default function Users() {
       const endIndex = startIndex + limit;
       const filteredData = data.filter(user => user.email !== 'admineasyfin@gmail.com');
       const paginatedData = filteredData.slice(startIndex, endIndex);
-      
+
       setDataUser(paginatedData);
       setPagination({
          page,
@@ -93,7 +93,7 @@ export default function Users() {
       { label: 'Usuário', value: 'user' },
    ];
 
- 
+
 
    const pageHeader = {
       title: 'Usuários',
@@ -134,6 +134,12 @@ export default function Users() {
             action="Criar usuário"
             icon={<PiPlusBold className="me-1.5 h-[17px] w-[17px]" />}
          >
+            <TablePagination
+               pagination={pagination}
+               onPageChange={handlePageChange}
+               onLimitChange={handleLimitChange}
+            />
+
             <TableComponent
                title=""
                column={ListUserColumn(getUsers)}
@@ -144,11 +150,11 @@ export default function Users() {
                pagination={false}
                loading={loading}
             />
-            
-            <TablePagination 
-               pagination={pagination} 
-               onPageChange={handlePageChange} 
-               onLimitChange={handleLimitChange} 
+
+            <TablePagination
+               pagination={pagination}
+               onPageChange={handlePageChange}
+               onLimitChange={handleLimitChange}
             />
          </TableLayout>
       </div>
