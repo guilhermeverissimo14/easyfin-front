@@ -25,6 +25,25 @@ export default function EnvironmentBanner() {
             }
          `;
          document.head.appendChild(style);
+      }else if (environment === 'homolog-client') {
+         // Adiciona classe ao body para ajustar padding
+         document.body.classList.add('has-env-banner');
+         
+         // Adiciona estilo global
+         const style = document.createElement('style');
+         style.id = 'env-banner-styles';
+         style.innerHTML = `
+            body.has-env-banner {
+               padding-top: 40px;
+            }
+            
+            @media (max-width: 640px) {
+               body.has-env-banner {
+                  padding-top: 36px;
+               }
+            }
+         `;
+         document.head.appendChild(style);
       }
 
       return () => {
@@ -36,7 +55,7 @@ export default function EnvironmentBanner() {
       };
    }, [environment]); 
 
-   if (environment !== 'homolog') {
+   if (environment !== 'homolog' && environment !== 'homolog-client') {
       return null;
    }
 
@@ -49,7 +68,7 @@ export default function EnvironmentBanner() {
                   <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
                </div>
                <span className="font-bold text-sm sm:text-base uppercase tracking-wider">
-                  🚧 Ambiente de Homologação
+                  {environment === 'homolog-client' ? '🚧 Ambiente de Homologação Cliente' : '🚧 Ambiente de Homologação Douglas'}
                </span>
             </div>
             <span className="hidden sm:inline text-xs opacity-90">
