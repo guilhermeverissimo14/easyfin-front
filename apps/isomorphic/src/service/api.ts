@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 
-const BASE_URL = 'https://easyapp-api.mgioqc.easypanel.host/api/';
+const BASE_URL = 'https://easyapp-api-hml-client.mgioqc.easypanel.host/api/';
 // const BASE_URL = 'https://easyapp-api-hml.mgioqc.easypanel.host/api';
 // const BASE_URL = "http://localhost:3333/api/"; 
 
