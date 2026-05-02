@@ -132,10 +132,9 @@ export const FilterAccountsPayable = ({
 
    const statusOptions = [
       { label: 'Todos', value: '' },
-      { label: 'Pendente', value: 'PENDING' },
+      { label: 'Aberto', value: 'PENDING' },
       { label: 'Vencido', value: 'OVERDUE' },
       { label: 'Pago', value: 'PAID' },
-      { label: 'Cancelado', value: 'CANCELLED' }
    ];
 
    return (
