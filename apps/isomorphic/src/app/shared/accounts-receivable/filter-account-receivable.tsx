@@ -170,7 +170,6 @@ export const FilterAccountsReceivable = ({ onFilter, currentFilters }: FilterAcc
                         { label: 'Todos os status', value: '' },
                         { label: 'Em aberto', value: 'PENDING' },
                         { label: 'Recebido', value: 'PAID' },
-                        { label: 'Cancelado', value: 'CANCELLED' },
                         { label: 'Vencido', value: 'OVERDUE' },
                     ]}
                     onChange={(selected) => {
