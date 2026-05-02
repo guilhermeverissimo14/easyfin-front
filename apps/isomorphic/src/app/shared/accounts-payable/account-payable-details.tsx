@@ -204,4 +204,4 @@ export const AccountPayableDetails = ({ id: id }: AccountPayableDetailsProps) =>
          )}
       </div>
    );
-};
+}; 
