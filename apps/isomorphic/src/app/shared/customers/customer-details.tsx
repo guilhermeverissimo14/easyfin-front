@@ -57,7 +57,7 @@ export default function CustomerDetails({ id }: CustomerDetailsProps) {
           <li className="flex items-center gap-2">
             <FaIdCard className="text-gray-700" />
             <span className="text-base font-bold text-gray-900">
-              CNPJ:
+              CPF/CNPJ:
             </span>
             <span className="text-base text-gray-700">
               {cpfCnpjMask(customer.cnpj)}

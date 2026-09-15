@@ -22,7 +22,11 @@ const customerSchema = z.object({
         .nonempty('Nome não pode ser vazio'),
     cnpj: z
         .string()
-        .nonempty('CNPJ não pode ser vazio'),
+        .nonempty('CPF/CNPJ não pode ser vazio')
+        .refine((value) => {
+            const digits = value.replace(/\D/g, '');
+            return digits.length === 11 || digits.length === 14;
+        }, 'CPF/CNPJ inválido'),
     email: z
         .string()
         .nullable()
@@ -163,8 +167,8 @@ export const CreateCustomer = ({ getCustomers }: CreateCustomerProps) => {
         >
             <div className="w-full space-y-5">
                 <InputField
-                    label="Nome da Empresa"
-                    placeholder="Digite o nome da empresa"
+                    label="Nome"
+                    placeholder="Digite o nome"
                     type="text"
                     register={register('name')}
                     error={errors.name?.message}
@@ -188,8 +192,8 @@ export const CreateCustomer = ({ getCustomers }: CreateCustomerProps) => {
                 />
 
                 <InputField
-                    label="CNPJ"
-                    placeholder="Digite o CNPJ"
+                    label="CPF/CNPJ"
+                    placeholder="Digite o CPF ou CNPJ"
                     type="text"
                     register={register('cnpj')}
                     error={errors.cnpj?.message}
