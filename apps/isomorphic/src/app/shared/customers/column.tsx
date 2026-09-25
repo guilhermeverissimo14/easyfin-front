@@ -36,7 +36,7 @@ export const ListCustomerColumn = (getList: () => void) => {
             </span>
          ),
       }), 
-      columnHelper.accessor('cnpj', {
+      columnHelper.accessor('cnpj', { 
          id: 'cnpj',
          size: 150,
          header: 'CNPJ/CPF',
