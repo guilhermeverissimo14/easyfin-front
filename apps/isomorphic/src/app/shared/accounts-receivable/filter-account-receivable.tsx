@@ -74,7 +74,7 @@ export const FilterAccountsReceivable = ({ onFilter, currentFilters }: FilterAcc
                     setCustomers(customersRes.data.map((customer: any) => ({
                         label: customer.name,
                         value: customer.id
-                    })));
+                    })).sort((a: any, b: any) => String(a.label ?? '').localeCompare(String(b.label ?? ''), 'pt-BR', { sensitivity: 'base' })));
                 }
 
                 if (costCentersRes?.data) {

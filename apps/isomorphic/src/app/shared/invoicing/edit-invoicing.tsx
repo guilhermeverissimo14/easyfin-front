@@ -66,13 +66,13 @@ export const EditInvoice = ({ getInvoices, invoiceId, customerId }: EditInvoiceP
             setCustomers(customersResponse.data.map((customer: Customer) => ({
                label: customer.name,
                value: customer.id
-            })));
+            })).sort((a: OptionsSelect, b: OptionsSelect) => String(a.label).localeCompare(String(b.label), 'pt-BR', { sensitivity: 'base' })));
 
             const paymentConditionsResponse = await api.get('/payment-terms');
             setPaymentConditions(paymentConditionsResponse.data.map((condition: { condition: string, id: string, description: string }) => ({
                label: `${condition.description} - (${condition.condition.split(',').map(s => s.trim()).join(', ')})`,
                value: condition.id
-            })));
+            })).sort((a: OptionsSelect, b: OptionsSelect) => String(a.label).localeCompare(String(b.label), 'pt-BR', { sensitivity: 'base' })));
 
             const bankAccountsResponse = await api.get('/bank-accounts');
             setBankAccounts(bankAccountsResponse.data.map((account: {bank:string, agency:string, account:number, id:string}) => ({

@@ -61,7 +61,7 @@ export const EditAccountReceivable = ({ getAccounts, account }: EditAccountRecei
             setCustomers(customersResponse.data.map((customer: any) => ({
                label: customer.name,
                value: customer.id
-            })));
+            })).sort((a: any, b: any) => String(a.label ?? '').localeCompare(String(b.label ?? ''), 'pt-BR', { sensitivity: 'base' })));
 
             const costCentersResponse = await api.get('/cost-centers');
             setCostCenters(costCentersResponse.data.map((center: any) => ({

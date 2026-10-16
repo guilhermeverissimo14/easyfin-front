@@ -99,7 +99,7 @@ const dateToString = (date: Date | null): string => {
                setCustomers(customersRes.data.map((item: CustomerType) => ({
                   label: item.name,
                   value: item.id
-               })));
+               })).sort((a: any, b: any) => String(a.label ?? '').localeCompare(String(b.label ?? ''), 'pt-BR', { sensitivity: 'base' })));
             }
 
             if (bankAccountsRes?.data) {
@@ -113,7 +113,7 @@ const dateToString = (date: Date | null): string => {
                setPaymentConditions(paymentConditionsRes.data.map((item: any) => ({
                   label: item.description || item.name,
                   value: item.id
-               })));
+               })).sort((a: any, b: any) => String(a.label ?? '').localeCompare(String(b.label ?? ''), 'pt-BR', { sensitivity: 'base' })));
             }
          } catch (error) {
             console.error('Erro ao buscar dados dos filtros:', error);

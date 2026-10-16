@@ -61,7 +61,7 @@ export const EditAccountPayable = ({ getAccounts, account }: EditAccountPayableP
             setSuppliers(suppliersResponse.data.map((supplier: any) => ({
                label: supplier.name,
                value: supplier.id
-            })));
+            })).sort((a: any, b: any) => String(a.label ?? '').localeCompare(String(b.label ?? ''), 'pt-BR', { sensitivity: 'base' })));
 
             const costCentersResponse = await api.get('/cost-centers');
             setCostCenters(costCentersResponse.data.map((center: any) => ({

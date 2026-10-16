@@ -78,7 +78,7 @@ export const FilterAccountsPayable = ({
                setSuppliers(suppliersRes.data.map((supplier: any) => ({
                   label: supplier.name,
                   value: supplier.id
-               })));
+               })).sort((a: any, b: any) => String(a.label ?? '').localeCompare(String(b.label ?? ''), 'pt-BR', { sensitivity: 'base' })));
             }
 
             if (costCentersRes?.data) {
