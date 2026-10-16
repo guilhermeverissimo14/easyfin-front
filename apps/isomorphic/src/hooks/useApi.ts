@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { api } from '@/service/api';
 import { redirect } from 'next/navigation';
+import { signOut } from 'next-auth/react';
 
 type RequestMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
 
@@ -51,7 +52,10 @@ const useApi = <T>(endpoint: string, options?: UseApiOptions<T>) => {
             );
             if ((error as any)?.response?.status === 401) {
                localStorage.clear();
-               redirect('/signin');
+               // Encerra também a sessão do NextAuth para manter cookie e localStorage sincronizados
+               signOut({ redirect: false }).finally(() => {
+                  window.location.href = '/signin';
+               });
             }
             if ((error as any)?.response?.status === 403) {
                if (userRole === 'ADMIN' || userRole === 'USER') {

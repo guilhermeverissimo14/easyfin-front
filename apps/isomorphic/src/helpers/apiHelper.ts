@@ -1,4 +1,5 @@
 import { toast } from "react-toastify";
+import { signOut } from "next-auth/react";
 
 export const apiCall = async <T>(request: () => Promise<T>): Promise<T | null> => {
 
@@ -12,7 +13,10 @@ export const apiCall = async <T>(request: () => Promise<T>): Promise<T | null> =
       toast.error((error as any).response?.data?.message || 'Erro ao fazer a chamada à API');
       if ((error as any)?.response?.status == 401 || (error as any).status == 401) {
          localStorage.clear();
-         window.location.href = '/signin';
+         // Encerra também a sessão do NextAuth para manter cookie e localStorage sincronizados
+         signOut({ redirect: false }).finally(() => {
+            window.location.href = '/signin';
+         });
       }
       if ((error as any)?.response?.status == 403) {
 

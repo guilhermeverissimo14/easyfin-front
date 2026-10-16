@@ -1,7 +1,7 @@
 "use client";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { SubmitHandler } from "react-hook-form";
 import {
 	PiArrowRightBold,
@@ -29,7 +29,22 @@ export default function SignInForm() {
 	const [loading, setLoading] = useState(false);
 	const [onSubmited, setOnSubmited] = useState(false);
 
+	const { status } = useSession();
+
 	useEffect(() => {
+		if (status === "loading") return;
+
+		// Sessão do NextAuth expirada: limpa o localStorage para evitar loop
+		// entre /signin e /dashboard-admin. Não limpa logo após o submit, pois o
+		// useSession ainda não foi atualizado e apagaria os dados do login recém-feito.
+		if (status === "unauthenticated" && !onSubmited) {
+			localStorage.removeItem("eas:isAuthenticated");
+			localStorage.removeItem("eas:token");
+			localStorage.removeItem("eas:user");
+			localStorage.removeItem("eas:userId");
+			return;
+		}
+
 		const isAuthenticated = localStorage.getItem("eas:isAuthenticated");
 		const userRole = (
 			JSON.parse(localStorage.getItem("eas:user") || "{}") as { role: string }
@@ -38,9 +53,9 @@ export default function SignInForm() {
 		if (isAuthenticated) {
 			if (userRole === "USER" || userRole === "ADMIN") {
 				redirect("/dashboard-admin");
-			} 
+			}
 		}
-	}, [onSubmited]);
+	}, [onSubmited, status]);
 
 	const onSubmit: SubmitHandler<LoginSchema> = async (data, event) => {
 		event?.preventDefault();
